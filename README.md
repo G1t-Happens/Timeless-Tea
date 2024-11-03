@@ -1,6 +1,6 @@
 # Timeless-Tea
 
-This template should help get you started developing with Vue 3 in Vite.
+Aufgabe 2 c.) liegt auf Branch **aufgabe2**: https://github.com/G1t-Happens/Timeless-Tea/tree/aufgabe2
 
 ## Recommended IDE Setup
 
