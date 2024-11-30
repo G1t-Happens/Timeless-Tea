@@ -15,6 +15,7 @@ module.exports.bootstrap = async function() {
 
   // Überprüfe, ob bereits Kategorien vorhanden sind
   const categoryCount = await Category.count();
+  const ratings = await Rating.count();
 
   if (categoryCount === 0) {
     // Füge Standard-Kategorien hinzu, wenn keine vorhanden sind
@@ -27,4 +28,19 @@ module.exports.bootstrap = async function() {
   } else {
     sails.log.info('Categories already exist.');
   }
+
+  if (ratings === 0) {
+    // Füge Ratings hinzu, wenn keine vorhanden sind
+    await Rating.createEach([
+      { stars: 1 },
+      { stars: 2 },
+      { stars: 3 },
+      { stars: 4 },
+      { stars: 5 }
+    ]);
+    sails.log.info('Default ratings created!');
+  } else {
+    sails.log.info('Ratings already exist.');
+  }
+
 };
