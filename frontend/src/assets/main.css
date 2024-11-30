@@ -1,35 +1,53 @@
-@import './base.css';
+/* App.vue - globale CSS */
+html, body {
+    height: 100%;
+    margin: 0;
+    display: flex;
+    font-family: 'Josefin Sans', sans-serif;
+    flex-direction: column;
+}
 
 #app {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  font-weight: normal;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
 }
 
-a,
-.green {
-  text-decoration: none;
-  color: hsla(160, 100%, 37%, 1);
-  transition: 0.4s;
-  padding: 3px;
+main {
+    flex: 1;
 }
 
-@media (hover: hover) {
-  a:hover {
-    background-color: hsla(160, 100%, 37%, 0.2);
-  }
+
+
+button:active {
+  border: none; /* Entfernt den Button-Rahmen beim Klicken */
+  outline: none; /* Entfernt auch die Button-Fokusumrandung, falls vorhanden */
 }
 
-@media (min-width: 1024px) {
-  body {
-    display: flex;
-    place-items: center;
+/* Kann bis min-width: 320px alles ordnungsgemaess darstellen.*/
+@media (max-width: 600px) {
+
+  .round-icon-responsive {
+    width: 35px;
+    height: 35px;
   }
 
-  #app {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    padding: 0 2rem;
+  .oval-icon-responsive {
+    width: 49px;
+    height: 30px;
   }
+
+  .banner-logo-responsive {
+    width: 162px;
+    height: 62px;
+  }
+
+  .search-input {
+    width: 100%; /* Die Suchleiste nimmt jetzt die gesamte Breite ein */
+    max-width: 400px; /* Maximalgröße der Suchleiste */
+  }
+
 }
+
+
+
