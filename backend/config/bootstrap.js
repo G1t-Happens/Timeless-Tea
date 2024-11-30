@@ -11,20 +11,20 @@
 
 module.exports.bootstrap = async function() {
 
-  // By convention, this is a good place to set up fake data during development.
-  //
-  // For example:
-  // ```
-  // // Set up fake development data (or if we already have some, avast)
-  // if (await User.count() > 0) {
-  //   return;
-  // }
-  //
-  // await User.createEach([
-  //   { emailAddress: 'ry@example.com', fullName: 'Ryan Dahl', },
-  //   { emailAddress: 'rachael@example.com', fullName: 'Rachael Shaw', },
-  //   // etc.
-  // ]);
-  // ```
+  sails.log.info('Bootstrapping application...');
 
+  // Überprüfe, ob bereits Kategorien vorhanden sind
+  const categoryCount = await Category.count();
+
+  if (categoryCount === 0) {
+    // Füge Standard-Kategorien hinzu, wenn keine vorhanden sind
+    await Category.createEach([
+      { name: 'Tee' },
+      { name: 'Kaffee' },
+      { name: 'Kräuter' }
+    ]);
+    sails.log.info('Default categories created!');
+  } else {
+    sails.log.info('Categories already exist.');
+  }
 };
