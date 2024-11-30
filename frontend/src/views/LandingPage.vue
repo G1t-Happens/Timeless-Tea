@@ -19,7 +19,11 @@
         <h2 class="text-center headline-title mb-4">Unsere beliebtesten Teesorten</h2>
         <div class="row">
           <!-- Produktkarten -->
-          <ProductCard v-for="product in products" :key="product.id" :product="product" />
+          <ProductCard
+            v-for="product in getTopRatedProducts()"
+            :key="product.id"
+            :product="product"
+          />
         </div>
       </section>
     </main>
@@ -27,10 +31,11 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
 import SearchField from '@/components/SearchField.vue'
 import MembershipSection from '@/components/MembershipSection.vue'
 import ProductCard from '@/components/ProductCard.vue'
+import { ref } from 'vue'
+
 
 // Beispielhafte Produktdaten - Hier normal backend api call
 const products = ref([
@@ -65,6 +70,14 @@ const products = ref([
     reviews: 89,
   },
 ])
+
+// Methode, um die beliebtesten 6 Produkte zu erhalten
+const getTopRatedProducts = () => {
+  return products.value
+    .sort((a, b) => b.rating - a.rating)
+    .slice(0, 6);
+}
+
 </script>
 
 <style scoped>
