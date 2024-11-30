@@ -19,7 +19,10 @@ module.exports.routes = {
   *                                                                          *
   ***************************************************************************/
 
-  '/': { view: 'pages/homepage' },
+  'POST /product': { controller: 'ProductController', action:'create' },
+  'GET /product': 'ProductController.find',
+  'GET /product/:id': 'product.findOne',
+  'DELETE /product/:id': 'product.destroy'
 
 
   /***************************************************************************
