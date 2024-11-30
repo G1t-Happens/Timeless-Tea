@@ -13,9 +13,9 @@ module.exports = {
     stars: { type: 'number', columnType: 'integer', required: true },
 
     // Die Bewertung gehört zu einem Produkt
-    owner: {
+    product: {
       model: 'product',  // Verweist auf das Product Model
-      required: true     // Eine Bewertung muss immer zu einem Produkt gehören
+      //required: true     // Eine Bewertung muss immer zu einem Produkt gehören
     }
 
   },

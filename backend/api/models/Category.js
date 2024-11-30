@@ -13,11 +13,10 @@ module.exports = {
 
     // Verknüpfung zu den Produkten, die zu dieser Kategorie gehören
     products: {
-      collection: 'product',  // Das ist die Verknüpfung zur "Product"-Entität
-      via: 'categories'      // Der Fremdschlüssel in der "Product"-Entität
+      collection: 'product',
+      via: 'categories'
     }
 
   }
 
-};
-
+}

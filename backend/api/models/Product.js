@@ -27,17 +27,15 @@ module.exports = {
     // Bewertungen zum Produkt
     ratings: {
       collection: 'rating',
-      via: 'owner'
+      via: 'product'
     },
 
     // Kategorien zum Produkt
     categories: {
-      collection: 'category',  // Verknüpft mit dem Category Model
-      via: 'products'         // Der Fremdschlüssel in der Category-Entität
+      collection: 'category',
+      via: 'products'
     }
 
   }
 
-};
-
-
+}
