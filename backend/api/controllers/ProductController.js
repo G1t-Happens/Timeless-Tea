@@ -19,7 +19,8 @@ module.exports = {
   },
   findOne: async function (req, res) {
     sails.log.debug('List single Product....');
-    let product = await Product.findOne({ id: req.params.id });
+    //let product = await Product.findOne({ id: req.params.id });
+    let product = await Product.findOne({ id: req.params.id }).populate('categories');
     res.json(product);
   },
   destroy: async function (req, res) {
