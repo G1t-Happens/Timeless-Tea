@@ -30,27 +30,49 @@
         </button>
       </form>
     </div>
+
+    <!-- Filter-Popup -->
+    <FilterPopup
+      v-if="isFilterVisible"
+      :filters="filters"
+      @close="toggleFilter"
+      @applyFilters="applyFilters"
+    />
   </div>
 </template>
 
 <script setup>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
+import FilterPopup from './FilterPopup.vue'
 
 const searchQuery = ref('')
+const isFilterVisible = ref(false)
+const filters = ref({
+  taste: [],
+  effect: [],
+  rating: null,
+  price: 50,
+  origin: '',
+})
 const router = useRouter()
 
 // Funktion zum Handhaben der Suche
 const handleSearch = () => {
   if (searchQuery.value.trim()) {
-    router.push({ name: 'search-results', query: { query: searchQuery.value } })
+    router.push({ name: 'search-results', query: { query: searchQuery.value, ...filters.value } })
   }
 }
 
-// Funktion zum Umschalten des Filters (optional)
+// Funktion zum Umschalten des Filters
 const toggleFilter = () => {
-  // Hier könnte eine Logik für die Filter-Optionen hinzugefügt werden
-  console.log('Filter aktiviert')
+  isFilterVisible.value = !isFilterVisible.value
+}
+
+// Funktion zum Anwenden der Filter
+const applyFilters = (appliedFilters) => {
+  filters.value = appliedFilters
+  toggleFilter()
 }
 </script>
 
