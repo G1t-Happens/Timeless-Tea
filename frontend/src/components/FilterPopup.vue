@@ -99,14 +99,9 @@
             placeholder="z.B. China, Indien"
           />
         </div>
-        <div>
-          <div class="filter-item">
-            <button class="save-button" @click="applyFilters">Speichern</button>
-          </div>
-          <!-- Reset Button -->
-          <div class="filter-item">
-            <button class="save-button" @click="resetFilters">Reset All</button>
-          </div>
+        <div class="filter-actions">
+          <button class="save-button" @click="applyFilters">Speichern</button>
+          <button class="save-button" @click="resetFilters">Reset All</button>
         </div>
       </div>
     </div>
@@ -176,6 +171,21 @@ const resetFilters = () => {
 </script>
 
 <style scoped>
+.filter-actions {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 4px;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.save-button {
+  max-width: 75%;
+  flex: 1;
+  text-align: center;
+}
+
 .filter-popup {
   position: fixed;
   top: 50%;
@@ -237,8 +247,10 @@ const resetFilters = () => {
   padding: 10px;
   position: absolute;
   z-index: 10000;
-  display: inherit;
-  max-width: 160px;
+  display: flex; /* Flexbox aktivieren */
+  flex-direction: column; /* Vertikale Anordnung der Items */
+  gap: 8px; /* Abstand zwischen Items */
+  max-width: 160px; /* Optional: Maximale Breite */
 }
 
 .selected-options {
