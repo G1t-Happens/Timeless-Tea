@@ -22,7 +22,7 @@
       </div>
       <!-- Control Icons für Login/ShoppingCart -->
       <div class="d-flex align-items-center">
-        <a href="/login.html" class="me-3" aria-label="Login">
+        <a href="/login" class="me-3" aria-label="Login">
           <img src="../../assets/icons/account.png" alt="Login" class="round-icon-responsive" />
         </a>
         <a href="/search.html" aria-label="ShoppingCart">

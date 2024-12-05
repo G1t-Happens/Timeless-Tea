@@ -36,7 +36,6 @@ import MembershipSection from '@/components/MembershipSection.vue'
 import ProductCard from '@/components/ProductCard.vue'
 import { ref } from 'vue'
 
-
 // Beispielhafte Produktdaten - Hier normal backend api call
 const products = ref([
   {
@@ -71,13 +70,24 @@ const products = ref([
   },
 ])
 
+// onMounted(() => {
+//   loading.value = true
+//     .get('/articles')
+//     .then((response) => {
+//       articles.value = response.data
+//     })
+//     .catch((error) => {
+//       console.error('Fehler beim Laden der Artikel:', error)
+//     })
+//     .finally(() => {
+//       loading.value = false
+//     })
+// })
+
 // Methode, um die beliebtesten 6 Produkte zu erhalten
 const getTopRatedProducts = () => {
-  return products.value
-    .sort((a, b) => b.rating - a.rating)
-    .slice(0, 6);
+  return products.value.sort((a, b) => b.rating - a.rating).slice(0, 6)
 }
-
 </script>
 
 <style scoped>
