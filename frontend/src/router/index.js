@@ -4,7 +4,7 @@ import MemberShip from '@/views/MemberShip.vue'
 import LoginPage from '@/views/LoginPage.vue'
 import SearchResults from '@/components/SearchResults.vue'
 import AdminDashboard from '@/views/AdminDashboard.vue'
-import CreateArticle from '@/components/CreateArticle.vue'
+import CreateArticle from '@/views/CreateArticle.vue'
 import EditArticle from '@/views/EditArticle.vue'
 
 const router = createRouter({
