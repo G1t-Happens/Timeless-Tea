@@ -7,6 +7,17 @@
         <!-- Produktname -->
         <h5 class="card-title">{{ product.name }}</h5>
 
+        <!-- Kategorien als Badges -->
+        <div class="categories-section mb-3">
+          <span
+            v-for="category in product.productCategories"
+            :key="category.id"
+            class="badge category-badge"
+          >
+            {{ category.name }}
+          </span>
+        </div>
+
         <!-- Sternebewertung -->
         <div class="card-icons">
           <!-- Vollständige Sterne -->
@@ -129,5 +140,21 @@ const emptyStars = computed(() => {
 .card-button {
   height: 50px;
   width: 50px;
+}
+
+/* Kategorien-Badges */
+.categories-section {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.category-badge {
+  background-color: #9fa86d;
+  color: #fff;
+  padding: 5px 10px;
+  font-size: 12px;
+  border-radius: 12px;
+  text-transform: capitalize;
 }
 </style>

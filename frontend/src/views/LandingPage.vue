@@ -41,7 +41,7 @@ const fetchProducts = () => {
   axios
     .get('/product')
     .then((response) => {
-      products.value = response.data
+      products.value = response.data.products
     })
     .catch((error) => {
       console.error('Fehler beim Laden der Artikel:', error)
