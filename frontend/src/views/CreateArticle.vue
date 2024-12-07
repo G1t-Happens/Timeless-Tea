@@ -15,7 +15,7 @@
 
       <div class="mb-3">
         <label for="price" class="form-label">Preis in €</label>
-        <input type="number" v-model="price" id="price" class="form-control" required />
+        <input type="number" step="0.01" v-model="price" id="price" class="form-control" required />
       </div>
 
       <!-- Dropdown Menu für Kategorienauswahl, gruppiert nach Typ -->

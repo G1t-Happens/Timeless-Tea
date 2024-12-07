@@ -26,7 +26,14 @@
 
         <div class="mb-3">
           <label for="price" class="form-label">Preis</label>
-          <input v-model="product.price" type="number" id="price" class="form-control" required />
+          <input
+            v-model="product.price"
+            type="number"
+            step="0.01"
+            id="price"
+            class="form-control"
+            required
+          />
         </div>
 
         <!-- Dropdown Menu für Kategorienauswahl, gruppiert nach Typ -->
