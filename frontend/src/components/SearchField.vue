@@ -45,9 +45,7 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import FilterPopup from './FilterPopup.vue'
-import axios from 'axios'
 
-const products = ref([])
 const searchQuery = ref('')
 const isFilterVisible = ref(false)
 const filters = ref({
@@ -60,32 +58,14 @@ const filters = ref({
 const router = useRouter()
 
 // Funktion zum Handhaben der Suche
-// script setup part of SearchField.vue
-// Function to handle search
 const handleSearch = async () => {
   if (searchQuery.value.trim()) {
     try {
-      // Navigate to the search results page and pass the query parameters
+      // Zur search-result page navigieren mit Uebergabe von query
       router.push({ name: 'search-results', query: { query: searchQuery.value } })
-      // Fetch products from the backend using Axios
-      await fetchProducts()
     } catch (error) {
       console.error('Error while searching:', error)
     }
-  }
-}
-
-// Function to fetch products using Axios
-const fetchProducts = async () => {
-  try {
-    const response = await axios.get(`/product?search=${encodeURIComponent(searchQuery.value)}`)
-    if (response.data) {
-      products.value = response.data
-    } else {
-      products.value = [] // Fallback if no data received
-    }
-  } catch (error) {
-    console.error('Error fetching products:', error)
   }
 }
 

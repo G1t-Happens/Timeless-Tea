@@ -72,6 +72,9 @@ import axios from 'axios'
 const route = useRoute()
 const router = useRouter()
 const loading = ref(true)
+const selectedCategories = ref([])
+const organizedCategories = ref([])
+const activeDropdown = ref(null)
 const product = ref({
   id: null,
   name: '',
@@ -79,10 +82,8 @@ const product = ref({
   price: 0,
   categories: [],
 })
-const selectedCategories = ref([])
-const organizedCategories = ref([])
-const activeDropdown = ref(null)
 
+// Kategorien nach Type filtern wie z.B. Geschmack oder Wirkung fuer schoenere Darstellung
 const organizeCategoriesByType = (categories) => {
   const grouped = categories.reduce((group, category) => {
     const type = category.type || 'Andere'
@@ -105,6 +106,7 @@ onMounted(async () => {
   await fetchArticle(route.params.id)
 })
 
+//Alle vorhandenen Kategorien laden die zur Auswahl stehen
 const fetchCategories = async () => {
   try {
     const { data } = await axios.get('/category')
@@ -114,6 +116,7 @@ const fetchCategories = async () => {
   }
 }
 
+//Produkt welches wir editieren wollen anhand der id laden
 const fetchArticle = async (id) => {
   loading.value = true
   try {
@@ -127,27 +130,27 @@ const fetchArticle = async (id) => {
   }
 }
 
+//Produkt updaten/speichern
 const handleSave = async () => {
   console.log('Saving article:', product.value)
 
   try {
-    // Prepare data to update product details and categories simultaneously
+    // Daten fuer den Patch Aufruf vorbereiten
     const updatedData = {
       name: product.value.name,
       description: product.value.description,
       price: product.value.price,
-      productCategories: selectedCategories.value, // Assuming backend expects category IDs directly
+      productCategories: selectedCategories.value,
     }
 
-    // Perform a PATCH request to update product and its categories
+    // PATCH Aufruf
     const response = await axios.patch(`/product/${product.value.id}`, updatedData)
     console.log('Article successfully updated:', response.data)
 
-    // Navigate back to the admin page or a confirmation page
+    // Nach dem Update wieder auf das AdminDashboard navigieren
     await router.push('/admin')
   } catch (error) {
     console.error('Error while saving the article:', error)
-    // Optionally, you could show a notification to the user, e.g., a toast message
   }
 }
 

@@ -47,7 +47,7 @@ const filteredProducts = computed(() => {
   )
 })
 
-// Funktion zum Simulieren des Ladens von Produkten
+// Laden der Produkte anhand des searchQuery aus der URI
 const fetchProducts = async () => {
   loading.value = true
   try {
@@ -92,7 +92,7 @@ const handleSearch = (query) => {
   display: flex;
   flex-wrap: wrap;
   justify-content: space-around;
-  gap: 20px; /* Abstand zwischen den Produktkarten */
+  gap: 20px;
 }
 
 p {

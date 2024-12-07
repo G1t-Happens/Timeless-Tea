@@ -67,10 +67,12 @@ const props = defineProps({
   },
 })
 
+//Runden der Durchschnittsbewertung
 const fullStars = computed(() => {
   return Math.floor(props.product.averageRating)
 })
 
+//Berechnung wie viele emptyStars noch angezeigt werden muessen
 const emptyStars = computed(() => {
   return 5 - fullStars.value
 })
@@ -116,7 +118,7 @@ const emptyStars = computed(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 4px; /* Verwende gap, um gleichmäßige Abstände zwischen den Sternen zu gewährleisten */
+  gap: 4px;
 }
 
 .card-rating {

@@ -1,6 +1,5 @@
 <template>
   <div>
-    <!-- Hauptinhalt -->
     <main class="container my-2">
       <!-- Suchfeld Komponente -->
       <SearchField />
@@ -18,12 +17,8 @@
       <section class="products-section">
         <h2 class="text-center headline-title mb-4">Unsere beliebtesten Teesorten</h2>
         <div class="row">
-          <!-- Produktkarten max 6 -->
-          <ProductCard
-            v-for="product in products.slice(0, 6)"
-            :key="product.id"
-            :product="product"
-          />
+          <!-- Produktkarten mit den 6 besten Produkten anhand der Bewertung -->
+          <ProductCard v-for="product in topProducts" :key="product.id" :product="product" />
         </div>
       </section>
     </main>
@@ -34,22 +29,19 @@
 import SearchField from '@/components/SearchField.vue'
 import MembershipSection from '@/components/MembershipSection.vue'
 import ProductCard from '@/components/ProductCard.vue'
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, computed } from 'vue'
 import axios from 'axios'
 
-// Produkte als reaktive Referenz definieren
-const products = ref([]) // Anfangs leer, wird später gefüllt
-
-// Loading-Zustand definieren, falls du ihn brauchst
+const products = ref([])
 const loading = ref(false)
 
-// API Call und Datenladen im onMounted Hook
-onMounted(() => {
+// Funktion zum Laden der Produkte von der API
+const fetchProducts = () => {
   loading.value = true
   axios
-    .get('/product') // API Call (Beispiel: '/product' ist der Endpoint)
+    .get('/product')
     .then((response) => {
-      products.value = response.data // Daten in products speichern
+      products.value = response.data
     })
     .catch((error) => {
       console.error('Fehler beim Laden der Artikel:', error)
@@ -57,20 +49,45 @@ onMounted(() => {
     .finally(() => {
       loading.value = false
     })
+}
+
+onMounted(fetchProducts)
+
+// Berechnete Eigenschaft für die Top 6 Produkte basierend auf 'averageRating'
+const topProducts = computed(() => {
+  return products.value
+    .slice()
+    .sort((a, b) => b.averageRating - a.averageRating) // Sortieren nach 'averageRating' absteigend
+    .slice(0, 6)
 })
 </script>
 
 <style scoped>
-/* Stil für die gestrichelte Linie */
-.dashed-line {
-  border: 0;
-  border-top: 2px dashed #c06e52; /* Gestreifte Linie */
-  width: 100%; /* Dehnt die Linie über die gesamte Breite des Bildschirms */
-  margin: 20px 0; /* Abstand nach oben und unten */
+.container {
+  max-width: 960px;
+  margin: auto;
 }
 
-/* Stil für die Textzentrierung */
+.dashed-line {
+  border-top: 2px dashed #c06e52;
+  margin: 20px 0;
+}
+
+.products-section {
+  margin-top: 20px;
+}
+
 .text-center {
   text-align: center;
+}
+
+.row {
+  display: flex;
+  justify-content: space-around;
+  flex-wrap: wrap;
+}
+
+.headline-title {
+  margin-bottom: 20px;
 }
 </style>

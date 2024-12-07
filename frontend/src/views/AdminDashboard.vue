@@ -49,16 +49,15 @@ import axios from 'axios'
 const searchQuery = ref('')
 const loading = ref(false)
 const router = useRouter()
-
-// Simulierte Artikel-Daten (In der Praxis durch API-Aufruf ersetzen)
 const products = ref([])
 
+//Alle Daten aus der Datenbank laden
 onMounted(() => {
   loading.value = true
   axios
-    .get('/product') // API Call (Beispiel: '/product' ist der Endpoint)
+    .get('/product')
     .then((response) => {
-      products.value = response.data // Daten in products speichern
+      products.value = response.data
     })
     .catch((error) => {
       console.error('Fehler beim Laden der Artikel:', error)
@@ -68,12 +67,12 @@ onMounted(() => {
     })
 })
 
-// Methode zum Erstellen eines neuen Artikels
+// Methode/Routing zum Erstellen eines neuen Artikels
 const createNewArticle = () => {
   router.push('/admin/create-article')
 }
 
-// Methode zum Bearbeiten eines Artikels
+// Methode/Routing zum Bearbeiten eines Artikels
 const editArticle = (article) => {
   router.push(`/admin/edit-article/${article.id}`)
 }
@@ -82,7 +81,7 @@ const editArticle = (article) => {
 const deleteArticle = async (id) => {
   try {
     await axios.delete(`/product/${id}`)
-    //Avoid reload => Just slice it
+    //Um reload/neuen Fetch zu sparen einfach splicen im frontend
     const index = products.value.findIndex((article) => article.id === id)
     if (index !== -1) {
       products.value.splice(index, 1)
