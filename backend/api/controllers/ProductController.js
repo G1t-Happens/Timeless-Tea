@@ -85,8 +85,11 @@ module.exports = {
     const productId = req.params.id;
 
     try {
-      // Lösche alle verknüpften ProductCategory-Einträge
+      // Lösche alle verknüpften ProductCategory-Einträge --ggf ON DELETE CASCADE ?
       await ProductCategory.destroy({ product: productId });
+
+      // Lösche alle verknüpften ProductRating-Einträge --ggf ON DELETE CASCADE ?
+      await ProductRating.destroy({ product: productId });
 
       // Danach lösche das Produkt
       await Product.destroy({ id: productId });
