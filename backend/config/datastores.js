@@ -51,11 +51,10 @@ module.exports.datastores = {
     // adapter: 'sails-mysql',
     // url: 'mysql://user:password@host:port/database',
     adapter: 'sails-mysql',
-    host: 'localhost',
-    port: 3306,
-    user: 'root',
-    password: 'root',
-    database: 'timelesstea_dev'
+    host: '193.196.53.194',
+    port: 33061,
+    user: 'user5_test',
+    database: 'timelesstea_test'
   },
 
 
