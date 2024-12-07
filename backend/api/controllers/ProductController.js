@@ -9,7 +9,7 @@ module.exports = {
     try {
       const { name, description, price, categories } = req.body;
 
-      // Erstelle Produkt und Kategorien in einer Transaktion
+      // Erstelle Produkt und setze Kategorien in einer Transaktion fuer bessere performance
       const product = await sails.getDatastore().transaction(async (db) => {
         const newProduct = await Product.create({ name, description, price })
           .fetch()
@@ -111,7 +111,7 @@ module.exports = {
   destroy: async function (req, res) {
     const productId = req.params.id;
     try {
-      // Lösche JoinTable + Product
+      // Lösche JoinTables + Product - ggf. ON DELETE CASCADE?
       await ProductCategory.destroy({ product: productId });
       await ProductRating.destroy({ product: productId });
       await Product.destroy({ id: productId });
@@ -133,14 +133,14 @@ module.exports = {
         return res.status(404).json({ error: `Product with id ${productId} not found.` });
       }
 
-      // Aktualisiere Produkt und Kategorien in einer Transaktion
+      // Aktualisiere Produkt und Kategorien in einer Transaktion fuer bessere performance
       const updatedProduct = await sails.getDatastore().transaction(async (db) => {
         // Produkt aktualisieren
         await Product.updateOne({ id: productId })
           .set({ name, description, price })
           .usingConnection(db);
 
-        // Kategorien aktualisieren
+        // Kategorien aktualisieren falls ausgewaehlt
         if (productCategories) {
           await ProductCategory.destroy({ product: productId }).usingConnection(db);
           const newCategories = productCategories.map((categoryId) => ({
