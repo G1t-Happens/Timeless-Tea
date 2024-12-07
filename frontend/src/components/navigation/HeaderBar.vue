@@ -1,4 +1,5 @@
 <template>
+  <!-- Header -->
   <header class="py-2">
     <div class="d-flex align-items-center justify-content-between w-100">
       <!-- w-100 hinzugefügt -->

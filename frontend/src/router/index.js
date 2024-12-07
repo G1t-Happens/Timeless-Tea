@@ -2,7 +2,6 @@ import { createRouter, createWebHistory } from 'vue-router'
 import LandingPage from '@/views/LandingPage.vue'
 import MemberShip from '@/views/MemberShip.vue'
 import LoginPage from '@/views/LoginPage.vue'
-import SearchResults from '@/components/SearchResults.vue'
 import AdminDashboard from '@/views/AdminDashboard.vue'
 import CreateArticle from '@/views/CreateArticle.vue'
 import EditArticle from '@/views/EditArticle.vue'
@@ -23,12 +22,6 @@ const router = createRouter({
       path: '/login',
       name: 'Login',
       component: LoginPage,
-    },
-    {
-      path: '/search-results',
-      name: 'search-results',
-      component: SearchResults,
-      props: (route) => ({ query: route.query.query }),
     },
     {
       path: '/admin',

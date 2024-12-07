@@ -43,6 +43,7 @@
       <div v-if="hasMore && !loading" class="text-center mt-4">
         <button @click="loadMore" class="btn btn-secondary">Mehr Tees</button>
       </div>
+      <!-- Ansonsten keine weiteren Produkte -->
       <div v-if="!hasMore && products.length > 0" class="text-center mt-4">
         <p>Keine weiteren Tees verfügbar.</p>
       </div>
@@ -51,7 +52,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import SearchField from '@/components/SearchField.vue'
 import ProductCard from '@/components/ProductCard.vue'
 import { useRouter } from 'vue-router'
@@ -102,8 +103,10 @@ const fetchProducts = async (query = '') => {
   }
 }
 
-// Erste Daten laden
-fetchProducts()
+// Produkte laden beim Mounten
+onMounted(async () => {
+  await fetchProducts()
+})
 
 // "Mehr laden"-Funktion
 const loadMore = async () => {
@@ -129,7 +132,8 @@ const deleteArticle = async (id) => {
     await axios.delete(`/product/${id}`)
     const index = products.value.findIndex((article) => article.id === id)
     if (index !== -1) {
-      products.value.splice(index, 1) // Entferne das gelöschte Produkt aus der Liste
+      // Entferne das gelöschte Produkt aus der Liste
+      products.value.splice(index, 1)
     }
   } catch (error) {
     console.error('Fehler beim Löschen des Artikels:', error)

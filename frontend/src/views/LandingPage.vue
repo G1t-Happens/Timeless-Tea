@@ -31,6 +31,7 @@
         <div v-if="hasMore && !loading" class="text-center mt-4">
           <button @click="loadMore" class="btn btn-secondary">Mehr Tees</button>
         </div>
+        <!-- Keine weiteren Produkte -->
         <div v-if="!hasMore && products.length > 0" class="text-center mt-4">
           <p>Keine weiteren Tees verfügbar.</p>
         </div>
@@ -40,7 +41,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import SearchField from '@/components/SearchField.vue'
 import ProductCard from '@/components/ProductCard.vue'
 import axios from 'axios'
@@ -101,7 +102,9 @@ const loadMore = async () => {
 }
 
 // Produkte laden beim Mounten
-fetchProducts()
+onMounted(async () => {
+  await fetchProducts()
+})
 </script>
 
 <style scoped>
@@ -112,17 +115,5 @@ fetchProducts()
 .text-center button {
   display: inline-block;
   width: auto;
-}
-
-.product-card-container {
-  width: 100%;
-  display: flex;
-  justify-content: center;
-}
-
-.btn-primary {
-  background-color: #c06e52;
-  border-color: #c06e52;
-  border-radius: 8px;
 }
 </style>

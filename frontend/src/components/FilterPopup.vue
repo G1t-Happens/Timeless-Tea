@@ -1,18 +1,23 @@
 <template>
   <div class="filter-popup">
+    <!-- Header mit Filterüberschrift und Schließen-Button -->
     <div class="filter-header">
       <h2>Filteroptionen</h2>
+      <!-- Schließen Button -->
       <button class="close-button" @click="emit('close')">X</button>
     </div>
+
     <div class="filter-body">
       <!-- Geschmack und Wirkung -->
       <div class="filter-row">
+        <!-- Geschmack Filter -->
         <div class="filter-item">
           <h3>Geschmack</h3>
-          <button class="filter-button" ref="tasteButton" @click="toggleDropdown('taste', $event)">
+          <button class="filter-button" ref="tasteButton" @click="toggleDropdown('taste')">
             ▾
           </button>
           <div v-if="activeDropdown === 'taste'" class="dropdown-menu">
+            <!-- Geschmack-Optionen -->
             <label
               ><input type="checkbox" v-model="localFilters.taste" value="fruchtig" />
               Fruchtig</label
@@ -25,21 +30,20 @@
               ><input type="checkbox" v-model="localFilters.taste" value="blumig" /> Blumig</label
             >
           </div>
+          <!-- Ausgewählte Geschmack-Optionen anzeigen -->
           <div v-if="localFilters.taste.length" class="selected-options">
             <strong>Ausgewählt:</strong> {{ localFilters.taste.join(', ') }}
           </div>
         </div>
 
+        <!-- Wirkung Filter -->
         <div class="filter-item">
           <h3>Wirkung</h3>
-          <button
-            class="filter-button"
-            ref="effectButton"
-            @click="toggleDropdown('effect', $event)"
-          >
+          <button class="filter-button" ref="effectButton" @click="toggleDropdown('effect')">
             ▾
           </button>
           <div v-if="activeDropdown === 'effect'" class="dropdown-menu">
+            <!-- Wirkung-Optionen -->
             <label
               ><input type="checkbox" v-model="localFilters.effect" value="beruhigend" />
               Beruhigend</label
@@ -53,6 +57,7 @@
               Stärkend</label
             >
           </div>
+          <!-- Ausgewählte Wirkung-Optionen anzeigen -->
           <div v-if="localFilters.effect.length" class="selected-options">
             <strong>Ausgewählt:</strong> {{ localFilters.effect.join(', ') }}
           </div>
@@ -61,28 +66,30 @@
 
       <!-- Bewertung und Preis -->
       <div class="filter-row">
+        <!-- Bewertung Filter -->
         <div class="filter-item">
           <h3>Bewertung</h3>
-          <button
-            class="filter-button"
-            ref="ratingButton"
-            @click="toggleDropdown('rating', $event)"
-          >
+          <button class="filter-button" ref="ratingButton" @click="toggleDropdown('rating')">
             ▾
           </button>
           <div v-if="activeDropdown === 'rating'" class="dropdown-menu">
+            <!-- Bewertung-Optionen -->
             <label><input type="radio" v-model="localFilters.rating" value="1" /> 1 Stern</label>
             <label><input type="radio" v-model="localFilters.rating" value="2" /> 2 Sterne</label>
             <label><input type="radio" v-model="localFilters.rating" value="3" /> 3 Sterne</label>
             <label><input type="radio" v-model="localFilters.rating" value="4" /> 4 Sterne</label>
             <label><input type="radio" v-model="localFilters.rating" value="5" /> 5 Sterne</label>
           </div>
+          <!-- Ausgewählte Bewertung anzeigen -->
           <div v-if="localFilters.rating" class="selected-options">
             <strong>Ausgewählt:</strong> {{ localFilters.rating }} Sterne
           </div>
         </div>
+
+        <!-- Preis Filter -->
         <div class="filter-item">
           <h3>Preis</h3>
+          <!-- Preis Slider -->
           <input class="price-input" type="range" v-model="localFilters.price" min="0" max="100" />
           <span>{{ localFilters.price }} €</span>
         </div>
@@ -92,6 +99,7 @@
       <div class="filter-row">
         <div class="filter-item">
           <h3>Herkunft</h3>
+          <!-- Herkunft Eingabefeld -->
           <input
             class="origin-input"
             v-model="localFilters.origin"
@@ -99,6 +107,7 @@
             placeholder="z.B. China, Indien"
           />
         </div>
+        <!-- Aktionen Buttons (Speichern & Zurücksetzen) -->
         <div class="filter-actions">
           <button class="save-button" @click="applyFilters">Speichern</button>
           <button class="save-button" @click="resetFilters">Reset All</button>
@@ -111,10 +120,13 @@
 <script setup>
 import { reactive, ref, watch, defineEmits } from 'vue'
 
-// Events definieren
+// Emit für close und applyFilters Events definieren
 const emit = defineEmits(['close', 'applyFilters'])
 
-// Empfangen der Filterwerte über Props
+// Const zum einsehen des Dropdown States
+const activeDropdown = ref(null)
+
+// Empfang der Filterwerte über Props
 const props = defineProps({
   filters: {
     type: Object,
@@ -122,7 +134,9 @@ const props = defineProps({
   },
 })
 
-// Lokale Zustände definieren und mit den Prop-Werten initialisieren
+//TODO: Filter/Kategorien dynamisch aus der Datenbank laden
+
+// Lokale Filter mit den Initialwerten setzen
 const localFilters = reactive({
   taste: [],
   effect: [],
@@ -131,7 +145,7 @@ const localFilters = reactive({
   origin: '',
 })
 
-// Synchronisieren der lokalen Filterwerte mit den übergebenen Prop-Werten
+// Synchronisieren der lokalen Filter mit den Prop-Werten
 watch(
   () => props.filters,
   (newFilters) => {
@@ -144,22 +158,17 @@ watch(
   { immediate: true },
 )
 
-const activeDropdown = ref(null)
-
-// Funktion, um Dropdowns umzuschalten und die Mausposition zu setzen
+// Funktion zum Umschalten der Dropdowns
 const toggleDropdown = (dropdown) => {
-  if (activeDropdown.value === dropdown) {
-    activeDropdown.value = null // Dropdown schließen
-  } else {
-    activeDropdown.value = dropdown // Andernfalls das neue Dropdown öffnen
-  }
+  activeDropdown.value = activeDropdown.value === dropdown ? null : dropdown
 }
 
-// Funktion, um die Filter anzuwenden und das Event zu emittieren
+// Filter anwenden und emitten
 const applyFilters = () => {
-  emit('applyFilters', { ...localFilters }) // Hier wird das Event korrekt emittiert
+  emit('applyFilters', { ...localFilters })
 }
 
+// Alle Filter zurücksetzen
 const resetFilters = () => {
   localFilters.taste = []
   localFilters.effect = []
@@ -171,21 +180,7 @@ const resetFilters = () => {
 </script>
 
 <style scoped>
-.filter-actions {
-  display: flex;
-  justify-content: center;
-  flex-wrap: wrap;
-  gap: 4px;
-  max-width: 100%;
-  box-sizing: border-box;
-}
-
-.save-button {
-  max-width: 75%;
-  flex: 1;
-  text-align: center;
-}
-
+/* Container für die Filter-Optionen */
 .filter-popup {
   position: fixed;
   top: 50%;
@@ -199,6 +194,7 @@ const resetFilters = () => {
   z-index: 1000;
 }
 
+/* Header der Filter-Popups */
 .filter-header {
   display: flex;
   justify-content: space-between;
@@ -208,6 +204,7 @@ const resetFilters = () => {
   margin-bottom: 15px;
 }
 
+/* Schließen Button */
 .close-button {
   background: none;
   border: none;
@@ -215,23 +212,27 @@ const resetFilters = () => {
   cursor: pointer;
 }
 
+/* Filterbereich */
 .filter-body {
   display: flex;
   flex-direction: column;
   gap: 15px;
 }
 
+/* Layout für Filterzeilen */
 .filter-row {
   display: flex;
   justify-content: space-between;
   gap: 10px;
 }
 
+/* Filteritem */
 .filter-item {
   flex: 1;
   text-align: center;
 }
 
+/* Filterbutton */
 .filter-button {
   background: #fff;
   border: 1px solid #ccc;
@@ -240,6 +241,7 @@ const resetFilters = () => {
   cursor: pointer;
 }
 
+/* Dropdown-Menü */
 .dropdown-menu {
   background: #f9f9f9;
   border: 1px solid #ccc;
@@ -247,22 +249,25 @@ const resetFilters = () => {
   padding: 10px;
   position: absolute;
   z-index: 10000;
-  display: flex; /* Flexbox aktivieren */
-  flex-direction: column; /* Vertikale Anordnung der Items */
-  gap: 8px; /* Abstand zwischen Items */
-  max-width: 160px; /* Optional: Maximale Breite */
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-width: 160px;
 }
 
+/* Ausgewählte Optionen */
 .selected-options {
   margin-top: 5px;
   font-size: 14px;
   color: #555;
 }
 
+/* Preis-Slider */
 .price-input {
   width: 100%;
 }
 
+/* Herkunft Eingabefeld */
 .origin-input {
   width: 100%;
   padding: 5px;
@@ -270,7 +275,21 @@ const resetFilters = () => {
   border-radius: 4px;
 }
 
+/* Action-Buttons */
+.filter-actions {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 4px;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+/* Save-Button */
 .save-button {
+  max-width: 75%;
+  flex: 1;
+  text-align: center;
   background: #666;
   color: #fff;
   padding: 10px 20px;

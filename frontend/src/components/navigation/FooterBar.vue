@@ -1,4 +1,5 @@
 <template>
+  <!-- Footer -->
   <footer class="text-center py-3">
     <p>&copy; 2024 Timeless Tea. Alle Rechte vorbehalten.</p>
   </footer>

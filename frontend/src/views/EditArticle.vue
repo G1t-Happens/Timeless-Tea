@@ -1,19 +1,24 @@
 <template>
   <div class="edit-article">
+    <!-- Titel für die Bearbeitungsseite -->
     <h2>Artikel bearbeiten</h2>
 
+    <!-- Ladeanzeige während der Datenabfrage -->
     <div v-if="loading" class="text-center">
       <p>Lade Artikel...</p>
     </div>
 
+    <!-- Formular zur Bearbeitung des Artikels, nur wenn nicht geladen -->
     <div v-else>
-      <!-- Artikel bearbeiten Form -->
+      <!-- Formular für die Bearbeitung eines Artikels -->
       <form @submit.prevent="handleSave">
+        <!-- Eingabefeld für den Artikelnamen -->
         <div class="mb-3">
           <label for="name" class="form-label">Artikelname</label>
           <input v-model="product.name" type="text" id="name" class="form-control" required />
         </div>
 
+        <!-- Textarea für die Artikelbeschreibung -->
         <div class="mb-3">
           <label for="description" class="form-label">Beschreibung</label>
           <textarea
@@ -24,6 +29,7 @@
           ></textarea>
         </div>
 
+        <!-- Eingabefeld für den Preis des Artikels -->
         <div class="mb-3">
           <label for="price" class="form-label">Preis</label>
           <input
@@ -36,15 +42,20 @@
           />
         </div>
 
-        <!-- Dropdown Menu für Kategorienauswahl, gruppiert nach Typ -->
+        <!-- Dropdown für die Kategorienauswahl -->
         <div class="mb-3">
           <h3>Kategorien</h3>
+          <!-- Button, um das Dropdown für die Kategorien zu öffnen -->
           <button class="filter-button" type="button" @click="toggleDropdown('categories')">
             ▾
           </button>
+
+          <!-- Dropdown-Menü, das nur angezeigt wird, wenn der Button geklickt wurde -->
           <div v-if="activeDropdown === 'categories'" class="dropdown-menu">
+            <!-- Gruppen von Kategorien, nach Typ organisiert -->
             <div v-for="group in organizedCategories" :key="group.type">
               <strong>{{ group.type }}</strong>
+              <!-- Jede Kategorie innerhalb der Gruppe -->
               <div v-for="category in group.categories" :key="category.id">
                 <label>
                   <input type="checkbox" v-model="selectedCategories" :value="category.id" />
@@ -53,11 +64,14 @@
               </div>
             </div>
           </div>
+
+          <!-- Anzeige der ausgewählten Kategorien -->
           <div v-if="selectedCategories.length" class="selected-options">
             <strong>Ausgewählt:</strong> {{ getCategoryNames().join(', ') }}
           </div>
         </div>
 
+        <!-- Button zum Speichern der Änderungen -->
         <button type="submit" class="btn btn-primary">Speichern</button>
       </form>
     </div>
@@ -69,24 +83,25 @@ import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import axios from 'axios'
 
-const route = useRoute()
-const router = useRouter()
-const loading = ref(true)
-const selectedCategories = ref([])
-const organizedCategories = ref([])
-const activeDropdown = ref(null)
+// Reaktive Variablen
+const route = useRoute() // Holt die aktuellen Routenparameter
+const router = useRouter() // Für Navigation nach dem Speichern
+const loading = ref(true) // Flag, ob die Daten noch geladen werden
+const selectedCategories = ref([]) // Ausgewählte Kategorien-IDs
+const organizedCategories = ref([]) // Kategorien, gruppiert nach Typ
+const activeDropdown = ref(null) // Verfolgt, welches Dropdown aktiv ist
 const product = ref({
   id: null,
   name: '',
   description: '',
   price: 0,
   categories: [],
-})
+}) // Artikel, der bearbeitet werden soll
 
-// Kategorien nach Type filtern wie z.B. Geschmack oder Wirkung fuer schoenere Darstellung
+// Funktion zum Gruppieren von Kategorien nach ihrem Typ
 const organizeCategoriesByType = (categories) => {
   const grouped = categories.reduce((group, category) => {
-    const type = category.type || 'Andere'
+    const type = category.type || 'Andere' // Defaultwert 'Andere' für nicht definierte Typen
     group[type] = group[type] || []
     group[type].push(category)
     return group
@@ -94,53 +109,54 @@ const organizeCategoriesByType = (categories) => {
   return Object.entries(grouped).map(([type, categories]) => ({ type, categories }))
 }
 
+// Funktion, um die Namen der ausgewählten Kategorien zu erhalten
 const getCategoryNames = () => {
-  return selectedCategories.value.map((id) =>
-    organizedCategories.value
-      .flatMap((group) => group.categories)
-      .find((category) => category.id === id)?.name
-  );
-};
+  return selectedCategories.value.map(
+    (id) =>
+      organizedCategories.value
+        .flatMap((group) => group.categories)
+        .find((category) => category.id === id)?.name,
+  )
+}
 
-
+// Funktion, die beim Laden der Seite aufgerufen wird
 onMounted(async () => {
-  await fetchCategories()
-  await fetchArticle(route.params.id)
+  await fetchCategories() // Kategorien abrufen
+  await fetchArticle(route.params.id) // Artikel anhand der ID abrufen
 })
 
-//Alle vorhandenen Kategorien laden die zur Auswahl stehen
-  const fetchCategories = async () => {
-    try {
-      const { data } = await axios.get('/category')
-      organizedCategories.value = organizeCategoriesByType(data)
-    } catch (error) {
-      console.error('Fehler beim Laden der Kategorien:', error)
-    }
-  }
-
-//Produkt welches wir editieren wollen anhand der id laden
-const fetchArticle = async (id) => {
-  loading.value = true;
+// Funktion zum Abrufen aller Kategorien
+const fetchCategories = async () => {
   try {
-    const { data } = await axios.get(`/product/${id}`);
-    product.value = data;
-
-    // IDs der ausgewählten Kategorien aus productCategories extrahieren
-    selectedCategories.value = data.productCategories.map((cat) => cat.id);
+    const { data } = await axios.get('/category')
+    organizedCategories.value = organizeCategoriesByType(data) // Kategorien gruppieren
   } catch (error) {
-    console.error('Fehler beim Laden des Artikels:', error);
-  } finally {
-    loading.value = false;
+    console.error('Fehler beim Laden der Kategorien:', error)
   }
-};
+}
 
+// Funktion zum Abrufen des Artikels, der bearbeitet werden soll
+const fetchArticle = async (id) => {
+  loading.value = true // Setzt das Loading-Flag auf true, um die Ladeanzeige zu zeigen
+  try {
+    const { data } = await axios.get(`/product/${id}`)
+    product.value = data // Produktdaten zuweisen
 
-//Produkt updaten/speichern
+    // IDs der ausgewählten Kategorien aus den Produktkategorien extrahieren
+    selectedCategories.value = data.productCategories.map((cat) => cat.id)
+  } catch (error) {
+    console.error('Fehler beim Laden des Artikels:', error)
+  } finally {
+    loading.value = false // Ladeanzeige ausblenden
+  }
+}
+
+// Funktion, um die Änderungen des Artikels zu speichern
 const handleSave = async () => {
   console.log('Saving article:', product.value)
 
   try {
-    // Daten fuer den Patch Aufruf vorbereiten
+    // Daten für den Patch-Aufruf vorbereiten
     const updatedData = {
       name: product.value.name,
       description: product.value.description,
@@ -148,35 +164,40 @@ const handleSave = async () => {
       productCategories: selectedCategories.value,
     }
 
-    // PATCH Aufruf
+    // PATCH-Anfrage, um den Artikel zu aktualisieren
     const response = await axios.patch(`/product/${product.value.id}`, updatedData)
-    console.log('Article successfully updated:', response.data)
+    console.log('Artikel erfolgreich aktualisiert:', response.data)
 
-    // Nach dem Update wieder auf das AdminDashboard navigieren
+    // Nach dem Speichern auf das Admin-Dashboard weiterleiten
     await router.push('/admin')
   } catch (error) {
-    console.error('Error while saving the article:', error)
+    console.error('Fehler beim Speichern des Artikels:', error)
   }
 }
 
+// Funktion zum Umschalten des Dropdown-Menüs
 const toggleDropdown = (dropdown) => {
   activeDropdown.value = activeDropdown.value === dropdown ? null : dropdown
 }
 </script>
 
 <style scoped>
+/* Stil für den Hauptcontainer */
 .edit-article {
   padding: 20px;
 }
 
+/* Stil für Form-Labels */
 .form-label {
   font-weight: bold;
 }
 
+/* Stil für den Speichern-Button */
 button {
   margin-top: 20px;
 }
 
+/* Stil für das Dropdown-Menü */
 .dropdown-menu {
   background: #f9f9f9;
   border: 1px solid #ccc;
@@ -187,9 +208,10 @@ button {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  max-width: 300px; /* Adjust based on layout needs */
+  max-width: 300px; /* Maximale Breite des Dropdowns */
 }
 
+/* Stil für die Anzeige der ausgewählten Kategorien */
 .selected-options {
   margin-top: 5px;
   font-size: 14px;
