@@ -22,6 +22,15 @@
       <!-- Sektion für beliebteste Teesorten -->
       <section class="products-section">
         <h2 class="text-center headline-title mb-4">Unsere beliebtesten Teesorten</h2>
+
+        <!-- Ladezustand oder keine Produkte -->
+        <div v-if="loading && products.length === 0" class="text-center">
+          <p>Lade Artikel...</p>
+        </div>
+        <div v-if="!loading && products.length === 0" class="text-center">
+          <p>Keine Produkte gefunden.</p>
+        </div>
+
         <div class="row">
           <!-- Produktkarten mit den Ergebnissen -->
           <ProductCard v-for="product in products" :key="product.id" :product="product" />
