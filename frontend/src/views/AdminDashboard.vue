@@ -13,7 +13,7 @@
     </div>
 
     <!-- Liste der Artikel -->
-    <div v-if="loading" class="text-center">
+    <div v-if="loading && products.length === 0" class="text-center">
       <p>Lade Artikel...</p>
     </div>
 
@@ -35,6 +35,13 @@
           </div>
         </div>
       </div>
+      <!-- Mehr Tees Button -->
+      <div v-if="hasMore && !loading" class="text-center mt-4">
+        <button @click="loadMore" class="btn btn-secondary">Mehr Tees</button>
+      </div>
+      <div v-if="!hasMore && products.length > 0" class="text-center mt-4">
+        <p>Keine weiteren Tees verfügbar.</p>
+      </div>
     </div>
   </div>
 </template>
@@ -50,22 +57,42 @@ const searchQuery = ref('')
 const loading = ref(false)
 const router = useRouter()
 const products = ref([])
+const currentPage = ref(1) // Aktuelle Seite
+const pageSize = 10 // Anzahl der Artikel pro Seite
+const hasMore = ref(true) // Gibt an, ob es mehr Artikel gibt
 
-//Alle Daten aus der Datenbank laden
-onMounted(() => {
+// Artikel laden (mit Pagination)
+const fetchProducts = async () => {
+  if (loading.value) return // Mehrfachklick verhindern
   loading.value = true
-  axios
-    .get('/product')
-    .then((response) => {
-      products.value = response.data
+
+  try {
+    const response = await axios.get('http://localhost:1337/product', {
+      params: {
+        page: currentPage.value, // Die aktuelle Seite
+        size: pageSize, // Anzahl der Artikel pro Seite
+      },
     })
-    .catch((error) => {
-      console.error('Fehler beim Laden der Artikel:', error)
-    })
-    .finally(() => {
-      loading.value = false
-    })
-})
+
+    console.log('API Response:', response.data) // Debugging: Zeigt die API-Antwort
+
+    // Prüfen, ob die Antwort die erwarteten Daten enthält
+    if (response.data && Array.isArray(response.data.products)) {
+      products.value.push(...response.data.products) // Produkte zur Liste hinzufügen
+      currentPage.value++ // Nächste Seite vorbereiten
+      hasMore.value = response.data.hasMore // Prüfen, ob es weitere Artikel gibt
+    } else {
+      console.error('Unerwartetes API-Antwortformat:', response.data)
+    }
+  } catch (error) {
+    console.error('Fehler beim Laden der Artikel:', error.message)
+  } finally {
+    loading.value = false
+  }
+}
+
+// Erste Daten laden
+onMounted(fetchProducts)
 
 // Methode/Routing zum Erstellen eines neuen Artikels
 const createNewArticle = () => {
@@ -80,15 +107,20 @@ const editArticle = (article) => {
 // Methode zum Löschen eines Artikels
 const deleteArticle = async (id) => {
   try {
-    await axios.delete(`/product/${id}`)
-    //Um reload/neuen Fetch zu sparen einfach splicen im frontend
+    await axios.delete(`http://localhost:1337/product/${id}`)
+    // Um reload/neuen Fetch zu sparen einfach splicen im frontend
     const index = products.value.findIndex((article) => article.id === id)
     if (index !== -1) {
       products.value.splice(index, 1)
     }
   } catch (error) {
-    console.error('Fehler beim Laden des Artikels:', error)
+    console.error('Fehler beim Löschen des Artikels:', error.message)
   }
+}
+
+// Mehr Artikel laden
+const loadMore = () => {
+  fetchProducts()
 }
 </script>
 

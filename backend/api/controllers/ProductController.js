@@ -73,35 +73,49 @@ module.exports = {
   find: async function (req, res) {
     try {
       const search = req.query.search || '';
+      const page = parseInt(req.query.page, 10) || 1; // Standardseite 1
+      const size = parseInt(req.query.size, 10) || 20; // Standardgröße 20
+      const offset = (page - 1) * size; // Offset berechnen
 
-      // Effizienten Datenabfrage
+      // Effiziente Datenabfrage mit LIMIT und OFFSET für Pagination
       const products = await sails.sendNativeQuery(`
-        SELECT p.*,
-               JSON_ARRAYAGG(JSON_OBJECT(
-                 'id', c.id,
-                 'name', c.name,
-                 'type', c.type
-               )) AS productCategories,
-               COALESCE(AVG(r.stars), 0) AS averageRating
-        FROM product p
-        LEFT JOIN productcategory pc ON p.id = pc.product
-        LEFT JOIN category c ON pc.category = c.id
-        LEFT JOIN productrating pr ON p.id = pr.product
-        LEFT JOIN rating r ON pr.rating = r.id
-        WHERE p.name LIKE $1
-        GROUP BY p.id
-      `, [`%${search}%`]);
+      SELECT p.*,
+             JSON_ARRAYAGG(JSON_OBJECT(
+               'id', c.id,
+               'name', c.name,
+               'type', c.type
+             )) AS productCategories,
+             COALESCE(AVG(r.stars), 0) AS averageRating
+      FROM product p
+      LEFT JOIN productcategory pc ON p.id = pc.product
+      LEFT JOIN category c ON pc.category = c.id
+      LEFT JOIN productrating pr ON p.id = pr.product
+      LEFT JOIN rating r ON pr.rating = r.id
+      WHERE p.name LIKE $1
+      GROUP BY p.id
+      LIMIT $2 OFFSET $3
+    `, [`%${search}%`, size, offset]);
+
+      const totalCountQuery = await sails.sendNativeQuery(`
+      SELECT COUNT(*) AS total FROM product
+      WHERE name LIKE $1
+    `, [`%${search}%`]);
+
+      const totalCount = totalCountQuery.rows[0].total || 0; // Gesamtanzahl der Produkte
+      const totalPages = Math.ceil(totalCount / size); // Berechnung der Gesamtseitenanzahl
 
       const results = products.rows.map((product) => ({
         ...product,
         productCategories: JSON.parse(product.productCategories || '[]'),
       }));
 
-      if (results.length === 0) {
-        return res.status(404).json({ error: 'No products found.' });
-      }
-
-      return res.json(results);
+      return res.json({
+        products: results,
+        total: totalCount,
+        totalPages: totalPages,
+        currentPage: page,
+        hasMore: page < totalPages,
+      });
     } catch (error) {
       sails.log.error('Error in find:', error.message);
       return res.serverError('Failed to retrieve products.');
