@@ -73,11 +73,41 @@ module.exports = {
   find: async function (req, res) {
     try {
       const search = req.query.search || '';
-      const page = parseInt(req.query.page, 10) || 1; // Standardseite 1
-      const size = parseInt(req.query.size, 10) || 20; // Standardgröße 20
-      const offset = (page - 1) * size; // Offset berechnen
+      const page = req.query.page ? parseInt(req.query.page, 10) : null;
+      const size = req.query.size ? parseInt(req.query.size, 10) : null;
 
-      // Effiziente Datenabfrage mit LIMIT und OFFSET für Pagination
+      // Wenn ein Such-Query vorhanden ist, Pagination deaktivieren
+      if (search) {
+        const products = await sails.sendNativeQuery(`
+        SELECT p.*,
+               JSON_ARRAYAGG(JSON_OBJECT(
+                 'id', c.id,
+                 'name', c.name,
+                 'type', c.type
+               )) AS productCategories,
+               COALESCE(AVG(r.stars), 0) AS averageRating
+        FROM product p
+        LEFT JOIN productcategory pc ON p.id = pc.product
+        LEFT JOIN category c ON pc.category = c.id
+        LEFT JOIN productrating pr ON p.id = pr.product
+        LEFT JOIN rating r ON pr.rating = r.id
+        WHERE p.name LIKE $1
+        GROUP BY p.id
+      `, [`%${search}%`]);
+
+        const results = products.rows.map((product) => ({
+          ...product,
+          productCategories: JSON.parse(product.productCategories || '[]'),
+        }));
+
+        return res.json({
+          products: results,
+          total: results.length, // Gesamtanzahl der gefundenen Produkte
+        });
+      }
+
+      // Wenn keine Suchabfrage vorhanden ist, Pagination anwenden
+      const offset = (page - 1) * size;
       const products = await sails.sendNativeQuery(`
       SELECT p.*,
              JSON_ARRAYAGG(JSON_OBJECT(
@@ -91,18 +121,16 @@ module.exports = {
       LEFT JOIN category c ON pc.category = c.id
       LEFT JOIN productrating pr ON p.id = pr.product
       LEFT JOIN rating r ON pr.rating = r.id
-      WHERE p.name LIKE $1
       GROUP BY p.id
-      LIMIT $2 OFFSET $3
-    `, [`%${search}%`, size, offset]);
+      LIMIT $1 OFFSET $2
+    `, [size, offset]);
 
       const totalCountQuery = await sails.sendNativeQuery(`
-      SELECT COUNT(*) AS total FROM product
-      WHERE name LIKE $1
-    `, [`%${search}%`]);
+        SELECT COUNT(*) AS total FROM product
+      `);
 
-      const totalCount = totalCountQuery.rows[0].total || 0; // Gesamtanzahl der Produkte
-      const totalPages = Math.ceil(totalCount / size); // Berechnung der Gesamtseitenanzahl
+      const totalCount = totalCountQuery.rows[0].total || 0;
+      const totalPages = Math.ceil(totalCount / size);
 
       const results = products.rows.map((product) => ({
         ...product,

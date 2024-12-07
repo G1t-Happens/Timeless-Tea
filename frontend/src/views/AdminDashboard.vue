@@ -4,7 +4,7 @@
 
     <!-- Suchfeld für Artikel -->
     <div class="search-section mb-4">
-      <SearchField v-model="searchQuery" placeholder="Artikel suchen..." />
+      <SearchField v-model="searchQuery" @search="fetchProducts" placeholder="Artikel suchen..." />
     </div>
 
     <!-- Button zum Hinzufügen eines neuen Artikels -->
@@ -12,11 +12,15 @@
       <button @click="createNewArticle" class="btn btn-primary">Neuen Artikel erstellen</button>
     </div>
 
-    <!-- Liste der Artikel -->
+    <!-- Ladezustand oder keine Produkte -->
     <div v-if="loading && products.length === 0" class="text-center">
       <p>Lade Artikel...</p>
     </div>
+    <div v-if="!loading && products.length === 0" class="text-center">
+      <p>Keine Produkte gefunden.</p>
+    </div>
 
+    <!-- Liste der Artikel -->
     <div v-else>
       <div class="row">
         <!-- Produktkarten -->
@@ -47,80 +51,89 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref } from 'vue'
 import SearchField from '@/components/SearchField.vue'
 import ProductCard from '@/components/ProductCard.vue'
 import { useRouter } from 'vue-router'
 import axios from 'axios'
 
+// Reaktive Variablen
+const products = ref([])
 const searchQuery = ref('')
 const loading = ref(false)
+const currentPage = ref(1)
+const pageSize = 9
+const hasMore = ref(true)
 const router = useRouter()
-const products = ref([])
-const currentPage = ref(1) // Aktuelle Seite
-const pageSize = 10 // Anzahl der Artikel pro Seite
-const hasMore = ref(true) // Gibt an, ob es mehr Artikel gibt
 
-// Artikel laden (mit Pagination)
-const fetchProducts = async () => {
-  if (loading.value) return // Mehrfachklick verhindern
+// API-Aufruf für Produkte
+const fetchProducts = async (query = '') => {
+  // Reset bei neuer Suchanfrage
+  if (query !== searchQuery.value) {
+    searchQuery.value = query.trim()
+    currentPage.value = 1 // Zurück zur ersten Seite
+    products.value = [] // Vorherige Ergebnisse leeren
+    hasMore.value = true // Button zurücksetzen
+  }
+
+  // Ladezustand aktivieren
   loading.value = true
-
   try {
-    const response = await axios.get('http://localhost:1337/product', {
+    const response = await axios.get('/product', {
       params: {
-        page: currentPage.value, // Die aktuelle Seite
-        size: pageSize, // Anzahl der Artikel pro Seite
+        search: searchQuery.value || undefined,
+        page: currentPage.value,
+        size: pageSize,
       },
     })
 
-    console.log('API Response:', response.data) // Debugging: Zeigt die API-Antwort
-
-    // Prüfen, ob die Antwort die erwarteten Daten enthält
-    if (response.data && Array.isArray(response.data.products)) {
-      products.value.push(...response.data.products) // Produkte zur Liste hinzufügen
-      currentPage.value++ // Nächste Seite vorbereiten
-      hasMore.value = response.data.hasMore // Prüfen, ob es weitere Artikel gibt
+    // Ergebnisse verarbeiten
+    if (currentPage.value === 1) {
+      products.value = response.data.products
     } else {
-      console.error('Unerwartetes API-Antwortformat:', response.data)
+      products.value.push(...response.data.products)
     }
+
+    hasMore.value = response.data.hasMore
   } catch (error) {
-    console.error('Fehler beim Laden der Artikel:', error.message)
+    console.error('Fehler beim Laden der Artikel:', error)
   } finally {
     loading.value = false
   }
 }
 
 // Erste Daten laden
-onMounted(fetchProducts)
+fetchProducts()
 
-// Methode/Routing zum Erstellen eines neuen Artikels
+// "Mehr laden"-Funktion
+const loadMore = async () => {
+  if (hasMore.value) {
+    currentPage.value++
+    await fetchProducts()
+  }
+}
+
+// Artikel erstellen
 const createNewArticle = () => {
   router.push('/admin/create-article')
 }
 
-// Methode/Routing zum Bearbeiten eines Artikels
+// Artikel bearbeiten
 const editArticle = (article) => {
   router.push(`/admin/edit-article/${article.id}`)
 }
 
-// Methode zum Löschen eines Artikels
+// Artikel löschen
 const deleteArticle = async (id) => {
   try {
-    await axios.delete(`http://localhost:1337/product/${id}`)
-    // Um reload/neuen Fetch zu sparen einfach splicen im frontend
+    await axios.delete(`/product/${id}`)
     const index = products.value.findIndex((article) => article.id === id)
     if (index !== -1) {
-      products.value.splice(index, 1)
+      products.value.splice(index, 1) // Entferne das gelöschte Produkt aus der Liste
     }
   } catch (error) {
-    console.error('Fehler beim Löschen des Artikels:', error.message)
+    console.error('Fehler beim Löschen des Artikels:', error)
   }
-}
-
-// Mehr Artikel laden
-const loadMore = () => {
-  fetchProducts()
 }
 </script>
 

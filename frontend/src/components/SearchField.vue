@@ -11,15 +11,6 @@
           alt="Search Field"
         />
 
-        <!-- Filter Button -->
-        <button class="btn btn-image" type="button" @click="toggleFilter">
-          <img
-            src="../../src/assets/icons/filter.png"
-            class="oval-icon-responsive"
-            alt="Filter Icon"
-          />
-        </button>
-
         <!-- Suchen Button -->
         <button class="btn btn-image" type="submit">
           <img
@@ -30,54 +21,18 @@
         </button>
       </form>
     </div>
-
-    <!-- Filter-Popup -->
-    <FilterPopup
-      v-if="isFilterVisible"
-      :filters="filters"
-      @close="toggleFilter"
-      @applyFilters="applyFilters"
-    />
   </div>
 </template>
 
 <script setup>
 import { ref } from 'vue'
-import { useRouter } from 'vue-router'
-import FilterPopup from './FilterPopup.vue'
 
 const searchQuery = ref('')
-const isFilterVisible = ref(false)
-const filters = ref({
-  taste: [],
-  effect: [],
-  rating: null,
-  price: 50,
-  origin: '',
-})
-const router = useRouter()
+const emit = defineEmits(['search'])
 
-// Funktion zum Handhaben der Suche
-const handleSearch = async () => {
-  if (searchQuery.value.trim()) {
-    try {
-      // Zur search-result page navigieren mit Uebergabe von query
-      router.push({ name: 'search-results', query: { query: searchQuery.value } })
-    } catch (error) {
-      console.error('Error while searching:', error)
-    }
-  }
-}
-
-// Funktion zum Umschalten des Filters
-const toggleFilter = () => {
-  isFilterVisible.value = !isFilterVisible.value
-}
-
-// Funktion zum Anwenden der Filter
-const applyFilters = (appliedFilters) => {
-  filters.value = appliedFilters
-  toggleFilter()
+// Suchfunktion ausführen und Ereignis auslösen
+const handleSearch = () => {
+  emit('search', searchQuery.value.trim()) // Suchabfrage senden (auch leerer Wert möglich)
 }
 </script>
 

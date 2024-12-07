@@ -1,8 +1,14 @@
 <template>
-  <div>
+  <div class="admin-dashboard">
     <main class="container my-2">
-      <!-- Suchfeld Komponente -->
-      <SearchField />
+      <!-- Suchfeld für Artikel -->
+      <div class="search-section mb-4">
+        <SearchField
+          v-model="searchQuery"
+          @search="fetchProducts"
+          placeholder="Artikel suchen..."
+        />
+      </div>
 
       <!-- Trennlinie -->
       <hr class="dashed-line" />
@@ -17,8 +23,16 @@
       <section class="products-section">
         <h2 class="text-center headline-title mb-4">Unsere beliebtesten Teesorten</h2>
         <div class="row">
-          <!-- Produktkarten mit den 6 besten Produkten anhand der Bewertung -->
-          <ProductCard v-for="product in topProducts" :key="product.id" :product="product" />
+          <!-- Produktkarten mit den Ergebnissen -->
+          <ProductCard v-for="product in products" :key="product.id" :product="product" />
+        </div>
+
+        <!-- Mehr Tees Button -->
+        <div v-if="hasMore && !loading" class="text-center mt-4">
+          <button @click="loadMore" class="btn btn-secondary">Mehr Tees</button>
+        </div>
+        <div v-if="!hasMore && products.length > 0" class="text-center mt-4">
+          <p>Keine weiteren Tees verfügbar.</p>
         </div>
       </section>
     </main>
@@ -26,68 +40,89 @@
 </template>
 
 <script setup>
+import { ref } from 'vue'
 import SearchField from '@/components/SearchField.vue'
-import MembershipSection from '@/components/MembershipSection.vue'
 import ProductCard from '@/components/ProductCard.vue'
-import { onMounted, ref, computed } from 'vue'
 import axios from 'axios'
+import MembershipSection from '@/components/MembershipSection.vue'
 
+// Reaktive Variablen
 const products = ref([])
+const searchQuery = ref('')
 const loading = ref(false)
+const pageSize = 9
+const currentPage = ref(1)
+const hasMore = ref(true)
 
-// Funktion zum Laden der Produkte von der API
-const fetchProducts = () => {
+// API-Aufruf
+const fetchProducts = async (query = '') => {
+  // Reset bei neuer Suchanfrage
+  if (query !== searchQuery.value) {
+    searchQuery.value = query.trim() // Aktualisiere Suchquery
+    currentPage.value = 1 // Erste Seite
+    products.value = [] // Leere Produkte
+    hasMore.value = true // "Mehr laden" zurücksetzen
+  }
+
+  // Ladezustand aktivieren
   loading.value = true
-  axios
-    .get('/product')
-    .then((response) => {
-      products.value = response.data.products
+  try {
+    // API-Aufruf mit der aktuellen Seite
+    const response = await axios.get('/product', {
+      params: {
+        search: searchQuery.value || undefined,
+        page: currentPage.value, // Aktuelle Seite
+        size: pageSize, // Anzahl der Produkte pro Seite
+      },
     })
-    .catch((error) => {
-      console.error('Fehler beim Laden der Artikel:', error)
-    })
-    .finally(() => {
-      loading.value = false
-    })
+
+    // Ergebnisse verarbeiten
+    if (currentPage.value === 1) {
+      products.value = response.data.products // Ersetze Produkte
+    } else {
+      products.value.push(...response.data.products) // Füge weitere Seiten hinzu
+    }
+
+    // Aktualisiere hasMore basierend auf der API-Antwort
+    hasMore.value = response.data.hasMore
+  } catch (error) {
+    console.error('Fehler beim Laden der Artikel:', error)
+  } finally {
+    loading.value = false // Ladezustand beenden
+  }
 }
 
-onMounted(fetchProducts)
+// Funktion zum Laden der nächsten Seite
+const loadMore = async () => {
+  if (hasMore.value) {
+    currentPage.value++ // Erhöhe die aktuelle Seite
+    await fetchProducts() // Produkte laden
+  }
+}
 
-// Berechnete Eigenschaft für die Top 6 Produkte basierend auf 'averageRating'
-const topProducts = computed(() => {
-  return products.value
-    .slice()
-    .sort((a, b) => b.averageRating - a.averageRating) // Sortieren nach 'averageRating' absteigend
-    .slice(0, 6)
-})
+// Produkte laden beim Mounten
+fetchProducts()
 </script>
 
 <style scoped>
-.container {
-  max-width: 960px;
-  margin: auto;
+.admin-dashboard {
+  padding: 20px;
 }
 
-.dashed-line {
-  border-top: 2px dashed #c06e52;
-  margin: 20px 0;
+.text-center button {
+  display: inline-block;
+  width: auto;
 }
 
-.products-section {
-  margin-top: 20px;
-}
-
-.text-center {
-  text-align: center;
-}
-
-.row {
+.product-card-container {
+  width: 100%;
   display: flex;
-  justify-content: space-around;
-  flex-wrap: wrap;
+  justify-content: center;
 }
 
-.headline-title {
-  margin-bottom: 20px;
+.btn-primary {
+  background-color: #c06e52;
+  border-color: #c06e52;
+  border-radius: 8px;
 }
 </style>

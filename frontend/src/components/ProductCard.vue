@@ -20,7 +20,6 @@
 
         <!-- Sternebewertung -->
         <div class="card-icons">
-          <!-- Vollständige Sterne -->
           <img
             v-for="n in fullStars"
             :key="'full-star-' + n"
@@ -28,7 +27,6 @@
             alt="Voller Stern"
             class="card-rating"
           />
-          <!-- Leere Sterne -->
           <img
             v-for="n in emptyStars"
             :key="'empty-star-' + n"
@@ -36,32 +34,12 @@
             alt="Leerer Stern"
             class="card-rating"
           />
-          <!-- Anzahl der Bewertungen -->
           <p>({{ product.reviews }})</p>
         </div>
 
         <!-- Preis -->
         <p class="card-text">Ab {{ product.price }}€ erhältlich</p>
-        <!-- Produktbeschreibung -->
         <p class="card-text">{{ product.description }}</p>
-
-        <!-- Buttons für "Like" und "In den Warenkorb" -->
-        <div class="card-icons">
-          <button class="btn btn-image" type="button">
-            <img
-              src="../../src/assets/icons/likeEmpty.png"
-              alt="Tee nicht geliket."
-              class="card-button me-4"
-            />
-          </button>
-          <button class="btn btn-image" type="button">
-            <img
-              src="../../src/assets/icons/shopingcart.png"
-              alt="Zum Einkaufswagen hinzufügen"
-              class="card-button"
-            />
-          </button>
-        </div>
       </div>
     </div>
   </div>
@@ -70,7 +48,6 @@
 <script setup>
 import { computed } from 'vue'
 
-// Die Produktdaten werden als Props übergeben
 const props = defineProps({
   product: {
     type: Object,
@@ -78,22 +55,11 @@ const props = defineProps({
   },
 })
 
-//Runden der Durchschnittsbewertung
-const fullStars = computed(() => {
-  return Math.floor(props.product.averageRating)
-})
-
-//Berechnung wie viele emptyStars noch angezeigt werden muessen
-const emptyStars = computed(() => {
-  return 5 - fullStars.value
-})
+const fullStars = computed(() => Math.floor(props.product.averageRating))
+const emptyStars = computed(() => 5 - fullStars.value)
 </script>
 
 <style scoped>
-.products-section .card-text {
-  color: #666;
-}
-
 .fixed-card {
   height: 600px;
   border: 2px solid #4a5043;
@@ -115,34 +81,11 @@ const emptyStars = computed(() => {
   justify-content: space-between;
 }
 
-.fixed-card .card-title,
-.fixed-card .card-text {
-  margin-bottom: 0.5rem;
-}
-
 .fixed-card .card-title {
   font-size: 22pt;
   color: #9fa86d;
 }
 
-.card-icons {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-}
-
-.card-rating {
-  height: 20px;
-  width: 20px;
-}
-
-.card-button {
-  height: 50px;
-  width: 50px;
-}
-
-/* Kategorien-Badges */
 .categories-section {
   display: flex;
   flex-wrap: wrap;
@@ -155,6 +98,5 @@ const emptyStars = computed(() => {
   padding: 5px 10px;
   font-size: 12px;
   border-radius: 12px;
-  text-transform: capitalize;
 }
 </style>
