@@ -1,22 +1,34 @@
 /**
  * Category.js
- *
- * @description :: A model definition represents a database table/collection.
- * @docs        :: https://sailsjs.com/docs/concepts/models-and-orm/models
  */
-
 module.exports = {
 
   attributes: {
 
-    name: { type: 'string', columnType: 'varchar(80)', required: true },
+    name: {
+      type: 'string',
+      columnType: 'varchar(80)',
+      required: true
+    },
 
-    // Verknüpfung zu den Produkten, die zu dieser Kategorie gehören
-    products: {
-      collection: 'product',
-      via: 'categories'
+
+    type: {
+      type: 'string',
+      columnType: 'varchar(80)',
+      required: true
+    },
+
+
+    label: {
+      type: 'string',
+      columnType: 'varchar(256)'
+    },
+
+    productCategories: {
+      collection: 'productcategory',
+      via: 'category'
     }
 
   }
 
-}
+};

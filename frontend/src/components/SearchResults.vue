@@ -31,45 +31,13 @@ import { ref, onMounted, computed, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import ProductCard from '@/components/ProductCard.vue'
 import SearchField from '@/components/SearchField.vue'
-
-// Beispielhafte Produktdaten
-const products = ref([
-  {
-    id: 1,
-    name: 'Schwarzer Tee - Earl Grey',
-    image: '../../src/assets/images/blackTea.jpg',
-    price: 12.3,
-    description:
-      'Aus den besten Teegärten Asiens: aromatisch, voller Koffein. Fördert Konzentration, Energie und sorgt für wohltuende Genussmomente.',
-    rating: 2,
-    reviews: 325,
-  },
-  {
-    id: 2,
-    name: 'Grüner Tee - Sencha',
-    image: '../../src/assets/images/greenTea.jpg',
-    price: 10.5,
-    description:
-      'Direkt aus den besten Teegärten Asiens! Reich an Antioxidantien, unterstützt er Wohlbefinden und innere Balance.',
-    rating: 3,
-    reviews: 198,
-  },
-  {
-    id: 3,
-    name: 'Kräutertee',
-    image: '../../src/assets/images/herbalTea.jpg',
-    price: 8.9,
-    description:
-      'Beruhigend wie eine warme Umarmung, ob mit Kamille, Pfefferminze oder Ingwer – perfekt für eine entspannte Auszeit.',
-    rating: 2,
-    reviews: 89,
-  },
-])
+import axios from 'axios'
 
 const route = useRoute()
 const router = useRouter()
 const loading = ref(true)
 const searchQuery = ref(route.query.query || '')
+const products = ref([])
 
 // Computed Property für gefilterte Produkte
 const filteredProducts = computed(() => {
@@ -80,10 +48,16 @@ const filteredProducts = computed(() => {
 })
 
 // Funktion zum Simulieren des Ladens von Produkten
-const fetchProducts = () => {
-  setTimeout(() => {
+const fetchProducts = async () => {
+  loading.value = true
+  try {
+    const response = await axios.get(`/product?search=${encodeURIComponent(searchQuery.value)}`)
+    products.value = response.data || []
     loading.value = false
-  }, 1000) // Simuliere eine Ladezeit von 1 Sekunde
+  } catch (error) {
+    loading.value = false
+    console.error('Error fetching products:', error)
+  }
 }
 
 onMounted(fetchProducts)

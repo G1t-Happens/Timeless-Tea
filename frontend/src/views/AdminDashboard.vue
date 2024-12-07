@@ -7,6 +7,11 @@
       <SearchField v-model="searchQuery" placeholder="Artikel suchen..." />
     </div>
 
+    <!-- Button zum Hinzufügen eines neuen Artikels -->
+    <div class="text-center mt-4 mb-4 w-10">
+      <button @click="createNewArticle" class="btn btn-primary">Neuen Artikel erstellen</button>
+    </div>
+
     <!-- Liste der Artikel -->
     <div v-if="loading" class="text-center">
       <p>Lade Artikel...</p>
@@ -15,9 +20,9 @@
     <div v-else>
       <div class="row">
         <!-- Produktkarten -->
-        <div v-for="product in filteredArticles" :key="product.id" class="col-12 col-md-4 mb-4">
+        <div v-for="product in products" :key="product.id" class="col-12 col-md-4 mb-4">
           <!-- Produktkarte auf maximale Breite setzen -->
-          <div class="product-card-container" style="width: 100%">
+          <div class="product-card-container">
             <ProductCard :product="product" />
           </div>
 
@@ -31,78 +36,36 @@
         </div>
       </div>
     </div>
-
-    <!-- Button zum Hinzufügen eines neuen Artikels -->
-    <div class="text-center mt-4">
-      <button @click="createNewArticle" class="btn btn-primary">Neuen Artikel erstellen</button>
-    </div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, onMounted } from 'vue'
 import SearchField from '@/components/SearchField.vue'
 import ProductCard from '@/components/ProductCard.vue'
 import { useRouter } from 'vue-router'
+import axios from 'axios'
 
 const searchQuery = ref('')
 const loading = ref(false)
 const router = useRouter()
 
 // Simulierte Artikel-Daten (In der Praxis durch API-Aufruf ersetzen)
-const articles = ref([
-  {
-    id: 1,
-    name: 'Schwarzer Tee - Earl Grey',
-    image: '../../src/assets/images/blackTea.jpg',
-    price: 12.3,
-    description:
-      'Aus den besten Teegärten Asiens: aromatisch, voller Koffein. Fördert Konzentration, Energie und sorgt für wohltuende Genussmomente.',
-    rating: 2,
-    reviews: 300,
-  },
-  {
-    id: 2,
-    name: 'Grüner Tee - Sencha',
-    image: '../../src/assets/images/greenTea.jpg',
-    price: 10.5,
-    description:
-      'Direkt aus den besten Teegärten Asiens! Reich an Antioxidantien, unterstützt er Wohlbefinden und innere Balance.',
-    rating: 3,
-    reviews: 198,
-  },
-  {
-    id: 3,
-    name: 'Kräutertee',
-    image: '../../src/assets/images/herbalTea.jpg',
-    price: 8.9,
-    description:
-      'Beruhigend wie eine warme Umarmung, ob mit Kamille, Pfefferminze oder Ingwer – perfekt für eine entspannte Auszeit.',
-    rating: 5,
-    reviews: 89,
-  },
-])
+const products = ref([])
 
-// onMounted(() => {
-//   loading.value = true
-//     .get('/articles')
-//     .then((response) => {
-//       articles.value = response.data
-//     })
-//     .catch((error) => {
-//       console.error('Fehler beim Laden der Artikel:', error)
-//     })
-//     .finally(() => {
-//       loading.value = false
-//     })
-// })
-
-// Gefilterte Artikel basierend auf der Suchanfrage
-const filteredArticles = computed(() => {
-  if (!searchQuery.value) return articles.value
-  return articles.value.filter((article) =>
-    article.name.toLowerCase().includes(searchQuery.value.toLowerCase()),
-  )
+onMounted(() => {
+  loading.value = true
+  axios
+    .get('/product') // API Call (Beispiel: '/product' ist der Endpoint)
+    .then((response) => {
+      products.value = response.data // Daten in products speichern
+    })
+    .catch((error) => {
+      console.error('Fehler beim Laden der Artikel:', error)
+    })
+    .finally(() => {
+      loading.value = false
+    })
 })
 
 // Methode zum Erstellen eines neuen Artikels
@@ -116,10 +79,16 @@ const editArticle = (article) => {
 }
 
 // Methode zum Löschen eines Artikels
-const deleteArticle = (id) => {
-  const index = articles.value.findIndex((article) => article.id === id)
-  if (index !== -1) {
-    articles.value.splice(index, 1)
+const deleteArticle = async (id) => {
+  try {
+    await axios.delete(`/product/${id}`)
+    //Avoid reload => Just slice it
+    const index = products.value.findIndex((article) => article.id === id)
+    if (index !== -1) {
+      products.value.splice(index, 1)
+    }
+  } catch (error) {
+    console.error('Fehler beim Laden des Artikels:', error)
   }
 }
 </script>
@@ -138,5 +107,11 @@ const deleteArticle = (id) => {
   width: 100%;
   display: flex;
   justify-content: center;
+}
+
+.btn-primary {
+  background-color: #c06e52;
+  border-color: #c06e52;
+  border-radius: 8px;
 }
 </style>

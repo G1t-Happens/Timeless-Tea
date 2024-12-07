@@ -11,13 +11,13 @@
       <form @submit.prevent="handleSave">
         <div class="mb-3">
           <label for="name" class="form-label">Artikelname</label>
-          <input v-model="article.name" type="text" id="name" class="form-control" required />
+          <input v-model="product.name" type="text" id="name" class="form-control" required />
         </div>
 
         <div class="mb-3">
           <label for="description" class="form-label">Beschreibung</label>
           <textarea
-            v-model="article.description"
+            v-model="product.description"
             id="description"
             class="form-control"
             required
@@ -26,7 +26,29 @@
 
         <div class="mb-3">
           <label for="price" class="form-label">Preis</label>
-          <input v-model="article.price" type="number" id="price" class="form-control" required />
+          <input v-model="product.price" type="number" id="price" class="form-control" required />
+        </div>
+
+        <!-- Dropdown Menu für Kategorienauswahl, gruppiert nach Typ -->
+        <div class="mb-3">
+          <h3>Kategorien</h3>
+          <button class="filter-button" type="button" @click="toggleDropdown('categories')">
+            ▾
+          </button>
+          <div v-if="activeDropdown === 'categories'" class="dropdown-menu">
+            <div v-for="group in organizedCategories" :key="group.type">
+              <strong>{{ group.type }}</strong>
+              <div v-for="category in group.categories" :key="category.id">
+                <label>
+                  <input type="checkbox" v-model="selectedCategories" :value="category.id" />
+                  {{ category.name }}
+                </label>
+              </div>
+            </div>
+          </div>
+          <div v-if="selectedCategories.length" class="selected-options">
+            <strong>Ausgewählt:</strong> {{ getCategoryNames().join(', ') }}
+          </div>
         </div>
 
         <button type="submit" class="btn btn-primary">Speichern</button>
@@ -38,73 +60,93 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import axios from 'axios'
 
 const route = useRoute()
 const router = useRouter()
-
-const article = ref({
+const loading = ref(true)
+const product = ref({
   id: null,
   name: '',
   description: '',
   price: 0,
+  categories: [],
+})
+const selectedCategories = ref([])
+const organizedCategories = ref([])
+const activeDropdown = ref(null)
+
+const organizeCategoriesByType = (categories) => {
+  const grouped = categories.reduce((group, category) => {
+    const type = category.type || 'Andere'
+    group[type] = group[type] || []
+    group[type].push(category)
+    return group
+  }, {})
+  return Object.entries(grouped).map(([type, categories]) => ({ type, categories }))
+}
+
+const getCategoryNames = () => {
+  return selectedCategories.value.map(
+    (id) =>
+      organizedCategories.value.flatMap((group) => group.categories).find((c) => c.id === id)?.name,
+  )
+}
+
+onMounted(async () => {
+  await fetchCategories()
+  await fetchArticle(route.params.id)
 })
 
-const loading = ref(true)
+const fetchCategories = async () => {
+  try {
+    const { data } = await axios.get('/category')
+    organizedCategories.value = organizeCategoriesByType(data)
+  } catch (error) {
+    console.error('Fehler beim Laden der Kategorien:', error)
+  }
+}
 
-// Artikel anhand der ID laden (diese wird über die URL übergeben)
-onMounted(() => {
-  const articleId = route.params.id
-  fetchArticle(articleId)
-})
-
-// Beispielhafte Methode zum Laden eines Artikels
 const fetchArticle = async (id) => {
   loading.value = true
+  try {
+    const { data } = await axios.get(`/product/${id}`)
+    product.value = data
+    selectedCategories.value = data.productCategories.map((cat) => cat.category)
+  } catch (error) {
+    console.error('Fehler beim Laden des Artikels:', error)
+  } finally {
+    loading.value = false
+  }
+}
 
-  // Beispiel: API Call (oder Fake-Daten) um den Artikel zu laden
-  setTimeout(() => {
-    // Dummy-Artikel, du würdest hier eine echte API-Abfrage durchführen
-    article.value = {
-      id: id,
-      name: `Artikel ${id}`,
-      description: `Beschreibung des Artikels ${id}`,
-      price: 20.0,
+const handleSave = async () => {
+  console.log('Saving article:', product.value)
+
+  try {
+    // Prepare data to update product details and categories simultaneously
+    const updatedData = {
+      name: product.value.name,
+      description: product.value.description,
+      price: product.value.price,
+      productCategories: selectedCategories.value, // Assuming backend expects category IDs directly
     }
 
-    loading.value = false
-  }, 1000)
+    // Perform a PATCH request to update product and its categories
+    const response = await axios.patch(`/product/${product.value.id}`, updatedData)
+    console.log('Article successfully updated:', response.data)
+
+    // Navigate back to the admin page or a confirmation page
+    await router.push('/admin')
+  } catch (error) {
+    console.error('Error while saving the article:', error)
+    // Optionally, you could show a notification to the user, e.g., a toast message
+  }
 }
 
-const handleSave = () => {
-  console.log('Artikel gespeichert:', article.value)
-  router.push('/admin')
-  // Hier würde man die bearbeiteten Daten über eine API absenden
+const toggleDropdown = (dropdown) => {
+  activeDropdown.value = activeDropdown.value === dropdown ? null : dropdown
 }
-
-// const fetchArticle = async (id) => {
-//   loading.value = true
-//
-//   try {
-//     const response = await axios.get(`/articles/${id}`)
-//     article.value = response.data
-//   } catch (error) {
-//     console.error('Fehler beim Laden des Artikels:', error)
-//   } finally {
-//     loading.value = false
-//   }
-// }
-
-// const handleSave = async () => {
-//   console.log('Artikel gespeichert:', article.value)
-//
-//   try {
-//     const response = await axios.put(`/articles/${article.value.id}`, article.value)
-//     console.log('Artikel erfolgreich gespeichert:', response.data)
-//     router.push(`/articles/${response.data.id}`)
-//   } catch (error) {
-//     console.error('Fehler beim Speichern des Artikels:', error)
-//   }
-// }
 </script>
 
 <style scoped>
@@ -118,5 +160,24 @@ const handleSave = () => {
 
 button {
   margin-top: 20px;
+}
+
+.dropdown-menu {
+  background: #f9f9f9;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 10px;
+  position: absolute;
+  z-index: 10000;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-width: 300px; /* Adjust based on layout needs */
+}
+
+.selected-options {
+  margin-top: 5px;
+  font-size: 14px;
+  color: #555;
 }
 </style>

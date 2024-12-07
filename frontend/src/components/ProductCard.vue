@@ -2,7 +2,7 @@
   <div class="col-md-4">
     <div class="card mb-4 shadow-sm fixed-card">
       <!-- Produktbild -->
-      <img :src="product.image" class="card-img-top" :alt="product.name" />
+      <img :src="product.image" class="card-img-top" />
       <div class="card-body">
         <!-- Produktname -->
         <h5 class="card-title">{{ product.name }}</h5>
@@ -68,7 +68,7 @@ const props = defineProps({
 })
 
 const fullStars = computed(() => {
-  return Math.floor(props.product.rating)
+  return Math.floor(props.product.averageRating)
 })
 
 const emptyStars = computed(() => {
