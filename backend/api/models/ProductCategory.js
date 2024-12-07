@@ -1,3 +1,4 @@
+// ProductCategory.js - Join Table
 module.exports = {
   attributes: {
     product: {
@@ -7,6 +8,6 @@ module.exports = {
     category: {
       model: 'category',
       required: true,
-    },
-  },
+    }
+  }
 };

@@ -4,142 +4,162 @@
  * @description :: Server-side actions for handling incoming requests.
  * @help        :: See https://sailsjs.com/docs/concepts/actions
  */
-
 module.exports = {
-  create: async function(req, res) {
+  create: async function (req, res) {
     try {
-      let product = await Product.create({
-        name: req.body.name,
-        description: req.body.description,
-        price: req.body.price
-      }).fetch();
+      const { name, description, price, categories } = req.body;
 
-      if (req.body.categories) {
-        await Promise.all(
-          req.body.categories.map(async (categoryId) => {
-            await ProductCategory.create({
-              product: product.id,
-              category: categoryId
-            });
-          })
-        );
-      }
+      // Erstelle Produkt und Kategorien in einer Transaktion
+      const product = await sails.getDatastore().transaction(async (db) => {
+        const newProduct = await Product.create({ name, description, price })
+          .fetch()
+          .usingConnection(db);
 
+        if (categories && categories.length > 0) {
+          const productCategories = categories.map((categoryId) => ({
+            product: newProduct.id,
+            category: categoryId,
+          }));
+          await ProductCategory.createEach(productCategories).usingConnection(db);
+        }
+        return newProduct;
+      });
       return res.status(201).json(product);
     } catch (err) {
-      return res.serverError(err.toString());
+      sails.log.error('Error creating product:', err.message);
+      return res.serverError('Failed to create product. Please try again later.');
     }
   },
+
   findOne: async function (req, res) {
-    sails.log.debug('List single Product....');
-    let product = await Product.findOne({ id: req.params.id }).populate('productCategories');
-    res.json(product);
-  },
-  find: async function (req, res) {
-    sails.log.debug('List all Products with average ratings...');
-    const search = req.query.search;
-
     try {
-      let queryOptions = {};
-      if (search) {
-        queryOptions.where = { name: { contains: search } };
+      const productId = req.param('id');
+      if (!productId) {
+        return res.badRequest({ error: 'Product ID is required.' });
       }
 
-      // Lade alle Produkte und deren Kategorien
-      let products = await Product.find(queryOptions).populate('productCategories');
-      if (!products || products.length === 0) {
-        return res.status(404).json({ error: 'Keine Produkte gefunden' });
+      // Effizienten Datenabfrage
+      const product = await sails.sendNativeQuery(`
+        SELECT p.*,
+               JSON_ARRAYAGG(JSON_OBJECT(
+                 'id', c.id,
+                 'name', c.name,
+                 'type', c.type
+               )) AS productCategories,
+               COALESCE(AVG(r.stars), 0) AS averageRating
+        FROM product p
+        LEFT JOIN productcategory pc ON p.id = pc.product
+        LEFT JOIN category c ON pc.category = c.id
+        LEFT JOIN productrating pr ON p.id = pr.product
+        LEFT JOIN rating r ON pr.rating = r.id
+        WHERE p.id = $1
+        GROUP BY p.id
+      `, [productId]);
+
+      const result = product.rows[0];
+      if (!result) {
+        return res.status(404).json({ error: 'Product not found.' });
       }
 
-      // Angepasste SQL-Abfrage ueber Zwischentabelle, um Durchschnittsbewertungen für Produkte zu berechnen
-      let averageRatingSQL = `
-      SELECT pr.product, AVG(r.stars) AS averageRating
-      FROM productrating pr
-      JOIN rating r ON pr.rating = r.id
-      GROUP BY pr.product
-      `;
+      result.productCategories = JSON.parse(result.productCategories || '[]');
 
-      // Führe den Native Query aus auf der Datenbank aus
-      let rawResult = await sails.sendNativeQuery(averageRatingSQL);
-
-      // Mappe die Durchschnittswerte auf die Produkte
-      let averageRatings = rawResult.rows.reduce((acc, row) => {
-        acc[row.product] = parseFloat(row.averageRating) || 0; // Durchschnittswerte nach Produkt-ID speichern
-        return acc;
-      }, {});
-
-      // Durchschnittsrating jedem Produkt hinzufügen
-      products = products.map(product => {
-        product.averageRating = averageRatings[product.id] || 0; // Standardwert 0, falls kein Rating vorhanden ist
-        return product;
-      });
-
-      return res.json(products);
+      return res.json(result);
     } catch (error) {
-      sails.log.error('Error while fetching products:', error);
-      return res.serverError('Ein Fehler ist aufgetreten.');
+      sails.log.error('Error in findOne:', error.message);
+      return res.serverError('Failed to retrieve product details.');
     }
   },
-  destroy: async function (req, res) {
-    sails.log.debug('Delete Product....');
-    const productId = req.params.id;
 
+  find: async function (req, res) {
     try {
-      // Lösche alle verknüpften ProductCategory-Einträge --ggf ON DELETE CASCADE ?
+      const search = req.query.search || '';
+
+      // Effizienten Datenabfrage
+      const products = await sails.sendNativeQuery(`
+        SELECT p.*,
+               JSON_ARRAYAGG(JSON_OBJECT(
+                 'id', c.id,
+                 'name', c.name,
+                 'type', c.type
+               )) AS productCategories,
+               COALESCE(AVG(r.stars), 0) AS averageRating
+        FROM product p
+        LEFT JOIN productcategory pc ON p.id = pc.product
+        LEFT JOIN category c ON pc.category = c.id
+        LEFT JOIN productrating pr ON p.id = pr.product
+        LEFT JOIN rating r ON pr.rating = r.id
+        WHERE p.name LIKE $1
+        GROUP BY p.id
+      `, [`%${search}%`]);
+
+      const results = products.rows.map((product) => ({
+        ...product,
+        productCategories: JSON.parse(product.productCategories || '[]'),
+      }));
+
+      if (results.length === 0) {
+        return res.status(404).json({ error: 'No products found.' });
+      }
+
+      return res.json(results);
+    } catch (error) {
+      sails.log.error('Error in find:', error.message);
+      return res.serverError('Failed to retrieve products.');
+    }
+  },
+
+  destroy: async function (req, res) {
+    const productId = req.params.id;
+    try {
+      // Lösche JoinTable + Product
       await ProductCategory.destroy({ product: productId });
-
-      // Lösche alle verknüpften ProductRating-Einträge --ggf ON DELETE CASCADE ?
       await ProductRating.destroy({ product: productId });
-
-      // Danach lösche das Produkt
       await Product.destroy({ id: productId });
-
       return res.ok();
     } catch (error) {
-      sails.log.error('Error deleting product:', error);
+      sails.log.error('Error deleting product:', error.message);
       return res.serverError('Failed to delete product.');
     }
   },
-  patch: async function (req, res) {
-    sails.log.debug('Updating Product....');
-    const productId = req.params.id;
 
+  patch: async function (req, res) {
     try {
-      // Daten aus dem Anfrage-Body extrahieren
+      const productId = req.params.id;
       const { name, description, price, productCategories } = req.body;
 
-      // Überprüfen, ob das Produkt existiert
-      const existingProduct = await Product.findOne({ id: productId });
-      if (!existingProduct) {
-        return res.notFound({ error: `Product with id ${productId} not found.` });
+      // Überprüfe, ob das Produkt existiert
+      const product = await Product.findOne({ id: productId });
+      if (!product) {
+        return res.status(404).json({ error: `Product with id ${productId} not found.` });
       }
 
-      // Produkt aktualisieren
-      await Product.updateOne({ id: productId }).set({
-        name,
-        description,
-        price
+      // Aktualisiere Produkt und Kategorien in einer Transaktion
+      const updatedProduct = await sails.getDatastore().transaction(async (db) => {
+        // Produkt aktualisieren
+        await Product.updateOne({ id: productId })
+          .set({ name, description, price })
+          .usingConnection(db);
+
+        // Kategorien aktualisieren
+        if (productCategories) {
+          await ProductCategory.destroy({ product: productId }).usingConnection(db);
+          const newCategories = productCategories.map((categoryId) => ({
+            product: productId,
+            category: categoryId,
+          }));
+          await ProductCategory.createEach(newCategories).usingConnection(db);
+        }
+
+        // Rückgabe des aktualisierten Produkts
+        return await Product.findOne({ id: productId }).populate('productCategories').usingConnection(db);
       });
 
-      // Manage categories
-      if (productCategories) {
-        // Remove existing categories
-        await ProductCategory.destroy({ product: productId });
-
-        // Add new categories
-        for (const categoryId of productCategories) {
-          await ProductCategory.create({ product: productId, category: categoryId });
-        }
-      }
-
-      // Respond with updated product information
-      const fullUpdatedProduct = await Product.findOne({ id: productId }).populate('productCategories');
-      return res.json(fullUpdatedProduct);
+      return res.json(updatedProduct);
     } catch (error) {
-      sails.log.error('Error updating product:', error);
-      return res.serverError({ error: 'An error occurred while updating the product.' });
+      sails.log.error('Error updating product:', error.message);
+      return res.serverError('Failed to update product.');
     }
-  }
-
+  },
 };
+
 

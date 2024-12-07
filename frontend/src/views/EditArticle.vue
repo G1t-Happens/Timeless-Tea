@@ -95,11 +95,13 @@ const organizeCategoriesByType = (categories) => {
 }
 
 const getCategoryNames = () => {
-  return selectedCategories.value.map(
-    (id) =>
-      organizedCategories.value.flatMap((group) => group.categories).find((c) => c.id === id)?.name,
-  )
-}
+  return selectedCategories.value.map((id) =>
+    organizedCategories.value
+      .flatMap((group) => group.categories)
+      .find((category) => category.id === id)?.name
+  );
+};
+
 
 onMounted(async () => {
   await fetchCategories()
@@ -107,28 +109,31 @@ onMounted(async () => {
 })
 
 //Alle vorhandenen Kategorien laden die zur Auswahl stehen
-const fetchCategories = async () => {
-  try {
-    const { data } = await axios.get('/category')
-    organizedCategories.value = organizeCategoriesByType(data)
-  } catch (error) {
-    console.error('Fehler beim Laden der Kategorien:', error)
+  const fetchCategories = async () => {
+    try {
+      const { data } = await axios.get('/category')
+      organizedCategories.value = organizeCategoriesByType(data)
+    } catch (error) {
+      console.error('Fehler beim Laden der Kategorien:', error)
+    }
   }
-}
 
 //Produkt welches wir editieren wollen anhand der id laden
 const fetchArticle = async (id) => {
-  loading.value = true
+  loading.value = true;
   try {
-    const { data } = await axios.get(`/product/${id}`)
-    product.value = data
-    selectedCategories.value = data.productCategories.map((cat) => cat.category)
+    const { data } = await axios.get(`/product/${id}`);
+    product.value = data;
+
+    // IDs der ausgewählten Kategorien aus productCategories extrahieren
+    selectedCategories.value = data.productCategories.map((cat) => cat.id);
   } catch (error) {
-    console.error('Fehler beim Laden des Artikels:', error)
+    console.error('Fehler beim Laden des Artikels:', error);
   } finally {
-    loading.value = false
+    loading.value = false;
   }
-}
+};
+
 
 //Produkt updaten/speichern
 const handleSave = async () => {

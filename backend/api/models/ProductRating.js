@@ -1,4 +1,4 @@
-// ProductRating.js
+// ProductRating.js - Join Table
 module.exports = {
   attributes: {
     product: {
