@@ -1,5 +1,5 @@
 # Aufgabe 4
 
 
-## Zum testen der CRUD Operationen:
+## View zum testen von den CRUD Operationen sowie Suche nach Name und Kategorien:
 ### http://localhost:5173/admin
