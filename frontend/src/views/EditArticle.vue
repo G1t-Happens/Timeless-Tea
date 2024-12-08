@@ -1,7 +1,7 @@
 <template>
   <div class="edit-article">
     <!-- Titel für die Bearbeitungsseite -->
-    <h2>Artikel bearbeiten</h2>
+    <h2 class="page-title">Artikel bearbeiten</h2>
 
     <!-- Ladeanzeige während der Datenabfrage -->
     <div v-if="loading" class="text-center">
@@ -11,15 +11,15 @@
     <!-- Formular zur Bearbeitung des Artikels, nur wenn nicht geladen -->
     <div v-else>
       <!-- Formular für die Bearbeitung eines Artikels -->
-      <form @submit.prevent="handleSave">
+      <form @submit.prevent="handleSave" class="form-container">
         <!-- Eingabefeld für den Artikelnamen -->
-        <div class="mb-3">
+        <div class="form-group">
           <label for="name" class="form-label">Artikelname</label>
           <input v-model="product.name" type="text" id="name" class="form-control" required />
         </div>
 
         <!-- Textarea für die Artikelbeschreibung -->
-        <div class="mb-3">
+        <div class="form-group">
           <label for="description" class="form-label">Beschreibung</label>
           <textarea
             v-model="product.description"
@@ -30,7 +30,7 @@
         </div>
 
         <!-- Eingabefeld für den Preis des Artikels -->
-        <div class="mb-3">
+        <div class="form-group">
           <label for="price" class="form-label">Preis</label>
           <input
             v-model="product.price"
@@ -43,19 +43,16 @@
         </div>
 
         <!-- Dropdown für die Kategorienauswahl -->
-        <div class="mb-3">
-          <h3>Kategorien</h3>
-          <!-- Button, um das Dropdown für die Kategorien zu öffnen -->
-          <button class="filter-button" type="button" @click="toggleDropdown('categories')">
-            ▾
+        <div class="form-group">
+          <label for="categories" class="form-label">Kategorien</label>
+          <button class="dropdown-button" type="button" @click="toggleDropdown('categories')">
+            ▾ Kategorien wählen
           </button>
 
           <!-- Dropdown-Menü, das nur angezeigt wird, wenn der Button geklickt wurde -->
           <div v-if="activeDropdown === 'categories'" class="dropdown-menu">
-            <!-- Gruppen von Kategorien, nach Typ organisiert -->
             <div v-for="group in organizedCategories" :key="group.type">
               <strong>{{ group.type }}</strong>
-              <!-- Jede Kategorie innerhalb der Gruppe -->
               <div v-for="category in group.categories" :key="category.id">
                 <label>
                   <input type="checkbox" v-model="selectedCategories" :value="category.id" />
@@ -72,7 +69,12 @@
         </div>
 
         <!-- Button zum Speichern der Änderungen -->
-        <button type="submit" class="btn btn-primary">Speichern</button>
+        <div class="button-group">
+          <button type="submit" class="btn btn-primary">Speichern</button>
+          <button type="button" @click="deleteArticle(product.id)" class="btn btn-danger">
+            Löschen
+          </button>
+        </div>
       </form>
     </div>
   </div>
@@ -151,7 +153,7 @@ const fetchArticle = async (id) => {
   }
 }
 
-// Funktion, um die Änderungen des Artikels zu speichern
+// Funktion zum Speichern der Änderungen
 const handleSave = async () => {
   try {
     // Daten für den Patch-Aufruf vorbereiten
@@ -172,6 +174,17 @@ const handleSave = async () => {
   }
 }
 
+// Artikel löschen
+const deleteArticle = async (id) => {
+  try {
+    await axios.delete(`/product/${id}`)
+    // Nach dem Löschen auf das Admin-Dashboard weiterleiten
+    await router.push('/admin')
+  } catch (error) {
+    console.error('Fehler beim Löschen des Artikels:', error)
+  }
+}
+
 // Funktion zum Umschalten des Dropdown-Menüs
 const toggleDropdown = (dropdown) => {
   activeDropdown.value = activeDropdown.value === dropdown ? null : dropdown
@@ -181,20 +194,93 @@ const toggleDropdown = (dropdown) => {
 <style scoped>
 /* Stil für den Hauptcontainer */
 .edit-article {
-  padding: 20px;
+  padding: 30px;
+  max-width: 800px;
+  margin: 0 auto;
+  background-color: #fff;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
 }
 
-/* Stil für Form-Labels */
+/* Titel */
+.page-title {
+  text-align: center;
+  margin-bottom: 30px;
+  font-size: 1.8rem;
+  color: #333;
+}
+
+/* Form-Container */
+.form-container {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+}
+
+/* Formulareingabefelder */
+.form-group {
+  display: flex;
+  flex-direction: column;
+}
+
 .form-label {
   font-weight: bold;
+  color: #333;
 }
 
-/* Stil für den Speichern-Button */
+.form-control {
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: border-color 0.3s ease;
+}
+
+.form-control:focus {
+  border-color: #007bff;
+  outline: none;
+}
+
+/* Button-Stile */
 button {
-  margin-top: 20px;
+  padding: 10px 20px;
+  font-size: 1rem;
+  border-radius: 5px;
+  transition: background-color 0.3s;
 }
 
-/* Stil für das Dropdown-Menü */
+.btn-primary {
+  background-color: #4a5043;
+  color: white;
+  border: none;
+}
+
+.btn-primary:hover {
+  background-color: #9fa86d;
+}
+
+.btn-danger {
+  background-color: #dc3545;
+  color: white;
+  border: none;
+}
+
+.btn-danger:hover {
+  background-color: #c82333;
+}
+
+/* Dropdown-Menü */
+.dropdown-button {
+  padding: 8px 15px;
+  background-color: #f8f9fa;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  cursor: pointer;
+  display: inline-flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
 .dropdown-menu {
   background: #f9f9f9;
   border: 1px solid #ccc;
@@ -205,13 +291,19 @@ button {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  max-width: 300px; /* Maximale Breite des Dropdowns */
+  max-width: 300px;
+  margin-top: 5px;
 }
 
-/* Stil für die Anzeige der ausgewählten Kategorien */
 .selected-options {
-  margin-top: 5px;
+  margin-top: 10px;
   font-size: 14px;
   color: #555;
+}
+
+/* Button-Group */
+.button-group {
+  display: flex;
+  justify-content: space-between;
 }
 </style>

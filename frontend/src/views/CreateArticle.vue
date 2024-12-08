@@ -2,40 +2,40 @@
   <!-- Hauptcontainer für die Artikel-Erstellung -->
   <div class="create-article">
     <!-- Überschrift -->
-    <h2 class="text-center mb-4">Neuen Artikel erstellen</h2>
+    <h2 class="page-title">Neuen Artikel erstellen</h2>
 
     <!-- Formular für die Artikeldaten -->
-    <form @submit.prevent="createArticle">
+    <form @submit.prevent="createArticle" class="form-container">
       <!-- Eingabefeld für den Artikelnamen -->
-      <div class="mb-3">
+      <div class="form-group">
         <label for="name" class="form-label">Artikelname</label>
         <input type="text" v-model="name" id="name" class="form-control" required />
       </div>
 
       <!-- Eingabefeld für die Beschreibung -->
-      <div class="mb-3">
+      <div class="form-group">
         <label for="description" class="form-label">Beschreibung</label>
         <input type="text" v-model="description" id="description" class="form-control" required />
       </div>
 
       <!-- Eingabefeld für den Preis -->
-      <div class="mb-3">
+      <div class="form-group">
         <label for="price" class="form-label">Preis in €</label>
         <input type="number" step="0.01" v-model="price" id="price" class="form-control" required />
       </div>
 
       <!-- Dropdown für Kategorienauswahl -->
-      <div class="mb-3">
-        <h3>Kategorien</h3>
+      <div class="form-group">
+        <label for="categories" class="form-label">Kategorien</label>
         <!-- Button zum Öffnen des Dropdown-Menüs -->
-        <button class="filter-button" type="button" @click="toggleDropdown('categories')">▾</button>
+        <button class="dropdown-button" type="button" @click="toggleDropdown('categories')">
+          ▾ Kategorien wählen
+        </button>
 
         <!-- Dropdown-Menü für die Auswahl von Kategorien -->
         <div v-if="activeDropdown === 'categories'" class="dropdown-menu">
-          <!-- Gruppen von Kategorien, nach Typ sortiert -->
           <div v-for="group in organizedCategories" :key="group.type">
             <strong>{{ group.type }}</strong>
-            <!-- Einzelne Kategorien innerhalb einer Gruppe -->
             <div v-for="category in group.categories" :key="category.id">
               <label>
                 <input type="checkbox" v-model="selectedCategories" :value="category.id" />
@@ -133,19 +133,83 @@ const createArticle = async () => {
 <style scoped>
 /* Stil für den Hauptcontainer der Seite */
 .create-article {
-  padding: 20px;
+  padding: 30px;
+  max-width: 800px;
+  margin: 0 auto;
+  background-color: #fff;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
 }
 
-/* Stil für den Button, der das Dropdown öffnet */
-.filter-button {
-  background: #fff;
+/* Titel */
+.page-title {
+  text-align: center;
+  margin-bottom: 30px;
+  font-size: 1.8rem;
+  color: #333;
+}
+
+/* Form-Container */
+.form-container {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+}
+
+/* Formulareingabefelder */
+.form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-label {
+  font-weight: bold;
+  color: #333;
+}
+
+.form-control {
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: border-color 0.3s ease;
+}
+
+.form-control:focus {
+  border-color: #007bff;
+  outline: none;
+}
+
+/* Button-Stile */
+button {
+  padding: 10px 20px;
+  font-size: 1rem;
+  border-radius: 5px;
+  transition: background-color 0.3s;
+}
+
+.btn-primary {
+  background-color: #4a5043;
+  color: white;
+  border: none;
+}
+
+.btn-primary:hover {
+  background-color: #9fa86d;
+}
+
+/* Dropdown-Menü */
+.dropdown-button {
+  padding: 8px 15px;
+  background-color: #f8f9fa;
   border: 1px solid #ccc;
-  border-radius: 4px;
-  padding: 5px 10px;
+  border-radius: 5px;
   cursor: pointer;
+  display: inline-flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
-/* Stil für das Dropdown-Menü der Kategorien */
 .dropdown-menu {
   background: #f9f9f9;
   border: 1px solid #ccc;
@@ -156,12 +220,12 @@ const createArticle = async () => {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  max-width: 300px; /* Anpassung je nach Layout */
+  max-width: 300px;
+  margin-top: 5px;
 }
 
-/* Stil für die Anzeige der ausgewählten Kategorien */
 .selected-options {
-  margin-top: 5px;
+  margin-top: 10px;
   font-size: 14px;
   color: #555;
 }
