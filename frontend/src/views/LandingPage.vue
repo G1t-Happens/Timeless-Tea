@@ -60,7 +60,7 @@ import MembershipSection from '@/components/MembershipSection.vue'
 const products = ref([])
 const searchQuery = ref('')
 const loading = ref(false)
-const pageSize = 9
+const pageSize = 3
 const currentPage = ref(1)
 const hasMore = ref(true)
 
@@ -119,6 +119,14 @@ onMounted(async () => {
 <style scoped>
 .admin-dashboard {
   padding: 20px;
+}
+
+/* Stil für die gestrichelte Linie */
+.dashed-line {
+  border: 0;
+  border-top: 2px dashed #c06e52; /* Gestreifte Linie */
+  width: 100%; /* Dehnt die Linie über die gesamte Breite des Bildschirms */
+  margin: 20px 0; /* Abstand nach oben und unten */
 }
 
 .text-center button {
