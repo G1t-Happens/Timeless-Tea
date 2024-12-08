@@ -3,13 +3,15 @@
     <h2 class="text-center mb-4">Admin Dashboard</h2>
 
     <!-- Suchfeld für Artikel -->
-    <div class="search-section mb-4">
+    <div class="search-section mb-4 mb-4">
       <SearchField v-model="searchQuery" @search="fetchProducts" placeholder="Artikel suchen..." />
     </div>
 
     <!-- Button zum Hinzufügen eines neuen Artikels -->
-    <div class="text-center mt-4 mb-4 w-10">
-      <button @click="createNewArticle" class="btn btn-primary">Neuen Artikel erstellen</button>
+    <div class="text-center mt-4 mb-4">
+      <button @click="createNewArticle" class="btn btn-primary" style="width: 100%">
+        Neuen Artikel erstellen
+      </button>
     </div>
 
     <!-- Ladezustand oder keine Produkte -->
@@ -22,18 +24,17 @@
 
     <!-- Liste der Artikel -->
     <div v-else>
-      <div class="row">
+      <div class="row row-cols-lg-4">
         <!-- Produktkarten -->
-        <div v-for="product in products" :key="product.id" class="col-12 col-md-4 mb-4">
-          <!-- Produktkarte auf maximale Breite setzen -->
-          <div class="product-card-container">
+        <div v-for="product in products" :key="product.id" class="col mb-4">
+          <div>
             <ProductCard :product="product" />
           </div>
 
           <!-- Buttons für Bearbeiten und Löschen -->
-          <div class="text-center mt-2">
+          <div class="text-center mb-5 cardset-admin-button">
             <button @click="editArticle(product)" class="btn btn-warning btn-sm">Bearbeiten</button>
-            <button @click="deleteArticle(product.id)" class="btn btn-danger btn-sm ml-2">
+            <button @click="deleteArticle(product.id)" class="btn btn-danger btn-sm">
               Löschen
             </button>
           </div>
@@ -67,7 +68,7 @@ const pageSize = 9
 const hasMore = ref(true)
 const router = useRouter()
 
-// API-Aufruf für Produkte
+// API-Aufruf für Produkte mit Pagination
 const fetchProducts = async (query = '') => {
   // Reset bei neuer Suchanfrage
   if (query !== searchQuery.value) {
@@ -146,20 +147,45 @@ const deleteArticle = async (id) => {
   padding: 20px;
 }
 
+.cardset-admin-button {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
 .text-center button {
   display: inline-block;
   width: auto;
 }
 
-.product-card-container {
-  width: 100%;
+/* Buttons und Karten zentrieren */
+.row {
   display: flex;
-  justify-content: center;
+  flex-wrap: wrap;
+  justify-content: space-between;
 }
 
+/* Stil für den Button */
 .btn-primary {
-  background-color: #c06e52;
-  border-color: #c06e52;
-  border-radius: 8px;
+  background-color: #c06e52; /* Orangefarbener Hintergrund */
+  border-color: #c06e52; /* Orangefarbener Rand */
+  border-radius: 8px; /* Abgerundete Ecken */
+}
+
+/* Stil für den Hover-Zustand */
+.btn-primary:hover {
+  background-color: #a35a44; /* Dunkleres Orange beim Hover */
+  border-color: #a35a44; /* Dunklerer Rand beim Hover */
+}
+
+/* Stil für den Active- (Klick-) Zustand */
+.btn-primary:active {
+  background-color: #8f4c37; /* Noch dunkleres Orange bei Klick */
+  border-color: #8f4c37; /* Noch dunklerer Rand bei Klick */
+}
+
+/* Optional: Stil für den Fokus-Zustand (wenn der Button fokussiert wird) */
+.btn-primary:focus {
+  box-shadow: 0 0 0 0.2rem rgba(192, 110, 82, 0.5); /* Ein sanfter Schatten beim Fokussieren */
 }
 </style>

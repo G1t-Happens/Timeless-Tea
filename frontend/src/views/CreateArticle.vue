@@ -121,9 +121,7 @@ const createArticle = async () => {
 
   try {
     // Anfrage zum Erstellen des Artikels auf dem Server
-    const response = await axios.post('/product', newArticle)
-    console.log('Artikel erfolgreich erstellt:', response.data)
-
+    await axios.post('/product', newArticle)
     // Nach erfolgreicher Erstellung zur Admin-Seite navigieren
     await router.push('/admin')
   } catch (error) {

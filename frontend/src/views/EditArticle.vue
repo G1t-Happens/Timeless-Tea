@@ -153,8 +153,6 @@ const fetchArticle = async (id) => {
 
 // Funktion, um die Änderungen des Artikels zu speichern
 const handleSave = async () => {
-  console.log('Saving article:', product.value)
-
   try {
     // Daten für den Patch-Aufruf vorbereiten
     const updatedData = {
@@ -165,8 +163,7 @@ const handleSave = async () => {
     }
 
     // PATCH-Anfrage, um den Artikel zu aktualisieren
-    const response = await axios.patch(`/product/${product.value.id}`, updatedData)
-    console.log('Artikel erfolgreich aktualisiert:', response.data)
+    await axios.patch(`/product/${product.value.id}`, updatedData)
 
     // Nach dem Speichern auf das Admin-Dashboard weiterleiten
     await router.push('/admin')

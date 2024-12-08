@@ -1,6 +1,6 @@
 <template>
-  <div class="col-md-4">
-    <div class="card mb-4 shadow-sm fixed-card">
+  <div class="product-card">
+    <div class="card mb-4 shadow-sm">
       <!-- Produktbild -->
       <img :src="product.image" class="card-img-top" alt="Produktbild" />
       <div class="card-body">
@@ -20,7 +20,6 @@
 
         <!-- Sternebewertung -->
         <div class="card-icons">
-          <!-- Darstellung der vollständigen Sterne -->
           <img
             v-for="n in fullStars"
             :key="'full-star-' + n"
@@ -28,7 +27,6 @@
             alt="Voller Stern"
             class="card-rating"
           />
-          <!-- Darstellung der leeren Sterne -->
           <img
             v-for="n in emptyStars"
             :key="'empty-star-' + n"
@@ -36,7 +34,6 @@
             alt="Leerer Stern"
             class="card-rating"
           />
-          <!-- Anzahl der Bewertungen -->
           <p>({{ product.reviews }})</p>
         </div>
 
@@ -44,24 +41,27 @@
         <p class="card-text">Ab {{ product.price }}€ erhältlich</p>
 
         <!-- Produktbeschreibung -->
-        <p class="card-text">{{ product.description }}</p>
-        <!-- Buttons für "Like" und "In den Warenkorb" -->
-        <div class="card-icons">
-          <button class="btn btn-image" type="button">
-            <img
-              src="../../src/assets/icons/likeEmpty.png"
-              alt="Tee nicht geliket."
-              class="card-button me-4"
-            />
-          </button>
-          <button class="btn btn-image" type="button">
-            <img
-              src="../../src/assets/icons/shopingcart.png"
-              alt="Zum Einkaufswagen hinzufügen"
-              class="card-button"
-            />
-          </button>
+        <div class="product-description">
+          <p class="card-text">{{ product.description }}</p>
         </div>
+      </div>
+
+      <!-- Buttons für "Like" und "In den Warenkorb" -->
+      <div class="bottom-buttons">
+        <button class="btn btn-image" type="button">
+          <img
+            src="../../src/assets/icons/likeEmpty.png"
+            alt="Tee nicht geliket."
+            class="card-button me-4"
+          />
+        </button>
+        <button class="btn btn-image" type="button">
+          <img
+            src="../../src/assets/icons/shopingcart.png"
+            alt="Zum Einkaufswagen hinzufügen"
+            class="card-button"
+          />
+        </button>
       </div>
     </div>
   </div>
@@ -86,65 +86,113 @@ const emptyStars = computed(() => 5 - fullStars.value)
 </script>
 
 <style scoped>
-/* Hauptstil für die Kartenkomponente */
-.fixed-card {
-  height: 600px;
-  border: 2px solid #4a5043; /* Dunkles Grau */
-  border-radius: 15px; /* Abgerundete Ecken */
-  background-color: #f1e2c5; /* Heller Beigeton */
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2); /* Schatten für Tiefe */
+.product-card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+  position: relative; /* Wichtig für die Positionierung der Buttons */
 }
 
-/* Stil für das Produktbild */
-.fixed-card .card-img-top {
-  height: 150pt; /* Einheitliche Höhe */
-  object-fit: cover; /* Bild wird skaliert, um den Platz auszufüllen */
+/* Hintergrund, Schatten, und Rand für die Karte */
+.card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  border-radius: 15px;
+  background-color: #f1e2c5; /* Heller Beigeton für den Hintergrund */
+  border: 2px solid #4a5043; /* Dunkles Grau für den Rand */
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2); /* Sanfter Schatten für Tiefe */
+  min-height: 500px; /* Mindesthöhe für die Karten */
+  max-height: 500px; /* Mindesthöhe für die Karten */
+  height: 100%; /* Die Karte füllt den gesamten verfügbaren Platz */
+  position: relative; /* Damit die Buttons absolut positioniert werden können */
+  overflow: hidden; /* Verhindert, dass der Inhalt über die Karte hinausgeht */
+}
+
+/* Das Produktbild */
+.card-img-top {
+  height: 150px; /* Einheitliche Höhe für das Bild */
+  object-fit: cover; /* Bild füllt den Raum ohne Verzerrung */
   border-top-left-radius: 15px;
   border-top-right-radius: 15px;
 }
 
-/* Stil für den Kartentextbereich */
-.fixed-card .card-body {
-  display: flex; /* Flexbox für Layout */
-  flex-direction: column; /* Elemente werden vertikal angeordnet */
-  justify-content: space-between; /* Verteile Elemente gleichmäßig */
+/* Body der Karte */
+.card-body {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  height: 100%;
+  padding: 16px; /* Etwas Innenabstand für das Layout */
+  flex-grow: 1; /* Sorgt dafür, dass die Karte in vertikaler Richtung wächst */
+  overflow: hidden; /* Verhindert das Überlaufen des Inhalts */
 }
 
-/* Stil für den Produktnamen */
-.fixed-card .card-title {
-  font-size: 22pt; /* Größere Schriftgröße */
-  color: #9fa86d; /* Grünton passend zum Thema */
+/* Titel des Produkts */
+.card-title {
+  font-size: 22pt;
+  color: #9fa86d; /* Grüner Farbton für den Titel */
+  margin-bottom: 8px; /* Abstand nach unten */
 }
 
-/* Stil für die Kategorien-Badges */
+/* Die Kategorien als Badges */
 .categories-section {
   display: flex;
-  flex-wrap: wrap; /* Zeilenumbruch bei mehreren Badges */
-  gap: 8px; /* Abstand zwischen Badges */
+  gap: 8px;
+  flex-wrap: wrap; /* Zeilenumbruch bei vielen Kategorien */
 }
 
 .category-badge {
-  background-color: #9fa86d; /* Grünton */
+  background-color: #9fa86d; /* Grüner Farbton für die Badges */
   color: #fff; /* Weiße Schrift */
-  padding: 5px 10px; /* Innenabstand */
-  font-size: 12px; /* Kleinere Schriftgröße */
-  border-radius: 12px; /* Runde Form */
+  padding: 5px 10px;
+  font-size: 12px;
+  border-radius: 12px;
 }
 
+/* Die Icons für die Sternebewertung und Buttons */
 .card-icons {
   display: flex;
-  align-items: center;
   justify-content: center;
-  gap: 4px;
+  gap: 8px;
+  margin-bottom: 8px;
 }
 
+/* Größe der Buttons */
 .card-button {
-  height: 50px; /* Einheitliche Höhe */
-  width: 50px; /* Einheitliche Breite */
+  height: 50px;
+  width: 50px;
 }
 
+/* Sternebewertung (Größe der Sterne) */
 .card-rating {
-  height: 20px; /* Einheitliche Größe der Sterne */
+  height: 20px;
   width: 20px;
+}
+
+/* Stil für die Preisangabe */
+.card-text {
+  font-size: 14px;
+  color: #333; /* Dunklere Farbe für den Text */
+  margin-bottom: 8px;
+}
+
+/* Stil für die Produktbeschreibung */
+.product-description {
+  flex-grow: 1; /* Sorgt dafür, dass die Beschreibung den restlichen Platz einnimmt */
+  overflow: hidden; /* Verhindert das Überlaufen des Inhalts */
+  max-height: 200px; /* Optional: Wenn du eine maximale Höhe für die Beschreibung festlegst */
+}
+
+/* Die Buttons immer ganz unten */
+.bottom-buttons {
+  position: absolute;
+  bottom: 1px; /* Abstand zum unteren Rand der Karte */
+  left: 16px; /* Optional: Abstand vom linken Rand */
+  right: 16px; /* Optional: Abstand vom rechten Rand */
+  display: flex;
+  justify-content: center;
+  gap: 20px;
 }
 </style>

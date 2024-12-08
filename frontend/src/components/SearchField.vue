@@ -9,7 +9,6 @@
           class="search-input"
           type="search"
           placeholder="Finde deinen Tee..."
-          alt="Search Field"
         />
 
         <!-- Filter Button -->
@@ -45,7 +44,6 @@
 import { ref } from 'vue'
 import FilterPopup from './FilterPopup.vue'
 
-// Lokaler Zustand für die Suchanfrage und Filter
 const searchQuery = ref('')
 const isFilterVisible = ref(false)
 const filters = ref({
@@ -56,21 +54,17 @@ const filters = ref({
   origin: '',
 })
 
-// Emit-Event definieren, um die Suchanfrage nach oben zu senden
 const emit = defineEmits(['search'])
 
-// Funktion zum Verarbeiten der Suchanfrage
 const handleSearch = () => {
-  const trimmedQuery = searchQuery.value.trim() // Führende und nachfolgende Leerzeichen entfernen
-  emit('search', trimmedQuery) // Emit die abgeschnittene Suchanfrage
+  const trimmedQuery = searchQuery.value.trim()
+  emit('search', trimmedQuery)
 }
 
-// Funktion zum Umschalten des Filters
 const toggleFilter = () => {
   isFilterVisible.value = !isFilterVisible.value
 }
 
-// Funktion zum Anwenden der Filter
 const applyFilters = (appliedFilters) => {
   filters.value = appliedFilters
   toggleFilter()

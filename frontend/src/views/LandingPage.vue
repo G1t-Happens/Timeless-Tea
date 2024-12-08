@@ -1,52 +1,49 @@
 <template>
-  <div class="admin-dashboard">
-    <main class="container my-2">
-      <!-- Suchfeld für Artikel -->
-      <div class="search-section mb-4">
-        <SearchField
-          v-model="searchQuery"
-          @search="fetchProducts"
-          placeholder="Artikel suchen..."
-        />
+  <main class="container my-2">
+    <!-- Suchfeld für Artikel -->
+    <div class="search-section mb-4">
+      <SearchField v-model="searchQuery" @search="fetchProducts" placeholder="Artikel suchen..." />
+    </div>
+
+    <!-- Trennlinie -->
+    <hr class="dashed-line" />
+
+    <!-- Mitgliedssektion -->
+    <MembershipSection />
+
+    <!-- Trennlinie -->
+    <hr class="dashed-line" />
+
+    <!-- Sektion für beliebteste Teesorten -->
+    <section class="products-section">
+      <h2 class="text-center headline-title mb-4">Unsere beliebtesten Teesorten</h2>
+
+      <!-- Ladezustand oder keine Produkte -->
+      <div v-if="loading && products.length === 0" class="text-center">
+        <p>Lade Artikel...</p>
+      </div>
+      <div v-if="!loading && products.length === 0" class="text-center">
+        <p>Keine Produkte gefunden.</p>
       </div>
 
-      <!-- Trennlinie -->
-      <hr class="dashed-line" />
-
-      <!-- Mitgliedssektion -->
-      <MembershipSection />
-
-      <!-- Trennlinie -->
-      <hr class="dashed-line" />
-
-      <!-- Sektion für beliebteste Teesorten -->
-      <section class="products-section">
-        <h2 class="text-center headline-title mb-4">Unsere beliebtesten Teesorten</h2>
-
-        <!-- Ladezustand oder keine Produkte -->
-        <div v-if="loading && products.length === 0" class="text-center">
-          <p>Lade Artikel...</p>
+      <!-- Karten Container -->
+      <div class="row row-cols-lg-3">
+        <!-- Produktkarten mit den Ergebnissen -->
+        <div v-for="product in products" :key="product.id" class="col mb-4">
+          <ProductCard :product="product" />
         </div>
-        <div v-if="!loading && products.length === 0" class="text-center">
-          <p>Keine Produkte gefunden.</p>
-        </div>
+      </div>
 
-        <div class="row">
-          <!-- Produktkarten mit den Ergebnissen -->
-          <ProductCard v-for="product in products" :key="product.id" :product="product" />
-        </div>
-
-        <!-- Mehr Tees Button -->
-        <div v-if="hasMore && !loading" class="text-center mt-4">
-          <button @click="loadMore" class="btn btn-secondary">Mehr Tees</button>
-        </div>
-        <!-- Keine weiteren Produkte -->
-        <div v-if="!hasMore && products.length > 0" class="text-center mt-4">
-          <p>Keine weiteren Tees verfügbar.</p>
-        </div>
-      </section>
-    </main>
-  </div>
+      <!-- Mehr Tees Button -->
+      <div v-if="hasMore && !loading" class="text-center mt-4">
+        <button @click="loadMore" class="btn btn-secondary">Mehr Tees</button>
+      </div>
+      <!-- Keine weiteren Produkte -->
+      <div v-if="!hasMore && products.length > 0" class="text-center mt-4">
+        <p>Keine weiteren Tees verfügbar.</p>
+      </div>
+    </section>
+  </main>
 </template>
 
 <script setup>
@@ -64,7 +61,7 @@ const pageSize = 3
 const currentPage = ref(1)
 const hasMore = ref(true)
 
-// API-Aufruf
+// API-Aufruf fuer Produkte mit Pagination
 const fetchProducts = async (query = '') => {
   // Reset bei neuer Suchanfrage
   if (query !== searchQuery.value) {
@@ -117,10 +114,6 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-.admin-dashboard {
-  padding: 20px;
-}
-
 /* Stil für die gestrichelte Linie */
 .dashed-line {
   border: 0;
@@ -129,8 +122,16 @@ onMounted(async () => {
   margin: 20px 0; /* Abstand nach oben und unten */
 }
 
+/* Zentrale Ausrichtung des Buttons */
 .text-center button {
   display: inline-block;
   width: auto;
+}
+
+/* Flexbox und Bootstrap Grid für Produktkarten */
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between; /* Karten gleichmäßig verteilen */
 }
 </style>
