@@ -110,6 +110,7 @@ const fetchProducts = async ({ query, filters }) => {
       products.value.push(...response.data.products)
     }
 
+    // "Mehr laden" aktualisieren
     hasMore.value = response.data.hasMore
   } catch (error) {
     console.error('Fehler beim Laden der Artikel:', error)

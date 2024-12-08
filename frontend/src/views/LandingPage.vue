@@ -60,24 +60,37 @@ const loading = ref(false)
 const pageSize = 3
 const currentPage = ref(1)
 const hasMore = ref(true)
+const localFilters = ref({ categories: [], price: 0, rating: 0, page: 1, size: 8 })
 
-// API-Aufruf fuer Produkte mit Pagination
-const fetchProducts = async (query = '') => {
+// API-Aufruf für Produkte mit Pagination und Filtern
+const fetchProducts = async ({ query = '', filters = localFilters.value }) => {
   // Reset bei neuer Suchanfrage
   if (query !== searchQuery.value) {
-    searchQuery.value = query.trim() // Aktualisiere Suchquery
-    currentPage.value = 1 // Erste Seite
-    products.value = [] // Leere Produkte
+    searchQuery.value = query.trim() // Such-Query aktualisieren
+    currentPage.value = 1 // Zurück zur ersten Seite
+    products.value = [] // Produkte leeren
     hasMore.value = true // "Mehr laden" zurücksetzen
+  }
+
+  // Überprüfen, ob sich die Filter geändert haben und falls ja changen
+  if (filters && JSON.stringify(filters) !== JSON.stringify(localFilters.value)) {
+    localFilters.value = { ...filters } // Filter aktualisieren
+    currentPage.value = 1 // Seite zurücksetzen, wenn die Filter geändert wurden
   }
 
   // Ladezustand aktivieren
   loading.value = true
+
+  // Kategorien als kommagetrennte Liste formatieren
+  const categoriesParam = filters.categories ? filters.categories.join(',') : undefined
+
   try {
-    // API-Aufruf mit der aktuellen Seite
     const response = await axios.get('/product', {
       params: {
-        search: searchQuery.value || undefined,
+        search: query || undefined,
+        categories: categoriesParam || undefined,
+        price: filters.price || undefined,
+        rating: filters.rating || undefined,
         page: currentPage.value, // Aktuelle Seite
         size: pageSize, // Anzahl der Produkte pro Seite
       },
@@ -85,31 +98,31 @@ const fetchProducts = async (query = '') => {
 
     // Ergebnisse verarbeiten
     if (currentPage.value === 1) {
-      products.value = response.data.products // Ersetze Produkte
+      products.value = response.data.products // Produkte für Seite 1
     } else {
-      products.value.push(...response.data.products) // Füge weitere Seiten hinzu
+      products.value.push(...response.data.products) // Weitere Produkte hinzufügen
     }
 
-    // Aktualisiere hasMore basierend auf der API-Antwort
+    // "Mehr laden" aktualisieren
     hasMore.value = response.data.hasMore
   } catch (error) {
     console.error('Fehler beim Laden der Artikel:', error)
   } finally {
-    loading.value = false // Ladezustand beenden
+    loading.value = false
   }
 }
 
 // Funktion zum Laden der nächsten Seite
 const loadMore = async () => {
   if (hasMore.value) {
-    currentPage.value++ // Erhöhe die aktuelle Seite
-    await fetchProducts() // Produkte laden
+    currentPage.value++ // Seite erhöhen
+    await fetchProducts({ query: searchQuery.value, filters: localFilters.value }) // Produkte nachladen
   }
 }
 
-// Produkte laden beim Mounten
-onMounted(async () => {
-  await fetchProducts()
+// Produkte beim Mounten laden
+onMounted(() => {
+  fetchProducts({ query: '', filters: localFilters.value }) // Initiales Laden
 })
 </script>
 
