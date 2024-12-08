@@ -39,31 +39,42 @@ module.exports = {
       }
 
       // Effizienten Datenabfrage
-      const product = await sails.sendNativeQuery(`
-        SELECT p.*,
-               JSON_ARRAYAGG(JSON_OBJECT(
-                 'id', c.id,
-                 'name', c.name,
-                 'type', c.type
-               )) AS productCategories,
-               COALESCE(AVG(r.stars), 0) AS averageRating
+      const query = `
+        SELECT
+          p.id,
+          p.name,
+          p.description,
+          p.price,
+          p.image,
+          p.reviews,
+          COALESCE(AVG(r.stars), 0) AS "averageRating",
+          JSON_ARRAYAGG(
+            JSON_OBJECT(
+              'id', c.id,
+              'name', c.name,
+              'type', c.type
+            )
+          ) AS "productCategories"
         FROM product p
-        LEFT JOIN productcategory pc ON p.id = pc.product
-        LEFT JOIN category c ON pc.category = c.id
-        LEFT JOIN productrating pr ON p.id = pr.product
-        LEFT JOIN rating r ON pr.rating = r.id
+               LEFT JOIN productrating pr ON p.id = pr.product
+               LEFT JOIN rating r ON pr.rating = r.id
+               LEFT JOIN productcategory pc ON p.id = pc.product
+               LEFT JOIN category c ON pc.category = c.id
         WHERE p.id = $1
         GROUP BY p.id
-      `, [productId]);
+      `;
 
-      const result = product.rows[0];
-      if (!result) {
+      const result = await sails.sendNativeQuery(query, [productId]);
+
+      const product = result.rows[0];
+      if (!product) {
         return res.status(404).json({ error: 'Product not found.' });
       }
 
-      result.productCategories = JSON.parse(result.productCategories || '[]');
-
-      return res.json(result);
+      // Parse das JSON-Array der Produkt-Kategorien und falls nicht vorhanden, setze leeren Array
+      const parsedCategories = product.productCategories ? JSON.parse(product.productCategories) : [];
+      product.productCategories = parsedCategories.some(category => category.id !== null) ? parsedCategories : [];
+      return res.json(product);
     } catch (error) {
       sails.log.error('Error in findOne:', error.message);
       return res.serverError('Failed to retrieve product details.');

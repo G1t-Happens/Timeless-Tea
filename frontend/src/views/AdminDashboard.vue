@@ -64,7 +64,7 @@ const products = ref([])
 const searchQuery = ref('')
 const loading = ref(false)
 const currentPage = ref(1)
-const pageSize = 9
+const pageSize = 8
 const hasMore = ref(true)
 const router = useRouter()
 
