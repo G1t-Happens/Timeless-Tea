@@ -1,132 +1,103 @@
 <template>
-  <div class="filter-popup">
-    <!-- Header mit Filterüberschrift und Schließen-Button -->
-    <div class="filter-header">
-      <h2>Filteroptionen</h2>
-      <!-- Schließen Button -->
-      <button class="close-button" @click="emit('close')">X</button>
+  <!-- Header mit Filterüberschrift und Schließen-Button -->
+  <div class="filter-header">
+    <h2>Filteroptionen</h2>
+    <!-- Schließen Button -->
+    <button class="close-button" @click="emitClose" aria-label="Schließen">X</button>
+  </div>
+
+  <div class="filter-body">
+    <!-- Geschmack und Wirkung -->
+    <div class="filter-row">
+      <!-- Geschmack Filter -->
+      <div class="filter-item">
+        <h3>Geschmack</h3>
+        <button class="filter-button" @click="toggleDropdown('taste')">▾</button>
+        <div v-if="activeDropdown === 'taste'" class="dropdown-menu">
+          <!-- Dynamische Geschmack-Optionen -->
+          <label v-for="taste in tastes" :key="taste.id">
+            <input type="checkbox" v-model="localFilters.taste" :value="taste.id" />
+            {{ taste.name }}
+          </label>
+        </div>
+        <!-- Ausgewählte Geschmack-Optionen anzeigen -->
+        <div v-if="localFilters.taste.length" class="selected-options">
+          <strong>Ausgewählt:</strong> {{ selectedTasteNames.join(', ') }}
+        </div>
+      </div>
+
+      <!-- Wirkung Filter -->
+      <div class="filter-item">
+        <h3>Wirkung</h3>
+        <button class="filter-button" @click="toggleDropdown('effect')">▾</button>
+        <div v-if="activeDropdown === 'effect'" class="dropdown-menu">
+          <!-- Dynamische Wirkung-Optionen -->
+          <label v-for="effect in effects" :key="effect.id">
+            <input type="checkbox" v-model="localFilters.effect" :value="effect.id" />
+            {{ effect.name }}
+          </label>
+        </div>
+        <!-- Ausgewählte Wirkung-Optionen anzeigen -->
+        <div v-if="localFilters.effect.length" class="selected-options">
+          <strong>Ausgewählt:</strong> {{ selectedEffectNames.join(', ') }}
+        </div>
+      </div>
     </div>
 
-    <div class="filter-body">
-      <!-- Geschmack und Wirkung -->
-      <div class="filter-row">
-        <!-- Geschmack Filter -->
-        <div class="filter-item">
-          <h3>Geschmack</h3>
-          <button class="filter-button" ref="tasteButton" @click="toggleDropdown('taste')">
-            ▾
-          </button>
-          <div v-if="activeDropdown === 'taste'" class="dropdown-menu">
-            <!-- Geschmack-Optionen -->
-            <label
-              ><input type="checkbox" v-model="localFilters.taste" value="fruchtig" />
-              Fruchtig</label
-            >
-            <label
-              ><input type="checkbox" v-model="localFilters.taste" value="würzig" /> Würzig</label
-            >
-            <label><input type="checkbox" v-model="localFilters.taste" value="süß" /> Süß</label>
-            <label
-              ><input type="checkbox" v-model="localFilters.taste" value="blumig" /> Blumig</label
-            >
-          </div>
-          <!-- Ausgewählte Geschmack-Optionen anzeigen -->
-          <div v-if="localFilters.taste.length" class="selected-options">
-            <strong>Ausgewählt:</strong> {{ localFilters.taste.join(', ') }}
-          </div>
+    <!-- Bewertung und Preis -->
+    <div class="filter-row">
+      <!-- Bewertung Filter -->
+      <div class="filter-item">
+        <h3>Bewertung</h3>
+        <button class="filter-button" @click="toggleDropdown('rating')">▾</button>
+        <div v-if="activeDropdown === 'rating'" class="dropdown-menu">
+          <!-- Bewertung-Optionen -->
+          <label v-for="star in 5" :key="star">
+            <input type="radio" v-model="localFilters.rating" :value="star.toString()" />
+            {{ star }} Stern{{ star > 1 ? 'e' : '' }}
+          </label>
         </div>
-
-        <!-- Wirkung Filter -->
-        <div class="filter-item">
-          <h3>Wirkung</h3>
-          <button class="filter-button" ref="effectButton" @click="toggleDropdown('effect')">
-            ▾
-          </button>
-          <div v-if="activeDropdown === 'effect'" class="dropdown-menu">
-            <!-- Wirkung-Optionen -->
-            <label
-              ><input type="checkbox" v-model="localFilters.effect" value="beruhigend" />
-              Beruhigend</label
-            >
-            <label
-              ><input type="checkbox" v-model="localFilters.effect" value="anregend" />
-              Anregend</label
-            >
-            <label
-              ><input type="checkbox" v-model="localFilters.effect" value="stärkend" />
-              Stärkend</label
-            >
-          </div>
-          <!-- Ausgewählte Wirkung-Optionen anzeigen -->
-          <div v-if="localFilters.effect.length" class="selected-options">
-            <strong>Ausgewählt:</strong> {{ localFilters.effect.join(', ') }}
-          </div>
+        <!-- Ausgewählte Bewertung anzeigen -->
+        <div v-if="localFilters.rating" class="selected-options">
+          <strong>Ausgewählt:</strong> {{ localFilters.rating }} Stern{{
+            localFilters.rating > 1 ? 'e' : ''
+          }}
         </div>
       </div>
 
-      <!-- Bewertung und Preis -->
-      <div class="filter-row">
-        <!-- Bewertung Filter -->
-        <div class="filter-item">
-          <h3>Bewertung</h3>
-          <button class="filter-button" ref="ratingButton" @click="toggleDropdown('rating')">
-            ▾
-          </button>
-          <div v-if="activeDropdown === 'rating'" class="dropdown-menu">
-            <!-- Bewertung-Optionen -->
-            <label><input type="radio" v-model="localFilters.rating" value="1" /> 1 Stern</label>
-            <label><input type="radio" v-model="localFilters.rating" value="2" /> 2 Sterne</label>
-            <label><input type="radio" v-model="localFilters.rating" value="3" /> 3 Sterne</label>
-            <label><input type="radio" v-model="localFilters.rating" value="4" /> 4 Sterne</label>
-            <label><input type="radio" v-model="localFilters.rating" value="5" /> 5 Sterne</label>
-          </div>
-          <!-- Ausgewählte Bewertung anzeigen -->
-          <div v-if="localFilters.rating" class="selected-options">
-            <strong>Ausgewählt:</strong> {{ localFilters.rating }} Sterne
-          </div>
-        </div>
-
-        <!-- Preis Filter -->
-        <div class="filter-item">
-          <h3>Preis</h3>
-          <!-- Preis Slider -->
-          <input class="price-input" type="range" v-model="localFilters.price" min="0" max="100" />
-          <span>{{ localFilters.price }} €</span>
-        </div>
+      <!-- Preis Filter -->
+      <div class="filter-item">
+        <h3>Preis</h3>
+        <!-- Preis Slider -->
+        <input class="price-input" type="range" v-model="localFilters.price" min="0" max="200" />
+        <span v-if="localFilters.price > 0">{{ localFilters.price }} €</span>
+        <span v-else class="infinity-symbol">∞</span>
       </div>
+    </div>
 
-      <!-- Herkunft -->
-      <div class="filter-row">
-        <div class="filter-item">
-          <h3>Herkunft</h3>
-          <!-- Herkunft Eingabefeld -->
-          <input
-            class="origin-input"
-            v-model="localFilters.origin"
-            type="text"
-            placeholder="z.B. China, Indien"
-          />
-        </div>
-        <!-- Aktionen Buttons (Speichern & Zurücksetzen) -->
-        <div class="filter-actions">
-          <button class="save-button" @click="applyFilters">Speichern</button>
-          <button class="save-button" @click="resetFilters">Reset All</button>
-        </div>
+    <!-- Buttons -->
+    <div class="filter-row">
+      <!-- Aktionen Buttons (Anwenden & Zurücksetzen) -->
+      <div class="filter-actions">
+        <button class="save-button" @click="applyFiltersHandler">Anwenden</button>
+        <button class="reset-button" @click="resetFilters">Reset All</button>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { reactive, ref, watch, defineEmits } from 'vue'
+import { reactive, ref, watch, onMounted, defineEmits, computed } from 'vue'
+import axios from 'axios'
 
-// Emit für close und applyFilters Events definieren
+// Define emits for close and applyFilters events
 const emit = defineEmits(['close', 'applyFilters'])
 
-// Const zum einsehen des Dropdown States
-const activeDropdown = ref(null)
+// Categories
+const tastes = ref([])
+const effects = ref([])
 
-// Empfang der Filterwerte über Props
+// Define props
 const props = defineProps({
   filters: {
     type: Object,
@@ -134,66 +105,89 @@ const props = defineProps({
   },
 })
 
-//TODO: Filter/Kategorien dynamisch aus der Datenbank laden
-
-// Lokale Filter mit den Initialwerten setzen
+// Initialize local filters
 const localFilters = reactive({
   taste: [],
   effect: [],
   rating: null,
-  price: 50,
-  origin: '',
+  price: 0,
 })
 
-// Synchronisieren der lokalen Filter mit den Prop-Werten
+// Synchronisieren der lokalen Filter mit den Prop-Werten die vom SearchField uebergeben wurden
 watch(
   () => props.filters,
   (newFilters) => {
     localFilters.taste = newFilters.taste || []
     localFilters.effect = newFilters.effect || []
     localFilters.rating = newFilters.rating || null
-    localFilters.price = newFilters.price || 50
-    localFilters.origin = newFilters.origin || ''
+    localFilters.price = newFilters.price || 0
   },
   { immediate: true },
 )
 
-// Funktion zum Umschalten der Dropdowns
+// Initial loading of categories
+onMounted(async () => {
+  try {
+    const response = await axios.get('/category/')
+    const category = response.data
+    tastes.value = category.filter((category) => category.type === 'Taste')
+    effects.value = category.filter((category) => category.type === 'Effect')
+  } catch (err) {
+    console.error('Error fetching categories:', err)
+  }
+})
+
+// Computed properties to display selected names based on IDs
+const selectedTasteNames = computed(() => {
+  return tastes.value
+    .filter((taste) => localFilters.taste.includes(taste.id))
+    .map((taste) => taste.name)
+})
+
+const selectedEffectNames = computed(() => {
+  return effects.value
+    .filter((effect) => localFilters.effect.includes(effect.id))
+    .map((effect) => effect.name)
+})
+
+// Toggle dropdown menus
+const activeDropdown = ref(null)
 const toggleDropdown = (dropdown) => {
   activeDropdown.value = activeDropdown.value === dropdown ? null : dropdown
 }
 
-// Filter anwenden und emitten
-const applyFilters = () => {
-  emit('applyFilters', { ...localFilters })
+// Filter anwenden und an AdminDashboard senden
+const applyFiltersHandler = () => {
+  const combinedCategories = [...localFilters.taste, ...localFilters.effect]
+  emit('applyFilters', {
+    categories: combinedCategories, // Kombinierte Kategorien
+    price: localFilters.price,
+    rating: localFilters.rating,
+    taste: localFilters.taste,
+    effect: localFilters.effect,
+  })
 }
 
-// Alle Filter zurücksetzen
+// Filter reseten und an AdminDashboard senden
 const resetFilters = () => {
   localFilters.taste = []
   localFilters.effect = []
   localFilters.rating = null
-  localFilters.price = 50
-  localFilters.origin = ''
-  applyFilters()
+  localFilters.price = 0
+  emit('applyFilters', {
+    categories: [],
+    price: localFilters.price,
+    rating: localFilters.rating,
+  })
+}
+
+// Close Event emitten
+const emitClose = () => {
+  emit('close')
 }
 </script>
 
 <style scoped>
-/* Container für die Filter-Optionen */
-.filter-popup {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background: #e0e0e0;
-  border-radius: 16px;
-  padding: 20px;
-  width: 320px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-  z-index: 1000;
-}
-
 /* Header der Filter-Popups */
 .filter-header {
   display: flex;
@@ -208,7 +202,7 @@ const resetFilters = () => {
 .close-button {
   background: none;
   border: none;
-  font-size: 18px;
+  font-size: 28px;
   cursor: pointer;
 }
 
@@ -224,12 +218,13 @@ const resetFilters = () => {
   display: flex;
   justify-content: space-between;
   gap: 10px;
+  position: relative;
 }
 
 /* Filteritem */
 .filter-item {
   flex: 1;
-  text-align: center;
+  text-align: left;
 }
 
 /* Filterbutton */
@@ -239,6 +234,7 @@ const resetFilters = () => {
   border-radius: 4px;
   padding: 5px 10px;
   cursor: pointer;
+  margin-left: 5px;
 }
 
 /* Dropdown-Menü */
@@ -252,13 +248,13 @@ const resetFilters = () => {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  max-width: 160px;
+  max-width: 300px;
 }
 
 /* Ausgewählte Optionen */
 .selected-options {
-  margin-top: 5px;
-  font-size: 14px;
+  margin-top: 6px;
+  margin-left: 6px;
   color: #555;
 }
 
@@ -267,27 +263,17 @@ const resetFilters = () => {
   width: 100%;
 }
 
-/* Herkunft Eingabefeld */
-.origin-input {
-  width: 100%;
-  padding: 5px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-}
-
 /* Action-Buttons */
 .filter-actions {
   display: flex;
-  justify-content: center;
-  flex-wrap: wrap;
-  gap: 4px;
-  max-width: 100%;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
   box-sizing: border-box;
 }
 
 /* Save-Button */
 .save-button {
-  max-width: 75%;
   flex: 1;
   text-align: center;
   background: #666;
@@ -295,6 +281,23 @@ const resetFilters = () => {
   padding: 10px 20px;
   border: none;
   border-radius: 8px;
-  cursor: pointer;
+}
+
+/* Reset-Button */
+.reset-button {
+  flex: 1;
+  text-align: center;
+  background: #bbb;
+  color: #fff;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+}
+
+/* Infinity-Symbol */
+.infinity-symbol {
+  font-size: 28px;
+  font-weight: 500;
+  color: #000000;
 }
 </style>

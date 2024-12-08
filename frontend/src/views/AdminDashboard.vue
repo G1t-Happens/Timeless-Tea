@@ -3,7 +3,7 @@
     <h2 class="text-center mb-4">Admin Dashboard</h2>
 
     <!-- Suchfeld für Artikel -->
-    <div class="search-section mb-4 mb-4">
+    <div class="search-section mb-4">
       <SearchField v-model="searchQuery" @search="fetchProducts" placeholder="Artikel suchen..." />
     </div>
 
@@ -62,28 +62,42 @@ import axios from 'axios'
 // Reaktive Variablen
 const products = ref([])
 const searchQuery = ref('')
+const localFilters = ref({ categories: [], price: 0, rating: 0, page: 1, size: 8 })
 const loading = ref(false)
 const currentPage = ref(1)
 const pageSize = 8
 const hasMore = ref(true)
 const router = useRouter()
 
-// API-Aufruf für Produkte mit Pagination
-const fetchProducts = async (query = '') => {
+// API-Aufruf für Produkte mit Pagination und Filtern
+const fetchProducts = async ({ query, filters }) => {
   // Reset bei neuer Suchanfrage
   if (query !== searchQuery.value) {
     searchQuery.value = query.trim()
-    currentPage.value = 1 // Zurück zur ersten Seite
-    products.value = [] // Vorherige Ergebnisse leeren
-    hasMore.value = true // Button zurücksetzen
+    currentPage.value = 1
+    products.value = []
+    hasMore.value = true
+  }
+
+  // Überprüfen, ob sich die Filter geändert haben und falls ja changen
+  if (filters && JSON.stringify(filters) !== JSON.stringify(localFilters.value)) {
+    localFilters.value = { ...filters } // Filter aktualisieren
+    currentPage.value = 1 // Seite zurücksetzen, wenn die Filter geändert wurden
   }
 
   // Ladezustand aktivieren
   loading.value = true
+
+  // Kategorien als kommagetrennte Liste formatieren
+  const categoriesParam = filters.categories ? filters.categories.join(',') : undefined
+
   try {
     const response = await axios.get('/product', {
       params: {
-        search: searchQuery.value || undefined,
+        search: query || undefined,
+        categories: categoriesParam || undefined,
+        price: filters.price || undefined,
+        rating: filters.rating || undefined,
         page: currentPage.value,
         size: pageSize,
       },
@@ -106,14 +120,14 @@ const fetchProducts = async (query = '') => {
 
 // Produkte laden beim Mounten
 onMounted(async () => {
-  await fetchProducts()
+  await fetchProducts({ query: '', filters: localFilters.value })
 })
 
 // "Mehr laden"-Funktion
 const loadMore = async () => {
   if (hasMore.value) {
     currentPage.value++
-    await fetchProducts()
+    await fetchProducts({ query: searchQuery.value, filters: localFilters.value })
   }
 }
 
@@ -133,7 +147,7 @@ const deleteArticle = async (id) => {
     await axios.delete(`/product/${id}`)
     const index = products.value.findIndex((article) => article.id === id)
     if (index !== -1) {
-      // Entferne das gelöschte Produkt aus der Liste
+      // Entferne das gelöschte Produkt aus der Liste(Frontend) nach dem API - Call
       products.value.splice(index, 1)
     }
   } catch (error) {

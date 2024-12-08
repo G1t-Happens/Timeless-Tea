@@ -30,6 +30,7 @@
         </button>
       </form>
     </div>
+
     <!-- Filter-Popup -->
     <FilterPopup
       v-if="isFilterVisible"
@@ -50,43 +51,49 @@ const filters = ref({
   taste: [],
   effect: [],
   rating: null,
-  price: 50,
-  origin: '',
+  price: 0,
 })
 
+// Emit für das Senden der Suchanfrage
 const emit = defineEmits(['search'])
 
+// Handle search mit den übergebenen Filterdaten
 const handleSearch = () => {
   const trimmedQuery = searchQuery.value.trim()
-  emit('search', trimmedQuery)
+  // Emit 'search' Event mit der Suchanfrage und den Filtern
+  emit('search', {
+    query: trimmedQuery,
+    filters: filters.value,
+  })
 }
 
+// Toggle Filter-Modal
 const toggleFilter = () => {
   isFilterVisible.value = !isFilterVisible.value
 }
 
-const applyFilters = (appliedFilters) => {
-  filters.value = appliedFilters
-  toggleFilter()
+// Empfange Filterdaten, setze sie in den Zustand und suche
+const applyFilters = (newFilters) => {
+  filters.value = newFilters
+  handleSearch()
 }
 </script>
 
 <style scoped>
 /* Stil für das Suchfeld */
 .search-input {
-  width: 500px; /* Einheitliche Breite des Suchfeldes */
-  border-width: 2px; /* Dicke des Rahmens */
-  border-radius: 36px; /* Abgerundete Ecken */
-  border-color: #c06e52; /* Farbcode für den Rand */
-  border-style: solid; /* Durchgezogener Rahmen */
-  padding: 10px; /* Innenabstand für besseres Styling */
-  font-size: 16px; /* Lesbare Schriftgröße */
+  width: 500px;
+  border-width: 2px;
+  border-radius: 36px;
+  border-color: #c06e52;
+  border-style: solid;
+  padding: 10px;
+  font-size: 16px;
 }
 
-/* Anpassung der Größe bei kleineren Bildschirmen */
 @media (max-width: 768px) {
   .search-input {
-    width: 100%; /* Passt sich der Breite des Containers an */
+    width: 100%;
   }
 }
 </style>
