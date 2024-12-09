@@ -1,10 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import LandingPage from '@/views/LandingPage.vue'
-import MemberShip from '@/views/MemberShip.vue'
-import LoginPage from '@/views/LoginPage.vue'
-import AdminDashboard from '@/views/AdminDashboard.vue'
-import CreateArticle from '@/views/CreateArticle.vue'
-import EditArticle from '@/views/EditArticle.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -16,28 +11,27 @@ const router = createRouter({
     {
       path: '/member',
       name: 'MemberShip',
-      component: MemberShip,
+      component: () => import('@/views/MemberShip.vue'),
     },
     {
       path: '/login',
       name: 'Login',
-      component: LoginPage,
+      component: () => import('@/views/LoginPage.vue'),
     },
     {
       path: '/admin',
       name: 'Admin',
-      component: AdminDashboard,
+      component: () => import('@/views/AdminDashboard.vue'),
     },
     {
       path: '/admin/create-article',
       name: 'CreateArticle',
-      component: CreateArticle,
+      component: () => import('@/views/CreateArticle.vue'),
     },
     {
       path: '/admin/edit-article/:id',
       name: 'EditArticle',
-      component: EditArticle,
-      props: true,
+      component: () => import('@/views/EditArticle.vue'),
     },
   ],
 })
