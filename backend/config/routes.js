@@ -21,11 +21,11 @@ module.exports.routes = {
   //ProductController.js
   'POST /product': { controller: 'ProductController', action: 'create' },
   'GET /product': 'ProductController.find',
-  'GET /product/:id': 'product.findOne',
+  'GET /product/:id': 'product.findById',
   'DELETE /product/:id': 'product.destroy',
   'PATCH /product/:id': 'product.patch',
   //CategoryController.js
-  'GET /category': 'category.listCategories'
+  'GET /category': 'CategoryController.find'
 
 
   /***************************************************************************
