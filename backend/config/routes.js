@@ -21,7 +21,7 @@ module.exports.routes = {
   //ProductController.js
   'POST /product': { controller: 'ProductController', action: 'create' },
   'GET /product': 'ProductController.find',
-  'GET /product/:id': 'product.findById',
+  'GET /product/:id': 'product.findOne',
   'DELETE /product/:id': 'product.destroy',
   'PATCH /product/:id': 'product.patch',
   //CategoryController.js

@@ -26,7 +26,7 @@ module.exports = {
   /**
    * Ruft ein Produkt anhand der ID ab
    */
-  findById: async function (req, res) {
+  findOne: async function (req, res) {
     try {
       const product = await ProductService.findProductById(req);
       return res.json(product);
