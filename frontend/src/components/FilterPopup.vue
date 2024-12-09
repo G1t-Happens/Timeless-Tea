@@ -87,7 +87,7 @@
 </template>
 
 <script setup>
-import { reactive, ref, watch, onMounted, defineEmits, computed } from 'vue'
+import { reactive, ref, watch, onMounted, computed } from 'vue'
 import axios from 'axios'
 
 // Define emits for close and applyFilters events
@@ -166,6 +166,7 @@ const applyFiltersHandler = () => {
     taste: localFilters.taste,
     effect: localFilters.effect,
   })
+  emit('close')
 }
 
 // Filter reseten und an AdminDashboard senden
