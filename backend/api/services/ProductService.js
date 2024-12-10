@@ -226,7 +226,7 @@ module.exports = {
  ******************************************************************************************************/
 
 /**
- * Extrahiert die Filter- und Pagination-Parameter aus dem Request.
+ * Extrahiert/Validiere die Filter- und Pagination-Parameter aus dem Request.
  *
  * @param {Request} req - Der eingehende HTTP-Request mit möglichen Query-Parametern (search, page, size, categories, price, rating).
  * @returns {Object} Ein Objekt mit den extrahierten Parametern (search, page, size, categories, price, rating).
@@ -238,8 +238,10 @@ function extractFilters(req) {
   const categories = req.query.categories
     ? req.query.categories.split(',').map(id => parseInt(id, 10)).filter(id => !isNaN(id))
     : null;
-  const price = req.query.price ? parseFloat(req.query.price) : null;
-  const rating = req.query.rating ? parseFloat(req.query.rating) : null;
+  const price = (req.query.price && parseFloat(req.query.price) !== 0)
+    ? parseFloat(req.query.price)
+    : null;
+  const rating = req.query.rating ? parseInt(req.query.rating) : null;
 
   return { search, page, size, categories, price, rating };
 }
