@@ -6,21 +6,25 @@ const errors = require('../utils/errors');
  * @description :: Server-side functions for handling business logic
  */
 module.exports = {
+
   /**
    * Erstelle ein Produkt
    */
   createProduct: async function (req) {
     const { name, description, price, categories } = req.body;
 
+    //Name und Preis sind Pflicht ansonsten BadRequestError
     if (!name || !price) {
       throw new errors.BadRequestError('Product name and price are required.');
     }
 
+    //Alles in einer Datenbanktransaktion abwickeln
     return await sails.getDatastore().transaction(async (db) => {
       const newProduct = await Product.create({ name, description, price })
           .fetch()
           .usingConnection(db);
 
+      //Falls Categories mitgeliefert in den JoinTable "ProductCategory" eintragen
       if (categories && categories.length > 0) {
         const productCategories = categories.map((categoryId) => ({
           product: newProduct.id,
@@ -32,15 +36,19 @@ module.exports = {
     });
   },
 
+
   /**
    * Ruft ein Produkt anhand seiner ID ab
    */
   findProductById: async function (req) {
     const productId = req.params.id;
+
+    //BadRequestError falls keine ID
     if (!productId) {
       throw new errors.BadRequestError('Product ID is required.');
     }
 
+    //Query fuer die Datenbank bauen
     const query = `
       SELECT p.id,
              p.name,
@@ -64,17 +72,23 @@ module.exports = {
       WHERE p.id = $1
       GROUP BY p.id
     `;
+
+    //Custom Query per "sendNativeQuery" an die Datenbank schicken
     const result = await sails.sendNativeQuery(query, [productId]);
+
+    //Resultat/Produkt extrahieren
     const product = result.rows[0];
+
+    //Falls kein Produkt gefunden => NotFoundError
     if (!product) {
       throw new errors.NotFoundError('Product not found.');
     }
-
+    //Falls keine zugehoerigen Categories gefunden => leerer Array ansonsten alle anfuegen
     const parsedCategories = product.productCategories ? JSON.parse(product.productCategories) : [];
     product.productCategories = parsedCategories.some(category => category.id !== null) ? parsedCategories : [];
-
     return product;
   },
+
 
   /**
    * Suche nach Produkten mit Filtern
@@ -234,18 +248,26 @@ module.exports = {
     }
   },
 
+
   /**
    * Löscht ein Produkt
    */
   deleteProduct: async function (req) {
     const productId = req.params.id;
+
+    //BadRequestError falls keine ID
     if (!productId) {
       throw new errors.BadRequestError('Product ID is required.');
     }
+
+    //Zuerst die JoinTables entfernen
     await ProductCategory.destroy({ product: productId });
     await ProductRating.destroy({ product: productId });
+
+    //Dann das tatsaechliche Produkt entfernen
     await Product.destroy({ id: productId });
   },
+
 
   /**
    * Aktualisiert ein Produkt
@@ -253,21 +275,29 @@ module.exports = {
   updateProduct: async function (req) {
     const productId = req.params.id;
 
+    //BadRequestError falls keine ID
     if (!productId) {
       throw new errors.BadRequestError('Product ID is required.');
     }
 
+    //Erwartetet Daten aus dem body
     const { name, description, price, productCategories } = req.body;
 
+    //Produkt anhand der productId finden
     const product = await Product.findOne({ id: productId });
+
+    //NotFoundError falls nicht gefunden
     if (!product) {
       throw new errors.NotFoundError(`Product with id ${productId} not found.`);
     }
+
+    //Update des Produktes in einer einzigen Transaktion durchfuehren
     return await sails.getDatastore().transaction(async (db) => {
       await Product.updateOne({ id: productId })
           .set({ name, description, price })
           .usingConnection(db);
 
+      //Falls neue Categories vorhanden, alle alten aus dem JoinTable entfernen und alle neuen setzen
       if (productCategories) {
         await ProductCategory.destroy({ product: productId }).usingConnection(db);
         const newCategories = productCategories.map((categoryId) => ({
@@ -276,6 +306,8 @@ module.exports = {
         }));
         await ProductCategory.createEach(newCategories).usingConnection(db);
       }
+
+      //Nach dem Update das Produkt wieder zurueckgeben
       return await Product.findOne({ id: productId }).populate('productCategories').usingConnection(db);
     });
   }
