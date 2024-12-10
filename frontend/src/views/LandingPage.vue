@@ -84,12 +84,15 @@ const fetchProducts = async ({ query = '', filters = localFilters.value }) => {
   // Kategorien als kommagetrennte Liste formatieren
   const categoriesParam = filters.categories ? filters.categories.join(',') : undefined
 
+  // Pruefen ob price !=0 ansonsten undefiend
+  const priceParam = ((p) => (p && p !== 0) ? p : undefined)(parseFloat(filters.price));
+
   try {
     const response = await axios.get('/product', {
       params: {
         search: query || undefined,
-        categories: categoriesParam || undefined,
-        price: filters.price || undefined,
+        categories: categoriesParam,
+        price: priceParam,
         rating: filters.rating || undefined,
         page: currentPage.value, // Aktuelle Seite
         size: pageSize, // Anzahl der Produkte pro Seite
