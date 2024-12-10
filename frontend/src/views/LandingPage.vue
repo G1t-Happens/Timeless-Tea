@@ -81,11 +81,13 @@ const fetchProducts = async ({ query = '', filters = localFilters.value }) => {
   // Ladezustand aktivieren
   loading.value = true
 
-  // Kategorien als kommagetrennte Liste formatieren
-  const categoriesParam = filters.categories ? filters.categories.join(',') : undefined
+  // Kategorien als kommagetrennte Liste formatieren fuer backend call
+  // Bsp: http://localhost:1337/product?categories=1,2,5&page=1&size=3
+  const categoriesParam =
+    filters.categories && filters.categories.length > 0 ? filters.categories.join(',') : undefined
 
   // Pruefen ob price !=0 ansonsten undefiend
-  const priceParam = ((p) => (p && p !== 0) ? p : undefined)(parseFloat(filters.price));
+  const priceParam = ((p) => (p && p !== 0 ? p : undefined))(parseFloat(filters.price))
 
   try {
     const response = await axios.get('/product', {
