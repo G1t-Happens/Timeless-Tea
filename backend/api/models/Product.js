@@ -47,12 +47,14 @@ module.exports = {
     },
 
     /**
-     * @description Anzahl der vorhandenen Reviews/Bewertungen.
+     * @description Die Menge des Produkts in Gramm.
      * @type {number}
+     * @example Für Productbestellung: 250 (für 250 Gramm)
      */
-    reviews: {
+    quantity: {
       type: 'number',
-      columnType: 'integer'
+      columnType: 'decimal(10,2)',
+      required: false
     },
 
     /**

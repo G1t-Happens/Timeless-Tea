@@ -73,20 +73,26 @@ module.exports = {
              p.description,
              p.price,
              p.image,
-             p.reviews,
+             COUNT(pr.rating) AS "reviews",
              COALESCE(AVG(r.stars), 0) AS "averageRating",
-             JSON_ARRAYAGG(
-               JSON_OBJECT(
-                 'id', c.id,
-                 'name', c.name,
-                 'type', c.type
-               )
+             (
+               SELECT JSON_ARRAYAGG(
+                        JSON_OBJECT(
+                          'id', unique_categories.id,
+                          'name', unique_categories.name,
+                          'type', unique_categories.type
+                        )
+                      )
+               FROM (
+                      SELECT DISTINCT c.id, c.name, c.type
+                      FROM productcategory pc
+                             JOIN category c ON pc.category = c.id
+                      WHERE pc.product = p.id
+                    ) AS unique_categories
              ) AS "productCategories"
       FROM product p
              LEFT JOIN productrating pr ON p.id = pr.product
              LEFT JOIN rating r ON pr.rating = r.id
-             LEFT JOIN productcategory pc ON p.id = pc.product
-             LEFT JOIN category c ON pc.category = c.id
       WHERE p.id = $1
       GROUP BY p.id
     `;
@@ -366,17 +372,32 @@ function buildCountQuery({ search, categories, price, rating }) {
 function buildProductQuery({ whereClauses, havingClauses }) {
   let baseQuery = `
     SELECT p.*,
-           JSON_ARRAYAGG(JSON_OBJECT(
-             'id', c.id,
-             'name', c.name,
-             'type', c.type
-                         )) AS productCategories,
-           COALESCE(AVG(r.stars), 0) AS averageRating
+           (
+             SELECT COUNT(DISTINCT pr.id)
+             FROM productrating pr
+             WHERE pr.product = p.id
+           ) AS "reviews",
+           COALESCE(AVG(r.stars), 0) AS averageRating,
+           (
+             SELECT JSON_ARRAYAGG(
+                      JSON_OBJECT(
+                        'id', unique_categories.id,
+                        'name', unique_categories.name,
+                        'type', unique_categories.type
+                      )
+                    )
+             FROM (
+                    SELECT DISTINCT c.id, c.name, c.type
+                    FROM productcategory pc
+                           JOIN category c ON pc.category = c.id
+                    WHERE pc.product = p.id
+                  ) AS unique_categories
+           ) AS productCategories
     FROM product p
-           LEFT JOIN productcategory pc ON p.id = pc.product
-           LEFT JOIN category c ON pc.category = c.id
            LEFT JOIN productrating pr ON p.id = pr.product
            LEFT JOIN rating r ON pr.rating = r.id
+           LEFT JOIN productcategory pc ON p.id = pc.product
+           LEFT JOIN category c ON pc.category = c.id
   `;
 
   if (whereClauses.length > 0) {
