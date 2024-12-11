@@ -88,8 +88,6 @@ module.exports.bootstrap = async function() {
     for (let teaInfo of teaNamesDescriptions) {
       let price = (Math.random() * 20 + 5).toFixed(2);
       let reviews = Math.floor(Math.random() * 500);
-      let selectedRatingId = allRatings[Math.floor(Math.random() * allRatings.length)].id;
-      let categoryId = categories[Math.floor(Math.random() * categories.length)].id;
       let imageIndex = Math.floor(Math.random() * images.length);
 
       let newProduct = await Product.create({
@@ -100,19 +98,30 @@ module.exports.bootstrap = async function() {
         reviews: reviews,
       }).fetch();
 
-      // Create a ProductRating JoinTable entry
-      await ProductRating.create({
-        product: newProduct.id,
-        rating: selectedRatingId
+      // Mehrere ProductRating Einträge erstellen
+      const numberOfRatings = Math.floor(Math.random() * 5) + 1; // 1 bis 5 Bewertungen pro Produkt
+      const productRatings = Array.from({ length: numberOfRatings }).map(() => {
+        const selectedRatingId = allRatings[Math.floor(Math.random() * allRatings.length)].id;
+        return {
+          product: newProduct.id,
+          rating: selectedRatingId
+        };
       });
+      await ProductRating.createEach(productRatings);
 
-      // Create a ProductCategory JoinTable entry
-      await ProductCategory.create({
+      // Wähle zufällig eine oder mehrere Kategorien aus, ohne Duplikate
+      const numberOfCategories = Math.floor(Math.random() * 3) + 1; // 1 bis 3 Kategorien pro Produkt
+      const selectedCategories = categories
+        .sort(() => 0.5 - Math.random()) // Zufällige Sortierung
+        .slice(0, numberOfCategories); // Auswahl der ersten n Kategorien
+
+      const productCategories = selectedCategories.map(cat => ({
         product: newProduct.id,
-        category: categoryId
-      });
-
+        category: cat.id
+      }));
+      await ProductCategory.createEach(productCategories);
     }
+
     sails.log.info(`${teaNamesDescriptions.length} new tea products created!`);
   } else {
     sails.log.info('Tea items already exist.');
