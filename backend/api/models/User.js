@@ -50,6 +50,11 @@ module.exports = {
     orders: {
       collection: 'order',
       via: 'user'
+    },
+
+    address: {
+      model: 'address',
+      description: 'The address associated with this user.'
     }
 
   },
