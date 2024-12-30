@@ -47,6 +47,11 @@ module.exports = {
       description: 'Whether this user is a "admin" with extra permissions, etc.',
     },
 
+    orders: {
+      collection: 'order',
+      via: 'user'
+    }
+
   },
 };
 

@@ -36,6 +36,12 @@ module.exports = {
     orderProducts: {
       collection: 'orderproduct',
       via: 'order'
+    },
+
+    user: {
+      model: 'user',
+      required: true,
+      description: 'The user who placed this order.'
     }
 
   },
