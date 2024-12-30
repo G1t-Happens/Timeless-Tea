@@ -75,6 +75,16 @@ module.exports = {
     productCategories: {
       collection: 'productcategory',
       via: 'product'
+    },
+
+    /**
+     * @description Beziehung zu OrderCategory, um Orders zu verknüpfen (Many-to-Many).
+     * Ein Produkt kann mehrere in mehreren Orders vorkommen
+     */
+    orderProducts: {
+      collection: 'orderproduct',
+      via: 'product'
     }
+
   }
 };
