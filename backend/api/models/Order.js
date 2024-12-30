@@ -42,6 +42,12 @@ module.exports = {
       model: 'user',
       required: true,
       description: 'The user who placed this order.'
+    },
+
+    shipping: {
+      model: 'shipping',
+      unique: true,
+      description: 'The shipping information associated with this order.'
     }
 
   },

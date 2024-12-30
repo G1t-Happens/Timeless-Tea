@@ -37,5 +37,12 @@ module.exports = {
       example: '2024-01-10'
     },
 
+    order: {
+      model: 'order',
+      unique: true,
+      required: true,
+      description: 'The order associated with this shipping information.'
+    }
+
   },
 };
