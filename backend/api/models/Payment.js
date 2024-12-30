@@ -31,5 +31,11 @@ module.exports = {
       example: 'EUR'
     },
 
+    user: {
+      model: 'user',
+      unique: true,
+      description: 'The user associated with this payment information.'
+    }
+
   },
 };

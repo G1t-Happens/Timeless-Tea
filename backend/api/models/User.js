@@ -37,7 +37,7 @@ module.exports = {
     lastName: {
       type: 'string',
       required: true,
-      description: 'First Name of the user.',
+      description: 'Last Name of the user.',
       maxLength: 100,
       example: 'Mary Sue van der McHenst'
     },
@@ -55,8 +55,13 @@ module.exports = {
     address: {
       model: 'address',
       description: 'The address associated with this user.'
+    },
+
+    payment: {
+      collection: 'payment',
+      via: 'user',
+      description: 'The payment information associated with this user.'
     }
 
   },
 };
-
