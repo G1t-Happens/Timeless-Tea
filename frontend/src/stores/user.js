@@ -54,7 +54,7 @@ export const useUserStore = defineStore("user", {
         .post("/register", registerInformation)
         .then((response) => {
           this.user = response;
-          router.push("/restricted");
+          router.push("/user");
         })
         .catch((error) => {
           console.error("Login failed:", error);
