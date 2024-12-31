@@ -56,5 +56,11 @@ module.exports = {
       example: 'Apartment 4B'
     },
 
+    shippings: {
+      collection: 'shipping',
+      via: 'address',
+      description: 'The shipping information associated with this address.'
+    }
+
   },
 };

@@ -42,6 +42,12 @@ module.exports = {
       unique: true,
       required: true,
       description: 'The order associated with this shipping information.'
+    },
+
+    address: {
+      model: 'address',
+      required: true,
+      description: 'The address associated with this shipping information.'
     }
 
   },
