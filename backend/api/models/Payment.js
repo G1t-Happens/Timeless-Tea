@@ -34,8 +34,16 @@ module.exports = {
     user: {
       model: 'user',
       unique: true,
+      required: true,
       description: 'The user associated with this payment information.'
+    },
+
+    order: {
+      model: 'order',
+      unique: true,
+      description: 'The order associated with this payment information.'
     }
+
 
   },
 };
