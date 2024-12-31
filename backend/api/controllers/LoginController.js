@@ -2,55 +2,101 @@
  * LoginController
  *
  * @description :: Server-side actions for handling incoming requests.
+ *                 Hier wird nur noch die Request/Response-Logik definiert.
  * @help        :: See https://sailsjs.com/docs/concepts/actions
  */
 
+const LoginService = require('../services/LoginService'); // Pfad ggf. anpassen
+const errors = require('../utils/errors');
+
 module.exports = {
+  /**
+   * login(req, res)
+   *
+   * @description
+   * Nimmt E-Mail-Adresse und Passwort entgegen, nutzt den Service zum Einloggen
+   * und schreibt den User in die Session.
+   */
   login: async function (req, res) {
-    let params = req.body;
-    let user = await User.findOne({
-      emailAddress: params.emailAddress.toLowerCase(),
-    });
-    // If there was no matching user, respond thru the "badCombo" exit.
-    if (!user) {
-      throw 'badCombo';
+    try {
+      const { emailAddress, password } = req.body;
+      // Benutzer über den Service einloggen
+      const user = await LoginService.loginUser(emailAddress, password);
+      // Session aktualisieren (kann alternativ auch direkt im Service erfolgen)
+      req.session.userId = user.id;
+      req.session.user = user;
+      return res.json(user);
+    } catch (err) {
+      sails.log.error('Error:', err.message);
+
+      if (err instanceof errors.CustomError) {
+        return res.status(err.status).json({ error: err.message });
+      }
+
+      return res.serverError('An unexpected error occurred.');
     }
-    // If the password doesn't match, then also exit thru "badCombo".
-    await sails.helpers.passwords
-      .checkPassword(params.password, user.password)
-      .intercept('incorrect', 'badCombo');
-    // Modify the active session instance.
-    req.session.userId = user.id;
-    req.session.user = user;
-    return res.json(user);
   },
+
+  /**
+   * sessionUser(req, res)
+   *
+   * @description
+   * Gibt den aktuell in der Session gespeicherten User zurück.
+   */
   sessionUser: async function (req, res) {
-    let user = req.session.user;
-    if (!user) {
-      res.status(403);
+    try {
+      const user = LoginService.getSessionUser(req.session);
+      return res.json(user);
+    } catch (err) {
+      sails.log.error('Error:', err.message);
+
+      if (err instanceof errors.CustomError) {
+        return res.status(err.status).json({ error: err.message });
+      }
+
+      return res.serverError('An unexpected error occurred.');
     }
-    return res.json(user);
   },
+
+  /**
+   * register(req, res)
+   *
+   * @description
+   * Legt einen neuen User an, hinterlegt ihn in der Session und gibt ihn zurück.
+   */
   register: async function (req, res) {
-    let params = req.body;
-    let newEmailAddress = params.emailAddress.toLowerCase();
+    try {
+      const user = await LoginService.registerUser(req.body, req.session);
+      return res.json(user);
+    } catch (err) {
+      sails.log.error('Error:', err.message);
 
-    let user = await User.create(
-      { emailAddress: newEmailAddress, firstName: params.firstName, lastName: params.lastName,
-        isAdmin:false, password: await sails.helpers.passwords.hashPassword(params.password),
-      }).intercept('E_UNIQUE', 'emailAlreadyInUse')
-      .intercept({name: 'UsageError'}, 'invalid')
-      .fetch();
+      if (err instanceof errors.CustomError) {
+        return res.status(err.status).json({ error: err.message });
+      }
 
-    // Store the user's new id in their session.
-    req.session.userId = user.id;
-    req.session.user = user;
-    return res.json(user);
+      return res.serverError('An unexpected error occurred.');
+    }
   },
+
+  /**
+   * logout(req, res)
+   *
+   * @description
+   * Löscht die User-Daten aus der Session und gibt einen OK-Status zurück.
+   */
   logout: async function (req, res) {
-    delete req.session.user;
-    delete req.session.userId;
-    return res.ok();
+    try {
+      LoginService.logoutUser(req.session);
+      return res.ok();
+    } catch (err) {
+      sails.log.error('Error:', err.message);
+
+      if (err instanceof errors.CustomError) {
+        return res.status(err.status).json({ error: err.message });
+      }
+
+      return res.serverError('An unexpected error occurred.');
+    }
   },
 };
-

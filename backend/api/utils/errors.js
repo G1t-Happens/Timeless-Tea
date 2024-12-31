@@ -55,9 +55,21 @@ class UnauthorizedError extends CustomError {
   }
 }
 
+class ForbiddenError extends CustomError {
+  /**
+   * Erstellt einen ForbiddenError (HTTP-Status 403).
+   *
+   * @param {string} message - Die Fehlermeldung (Standard: 'Forbidden').
+   */
+  constructor(message = 'Forbidden') {
+    super(message, 403);
+  }
+}
+
 module.exports = {
   CustomError,
   BadRequestError,
   NotFoundError,
-  UnauthorizedError
+  UnauthorizedError,
+  ForbiddenError
 };

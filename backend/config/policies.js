@@ -17,6 +17,18 @@ module.exports.policies = {
   *                                                                          *
   ***************************************************************************/
 
-  // '*': true,
+  LoginController:{
+    logout: 'isLoggedIn'
+  },
+
+  ProductController:{
+    create: 'isAdmin',
+    destroy: 'isAdmin',
+    patch: 'isAdmin'
+  },
+
+  CategoryController: {
+    '*': 'isLoggedIn',
+  },
 
 };
