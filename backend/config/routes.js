@@ -18,6 +18,8 @@ module.exports.routes = {
    * `assets` directory)                                                      *
    *                                                                          *
    ***************************************************************************/
+  '/': { view: 'pages/homepage' },
+
   //LoginController.js
   'POST /login': 'login.login',
   'POST /register': 'login.register',
