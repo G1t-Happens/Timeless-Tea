@@ -117,4 +117,7 @@ module.exports.models = {
   * (For production configuration, see `config/env/production.js`.)          *
   *                                                                          *
   ***************************************************************************/
+
+  cascadeOnDestroy: true
+
 };
