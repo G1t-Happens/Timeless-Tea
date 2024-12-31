@@ -18,6 +18,12 @@ module.exports.routes = {
    * `assets` directory)                                                      *
    *                                                                          *
    ***************************************************************************/
+  //LoginController.js
+  'POST /login': 'login.login',
+  'POST /register': 'login.register',
+  'GET /sessionUser': 'login.sessionUser',
+  'GET /logout': 'login.logout',
+
   //ProductController.js
   'POST /product': { controller: 'ProductController', action: 'create' },
   'GET /product': 'ProductController.find',

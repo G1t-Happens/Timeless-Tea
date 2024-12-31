@@ -11,17 +11,17 @@
               <h2 class="text-center mb-4">Werde Mitglied bei Timeless Tea</h2>
 
               <!-- Formular zur Registrierung -->
-              <form @submit.prevent="handleSubmit">
+              <form @submit.prevent="register">
                 <!-- Eingabefeld für den Vornamen -->
                 <div class="mb-3">
                   <label for="name" class="form-label">Vorname</label>
-                  <input type="text" v-model="vorname" id="name" class="form-control" required />
+                  <input type="text" v-model="firstName" id="name" class="form-control" required />
                 </div>
 
                 <!-- Eingabefeld für den Nachnamen -->
                 <div class="mb-3">
                   <label for="name" class="form-label">Nachname</label>
-                  <input type="text" v-model="nachname" id="name" class="form-control" required />
+                  <input type="text" v-model="lastName" id="name" class="form-control" required />
                 </div>
 
                 <!-- Eingabefeld für die E-Mail-Adresse -->
@@ -75,34 +75,32 @@
 
 <script setup>
 import { ref } from 'vue'
-
+import { useUserStore } from "../stores/user";
+const userStore = useUserStore();
 // Reaktive Variablen für die Eingabefelder (Vorname, Nachname, E-Mail, Passwort, Passwortbestätigung, Fehlernachricht)
-const vorname = ref('')
-const nachname = ref('')
+const firstName = ref('')
+const lastName = ref('')
 const email = ref('')
 const password = ref('')
 const confirmPassword = ref('')
 const errorMessage = ref('')
 
 // Methode zur Handhabung des Formulars nach Absenden
-const handleSubmit = () => {
+async function register() {
   // Überprüfung, ob die Passwörter übereinstimmen
   if (password.value !== confirmPassword.value) {
     errorMessage.value = 'Die Passwörter stimmen nicht überein!' // Fehlernachricht setzen
     return
   }
 
-  // Hier könnte die Registrierung erfolgen, z.B. durch einen API-Aufruf
-  console.log('Benutzer registriert:', {
-    vorname: vorname.value,
-    nachname: nachname.value,
-    email: email.value,
-    password: password.value,
-  })
+  userStore.signUp(firstName.value, lastName.value, email.value, password.value);
+  if (useUserStore.user) {
+    console.log("Logged in")
+  }
 
   // Felder nach erfolgreicher Registrierung leeren (optional)
-  vorname.value = ''
-  nachname.value = ''
+  firstName.value = ''
+  lastName.value = ''
   email.value = ''
   password.value = ''
   confirmPassword.value = ''

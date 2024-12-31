@@ -11,7 +11,7 @@
               <h2 class="text-center mb-4">Einloggen</h2>
 
               <!-- Formular zur Benutzerauthentifizierung -->
-              <form @submit.prevent="handleLogin">
+              <form @submit.prevent="login">
                 <!-- Eingabefeld für die E-Mail-Adresse -->
                 <div class="mb-3">
                   <label for="email" class="form-label">E-Mail</label>
@@ -46,15 +46,15 @@
 
 <script setup>
 import { ref } from 'vue'
-
-// Reaktive Variablen für die Eingabefelder E-Mail und Passwort
-const email = ref('') // E-Mail des Benutzers
-const password = ref('') // Passwort des Benutzers
-
-// Funktion, die beim Absenden des Formulars aufgerufen wird
-const handleLogin = () => {
-  //TODO: Login-Logik einfügen, z.B. ein API-Aufruf zur Authentifizierung
-  console.log('Login:', { email: email.value, password: password.value })
+import { useUserStore } from "../stores/user";
+const userStore = useUserStore();
+let email = ref("");
+let password =ref("");
+async function login() {
+  await userStore.signIn(email.value, password.value);
+  if (useUserStore.user) {
+    console.log("Logged in")
+  }
 }
 </script>
 

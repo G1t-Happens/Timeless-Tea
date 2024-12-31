@@ -1,6 +1,15 @@
 module.exports.bootstrap = async function() {
   sails.log.info('Bootstrapping application...');
 
+  // Create SuperAdmin User if not exist
+  const userCount = await User.count();
+  if (userCount === 0) {
+    await User.createEach([
+      { emailAddress: 'admin@example.com', firstName: 'Daniel', lastName: 'Boxheimer', isAdmin: true, password: await
+      sails.helpers.passwords.hashPassword('admin') },
+    ]);
+  }
+
   // Create categories and ratings if they do not exist
   const categoryCount = await Category.count();
   if (categoryCount === 0) {
