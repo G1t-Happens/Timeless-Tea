@@ -17,22 +17,9 @@ module.exports = {
 
     product: {
       model: 'product',
+      required: true,
       description: 'The product that is part of the order.'
-    },
-
-    quantity: {
-      type: 'number',
-      required: true,
-      description: 'The quantity of the product in the order.',
-      example: 2
-    },
-
-    priceAtPurchase: {
-      type: 'number',
-      required: true,
-      description: 'The price of the product at the time of purchase.',
-      example: 29.99
-    },
+    }
 
   },
 };

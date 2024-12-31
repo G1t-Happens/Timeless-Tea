@@ -46,13 +46,11 @@ module.exports = {
 
     shipping: {
       model: 'shipping',
-      unique: true,
       description: 'The shipping information associated with this order.'
     },
 
     payment: {
       model: 'payment',
-      unique: true,
       required: true,
       description: 'The payment information associated with this order.'
     }

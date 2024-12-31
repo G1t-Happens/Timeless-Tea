@@ -49,17 +49,19 @@ module.exports = {
 
     orders: {
       collection: 'order',
-      via: 'user'
+      via: 'user',
+      description: 'The orders associated with this user.'
     },
 
     address: {
       model: 'address',
+      required: true,
       description: 'The address associated with this user.'
     },
 
     payment: {
-      collection: 'payment',
-      via: 'user',
+      model: 'payment',
+      required: true,
       description: 'The payment information associated with this user.'
     }
 
