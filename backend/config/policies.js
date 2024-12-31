@@ -17,18 +17,17 @@ module.exports.policies = {
   *                                                                          *
   ***************************************************************************/
 
+  //Globale Standard-Policy
+  '*': 'isLoggedIn',
+
+  // Override globale Standard-Policy
   LoginController:{
-    logout: 'isLoggedIn'
+    '*': true,
   },
 
   ProductController:{
-    create: 'isAdmin',
-    destroy: 'isAdmin',
-    patch: 'isAdmin'
+    '*': 'isAdmin',
+    findOne: true,
+    find: true,
   },
-
-  CategoryController: {
-    '*': 'isLoggedIn',
-  },
-
 };
