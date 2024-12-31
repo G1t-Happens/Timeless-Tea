@@ -5,8 +5,6 @@
  *                 Hier wird nur noch die Request/Response-Logik definiert.
  * @help        :: See https://sailsjs.com/docs/concepts/actions
  */
-
-const LoginService = require('../services/LoginService'); // Pfad ggf. anpassen
 const errors = require('../utils/errors');
 
 module.exports = {
