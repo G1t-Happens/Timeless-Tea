@@ -276,7 +276,6 @@ const onFileChange = (event) => {
   border: 1px solid #ddd;
   border-radius: 8px;
   font-size: 1rem;
-  transition: border-color 0.3s ease;
 }
 
 .form-control:focus {
@@ -289,8 +288,12 @@ button {
   padding: 10px 20px;
   font-size: 1rem;
   border-radius: 5px;
-  transition: background-color 0.3s;
+  transition: all 0.3s ease;
   border: none;
+  display: flex; /* Buttons nebeneinander anordnen */
+  flex: 1;
+  justify-content: center;
+  text-align: center;
 }
 
 .btn-primary {
@@ -347,5 +350,6 @@ button {
 .button-group {
   display: flex;
   justify-content: space-between;
+  gap: 10px;
 }
 </style>
