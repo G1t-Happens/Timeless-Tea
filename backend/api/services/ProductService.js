@@ -1,4 +1,6 @@
 const errors = require('../utils/errors');
+const { v2: cloudinary } = require('cloudinary');
+
 
 /**
  * ProductService
@@ -19,32 +21,42 @@ module.exports = {
    * @throws {BadRequestError} Wenn kein Name oder Preis übergeben wurde.
    */
   createProduct: async function (req) {
-    const { name, description, price, categories } = req.body;
+    const { name, description, categories, price } = req.body;
 
-    // Name und Preis sind Pflichtfelder, bei Fehlen -> BadRequestError
     if (!name || !price) {
       throw new errors.BadRequestError('Product name and price are required.');
     }
 
-    // Alle Datenbankoperationen innerhalb einer Transaktion ausführen
+    const optimizedUrl = await uploadFileToCloudinary(req, 'image');
+
+    // Kategorien validieren und verarbeiten
+    let categoryArray = [];
+    if (categories) {
+      // Kategorien verarbeiten (String -> Array)
+      categoryArray = typeof categories === 'string' ? JSON.parse(categories) : categories;
+      // Prüfen, ob alle Elemente numerisch sind
+      if (!Array.isArray(categoryArray) || categoryArray.some((id) => typeof id !== 'number')) {
+        throw new errors.BadRequestError('Categories must be an array of numeric IDs.');
+      }
+    }
+
+    // Datenbankoperationen innerhalb einer Transaktion
     return await sails.getDatastore().transaction(async (db) => {
-      // Neues Produkt anlegen
-      const newProduct = await Product.create({ name, description, price })
+      const newProduct = await Product.create({ name, description, price, image: optimizedUrl })
         .fetch()
         .usingConnection(db);
 
-      // Falls Kategorien vorhanden, Verknüpfungen in ProductCategory setzen
-      if (categories && categories.length > 0) {
-        const productCategories = categories.map((categoryId) => ({
+      if (categoryArray.length > 0) {
+        const productCategories = categoryArray.map((categoryId) => ({
           product: newProduct.id,
-          category: categoryId
+          category: categoryId,
         }));
         await ProductCategory.createEach(productCategories).usingConnection(db);
       }
-
       return newProduct;
     });
   },
+
 
 
   /**
@@ -413,7 +425,6 @@ function buildProductQuery({ whereClauses, havingClauses }) {
   return baseQuery;
 }
 
-
 /**
  * Führt die Produkt-Query aus, bereitet das Ergebnis auf und gibt es formatiert zurück.
  * Bei Bedarf wird zudem Pagination angewendet bzw Paginationwerte zurueckgelierfert.
@@ -457,3 +468,29 @@ async function executeProductQuery(baseQuery, queryParams, page, size, totalCoun
     };
   }
 }
+
+/**
+ * Lädt eine Datei zu Cloudinary hoch und gibt die URL zurück
+ *
+ * @param {object} req - Das Sails.js-Request-Objekt
+ * @param {string} fieldName - Der Name des Datei-Feldes im Request
+ * @returns {Promise<string>} - Die URL der hochgeladenen und optimierten Datei
+ * @throws {errors.BadRequestError} - Wenn keine Datei hochgeladen wurde oder ein Fehler auftritt
+ */
+
+async function uploadFileToCloudinary(req, fieldName) {
+  // Configure Cloudinary
+  cloudinary.config(sails.config);
+
+  // Get the uploaded file or throw an error if none exists
+  const file = await new Promise((resolve, reject) =>
+    req.file(fieldName).upload((err, files) =>
+      err || !files.length ? reject(new errors.BadRequestError('No file uploaded.')) : resolve(files[0])
+    )
+  );
+
+  // Upload the file to Cloudinary and return the URL
+  const { public_id } = await cloudinary.uploader.upload(file.fd, { public_id: `product/${Date.now()}` });
+  return cloudinary.url(public_id, { fetch_format: 'auto', quality: 'auto' });
+}
+

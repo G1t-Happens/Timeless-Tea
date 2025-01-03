@@ -5,7 +5,7 @@
     <h2 class="page-title">Neuen Artikel erstellen</h2>
 
     <!-- Formular für die Artikeldaten -->
-    <form @submit.prevent="createArticle" class="form-container">
+    <form @submit.prevent="createArticle" class="form-container" method="post" enctype="multipart/form-data">
       <!-- Eingabefeld für den Artikelnamen -->
       <div class="form-group">
         <label for="name" class="form-label">Artikelname</label>
@@ -51,6 +51,12 @@
         </div>
       </div>
 
+      <!-- Eingabefeld für das Bild -->
+      <div class="form-group">
+        <label for="image" class="form-label">Bild hochladen</label>
+        <input type="file" id="image" class="form-control" @change="onFileChange" accept="image/*" />
+      </div>
+
       <!-- Submit-Button für das Formular -->
       <button type="submit" class="btn btn-primary w-100">Artikel erstellen</button>
     </form>
@@ -58,76 +64,94 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
-import axios from 'axios'
+import { ref, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
+import axios from 'axios';
 
 // Reaktive Variablen für Formulardaten
-const name = ref('')
-const description = ref('')
-const price = ref('')
-const selectedCategories = ref([]) // Array für ausgewählte Kategorien-IDs
-const organizedCategories = ref([]) // Liste der Kategorien, nach Typ gruppiert
-const activeDropdown = ref(null) // Aktuell geöffnetes Dropdown-Menü
+const name = ref('');
+const description = ref('');
+const price = ref('');
+const selectedCategories = ref([]); // Array für ausgewählte Kategorien-IDs
+const organizedCategories = ref([]); // Liste der Kategorien, nach Typ gruppiert
+const activeDropdown = ref(null); // Aktuell geöffnetes Dropdown-Menü
+const imageFile = ref(null); // Reaktive Variable für die Bilddatei
 
 // Router-Instanz für Navigation nach erfolgreicher Erstellung des Artikels
-const router = useRouter()
+const router = useRouter();
 
 // Funktion zum Gruppieren von Kategorien nach Typ
 const organizeCategoriesByType = (categories) => {
   const grouped = categories.reduce((group, category) => {
-    const type = category.type || 'Andere' // Standardwert 'Andere', falls kein Typ definiert ist
-    group[type] = group[type] || []
-    group[type].push(category)
-    return group
-  }, {})
+    const type = category.type || 'Andere'; // Standardwert 'Andere', falls kein Typ definiert ist
+    group[type] = group[type] || [];
+    group[type].push(category);
+    return group;
+  }, {});
 
   // Rückgabe als Array mit Typ und zugehörigen Kategorien
-  return Object.entries(grouped).map(([type, categories]) => ({ type, categories }))
-}
+  return Object.entries(grouped).map(([type, categories]) => ({ type, categories }));
+};
 
 // Beim Laden der Komponente: Kategoriedaten abrufen und gruppieren
 onMounted(async () => {
   try {
-    const response = await axios.get('/category')
-    organizedCategories.value = organizeCategoriesByType(response.data)
+    const response = await axios.get('/category');
+    organizedCategories.value = organizeCategoriesByType(response.data);
   } catch (error) {
-    console.error('Fehler beim Laden der Kategorien:', error)
+    console.error('Fehler beim Laden der Kategorien:', error);
   }
-})
+});
 
 // Funktion zum Umschalten des geöffneten Dropdown-Menüs
 const toggleDropdown = (dropdown) => {
-  activeDropdown.value = activeDropdown.value === dropdown ? null : dropdown
-}
+  activeDropdown.value = activeDropdown.value === dropdown ? null : dropdown;
+};
 
 // Funktion, um die Namen der ausgewählten Kategorien zu erhalten
 const getCategoryNames = () => {
   return selectedCategories.value.map(
     (id) =>
-      organizedCategories.value.flatMap((group) => group.categories).find((c) => c.id === id)?.name,
-  )
-}
+      organizedCategories.value.flatMap((group) => group.categories).find((c) => c.id === id)?.name
+  );
+};
+
+// Funktion zur Verarbeitung der Bildauswahl
+const onFileChange = (event) => {
+  const files = event.target.files;
+  if (files && files[0]) {
+    imageFile.value = files[0];
+  }
+};
 
 // Funktion zum Erstellen eines neuen Artikels
 const createArticle = async () => {
-  // Artikelobjekt basierend auf den Formulardaten
-  const newArticle = {
-    name: name.value,
-    description: description.value,
-    price: price.value,
-    categories: selectedCategories.value,
+  if (!imageFile.value) {
+    alert('Bitte wähle ein Bild aus.');
+    return;
   }
+
+  const formData = new FormData();
+  formData.append('name', name.value);
+  formData.append('description', description.value);
+  formData.append('price', price.value);
+  formData.append('categories', JSON.stringify(selectedCategories.value));
+  formData.append('image', imageFile.value);
 
   try {
     // Anfrage zum Erstellen des Artikels auf dem Server
-    await axios.post('/product', newArticle)
+    await axios.post('/product', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+
     // Nach erfolgreicher Erstellung zur Admin-Seite navigieren
-    await router.push('/admin')
+    await router.push('/admin');
   } catch (error) {
-    console.error('Fehler beim Erstellen des Artikels:', error)
+    console.error('Fehler beim Erstellen des Artikels:', error);
   }
-}
+};
 </script>
 
 <style scoped>
