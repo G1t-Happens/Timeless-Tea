@@ -88,7 +88,7 @@
 
         <!-- Eingabefeld für das Bild -->
         <div class="form-group">
-          <label for="image" class="form-label">Bild hochladen</label>
+          <label for="image" class="form-label">Neues Bild hochladen</label>
           <input type="file" id="image" class="form-control" @change="onFileChange" accept="image/*" />
         </div>
 
