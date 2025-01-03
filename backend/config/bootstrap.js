@@ -7,6 +7,8 @@ module.exports.bootstrap = async function() {
     await User.createEach([
       { emailAddress: 'admin@example.com', firstName: 'Daniel', lastName: 'Boxheimer', isAdmin: true, password: await
       sails.helpers.passwords.hashPassword('admin') },
+      { emailAddress: 'user@example.com', firstName: 'Yasin', lastName: 'Oyman', isAdmin: false, password: await
+      sails.helpers.passwords.hashPassword('user') }
     ]);
   }
 
