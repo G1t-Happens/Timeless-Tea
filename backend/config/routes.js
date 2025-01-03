@@ -26,6 +26,13 @@ module.exports.routes = {
   'GET /sessionUser': 'login.sessionUser',
   'GET /logout': 'login.logout',
 
+  // Benutzer-Routen
+  'POST /users': 'UserController.create',
+  'GET /users/:id': 'UserController.findOne',
+  'GET /users': 'UserController.find',
+  'PATCH /users/:id': 'UserController.patch',
+  'DELETE /users/:id': 'UserController.destroy',
+
   //ProductController.js
   'POST /product': { controller: 'ProductController', action: 'create' },
   'GET /product': 'ProductController.find',

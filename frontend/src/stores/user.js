@@ -40,6 +40,7 @@ export const useUserStore = defineStore("user", {
           }
         })
         .catch((error) => {
+          window.alert("Falsches Password oder Username!");
           console.error("Login failed:", error);
         });
     },
@@ -61,7 +62,7 @@ export const useUserStore = defineStore("user", {
         });
     },
     async logout() {
-      const response = await axios.get("/logout")
+      await axios.get("/logout")
       this.user = null;
     }
   },

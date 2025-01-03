@@ -2,50 +2,169 @@
   <div class="admin-dashboard">
     <h2 class="text-center mb-4">Admin Dashboard</h2>
 
-    <!-- Suchfeld für Artikel -->
-    <div class="search-section mb-4">
-      <SearchField v-model="searchQuery" @search="fetchProducts" placeholder="Artikel suchen..." />
-    </div>
-
-    <!-- Button zum Hinzufügen eines neuen Artikels -->
-    <div class="text-center mt-4 mb-4">
-      <button @click="createNewArticle" class="btn btn-primary" style="width: 100%">
-        Neuen Artikel erstellen
+    <!-- Navigationsmenü -->
+    <div class="navigation mb-4">
+      <button
+        v-for="panel in panels"
+        :key="panel.key"
+        @click="selectPanel(panel.key)"
+        :class="['btn', currentPanel === panel.key ? 'btn-active' : 'btn-outline']"
+      >
+        {{ panel.name }}
       </button>
     </div>
 
-    <!-- Ladezustand oder keine Produkte -->
-    <div v-if="loading && products.length === 0" class="text-center">
-      <p>Lade Artikel...</p>
-    </div>
-    <div v-if="!loading && products.length === 0" class="text-center">
-      <p>Keine Produkte gefunden.</p>
-    </div>
+    <!-- Artikel verwalten Panel -->
+    <div v-if="currentPanel === 'articles'">
+      <!-- Suchfeld für Artikel -->
+      <div class="search-section mb-4">
+        <SearchField
+          v-model="searchQuery"
+          @search="fetchArticles"
+          placeholder="Artikel suchen..."
+          :showFilter="true"
+        />
+      </div>
 
-    <!-- Liste der Artikel -->
-    <div v-else>
-      <div class="row row-cols-lg-4">
-        <!-- Produktkarten -->
-        <div v-for="product in products" :key="product.id" class="col mb-4">
-          <div>
-            <ProductCard :product="product" />
-          </div>
+      <!-- Button zum Hinzufügen eines neuen Artikels -->
+      <div class="text-center mt-4 mb-4">
+        <button @click="createNewArticle" class="btn btn-primary" style="width: 100%">
+          Neuen Artikel erstellen
+        </button>
+      </div>
 
-          <!-- Buttons für Bearbeiten und Löschen -->
-          <div class="text-center mb-5 cardset-admin-button">
-            <button @click="editArticle(product)" class="btn btn-warning">Bearbeiten</button>
-            <button @click="deleteArticle(product.id)" class="btn btn-danger">Löschen</button>
+      <!-- Ladezustand oder keine Produkte -->
+      <div v-if="loading.articles && articles.length === 0" class="text-center">
+        <p>Lade Artikel...</p>
+      </div>
+      <div v-if="!loading.articles && articles.length === 0" class="text-center">
+        <p>Keine Produkte gefunden.</p>
+      </div>
+
+      <!-- Liste der Artikel -->
+      <div v-else>
+        <div class="row row-cols-lg-4">
+          <!-- Produktkarten -->
+          <div v-for="product in articles" :key="product.id" class="col mb-4">
+            <div>
+              <ProductCard :product="product" />
+            </div>
+
+            <!-- Buttons für Bearbeiten und Löschen -->
+            <div class="text-center mb-5 cardset-admin-button">
+              <button @click="editArticle(product)" class="btn btn-warning">Bearbeiten</button>
+              <button @click="deleteArticle(product.id)" class="btn btn-danger">Löschen</button>
+            </div>
           </div>
         </div>
+        <!-- Mehr Tees Button -->
+        <div v-if="hasMore.articles && !loading.articles" class="text-center mt-4">
+          <button @click="loadMoreArticles" class="btn btn-secondary">Mehr Tees</button>
+        </div>
+        <!-- Ansonsten keine weiteren Produkte -->
+        <div v-if="!hasMore.articles && articles.length > 0" class="text-center mt-4">
+          <p>Keine weiteren Tees verfügbar.</p>
+        </div>
       </div>
-      <!-- Mehr Tees Button -->
-      <div v-if="hasMore && !loading" class="text-center mt-4">
-        <button @click="loadMore" class="btn btn-secondary">Mehr Tees</button>
+    </div>
+
+    <!-- User verwalten Panel -->
+    <div v-else-if="currentPanel === 'users'">
+      <!-- Suchfeld für User -->
+      <div class="search-section mb-4">
+        <SearchField
+          v-model="userSearchQuery"
+          @search="fetchUsers"
+          placeholder="User suchen..."
+          :showFilter="false"
+        />
       </div>
-      <!-- Ansonsten keine weiteren Produkte -->
-      <div v-if="!hasMore && products.length > 0" class="text-center mt-4">
-        <p>Keine weiteren Tees verfügbar.</p>
+
+      <!-- Ladezustand oder keine User -->
+      <div v-if="loading.users && users.length === 0" class="text-center">
+        <p>Lade User...</p>
       </div>
+      <div v-if="!loading.users && users.length === 0" class="text-center">
+        <p>Keine User gefunden.</p>
+      </div>
+
+      <!-- Liste der User -->
+      <div v-else>
+        <div class="row row-cols-lg-4">
+          <!-- Userkarten -->
+          <div v-for="user in users" :key="user.id" class="col mb-4">
+            <div>
+              <UserCard :user="user" />
+            </div>
+
+            <!-- Buttons für Bearbeiten und Löschen -->
+            <div class="text-center mb-5 cardset-admin-button">
+              <button @click="editUser(user)" class="btn btn-warning">Bearbeiten</button>
+              <button @click="deleteUser(user.id)" class="btn btn-danger">Löschen</button>
+            </div>
+          </div>
+        </div>
+        <!-- Mehr User Button -->
+        <div v-if="hasMore.users && !loading.users" class="text-center mt-4">
+          <button @click="loadMoreUsers" class="btn btn-secondary">Mehr User</button>
+        </div>
+        <!-- Ansonsten keine weiteren User -->
+        <div v-if="!hasMore.users && users.length > 0" class="text-center mt-4">
+          <p>Keine weiteren User verfügbar.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bestellungen verwalten Panel -->
+    <div v-else-if="currentPanel === 'orders'">
+      <!-- Suchfeld für Bestellungen -->
+      <div class="search-section mb-4">
+        <SearchField
+          v-model="orderSearchQuery"
+          @search="fetchOrders"
+          placeholder="Bestellungen suchen..."
+          :showFilter="false"
+        />
+      </div>
+
+      <!-- Ladezustand oder keine Bestellungen -->
+      <div v-if="loading.orders && orders.length === 0" class="text-center">
+        <p>Lade Bestellungen...</p>
+      </div>
+      <div v-if="!loading.orders && orders.length === 0" class="text-center">
+        <p>Keine Bestellungen gefunden.</p>
+      </div>
+
+      <!-- Liste der Bestellungen -->
+      <div v-else>
+        <div class="row row-cols-lg-4">
+          <!-- Bestellkarten -->
+          <div v-for="order in orders" :key="order.id" class="col mb-4">
+            <div>
+              <OrderCard :order="order" />
+            </div>
+
+            <!-- Buttons für Details und Löschen -->
+            <div class="text-center mb-5 cardset-admin-button">
+              <button @click="viewOrder(order)" class="btn btn-info">Details</button>
+              <button @click="deleteOrder(order.id)" class="btn btn-danger">Löschen</button>
+            </div>
+          </div>
+        </div>
+        <!-- Mehr Bestellungen Button -->
+        <div v-if="hasMore.orders && !loading.orders" class="text-center mt-4">
+          <button @click="loadMoreOrders" class="btn btn-secondary">Mehr Bestellungen</button>
+        </div>
+        <!-- Ansonsten keine weiteren Bestellungen -->
+        <div v-if="!hasMore.orders && orders.length > 0" class="text-center mt-4">
+          <p>Keine weiteren Bestellungen verfügbar.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Hauptbereich anzeigen, falls kein spezifisches Panel ausgewählt ist -->
+    <div v-else class="text-center">
+      <p>Bitte wählen Sie einen Verwaltungsbereich aus.</p>
     </div>
   </div>
 </template>
@@ -54,44 +173,66 @@
 import { onMounted, ref } from 'vue'
 import SearchField from '@/components/SearchField.vue'
 import ProductCard from '@/components/ProductCard.vue'
+import UserCard from '@/components/UserCard.vue'
+import OrderCard from '@/components/OrderCard.vue'
 import { useRouter } from 'vue-router'
 import axios from 'axios'
 
-// Reaktive Variablen
-const products = ref([])
-const searchQuery = ref('')
-const localFilters = ref({ categories: [], price: 0, rating: 0, page: 1, size: 8 })
-const loading = ref(false)
-const currentPage = ref(1)
-const pageSize = 8
-const hasMore = ref(true)
+// Navigation Panels
+const panels = ref([
+  { key: 'articles', name: 'Artikel verwalten' },
+  { key: 'users', name: 'User verwalten' },
+  { key: 'orders', name: 'Bestellungen verwalten' },
+])
+
+const currentPanel = ref('articles') // Standardmäßig Artikel verwalten
+
+// Router
 const router = useRouter()
 
-// API-Aufruf für Produkte mit Pagination und Filtern
-const fetchProducts = async ({ query, filters }) => {
+// Gemeinsame Loading-Status
+const loading = ref({
+  articles: false,
+  users: false,
+  orders: false,
+})
+
+// ----------------- Artikel verwalten -----------------
+const articles = ref([])
+const searchQuery = ref('')
+const localArticleFilters = ref({ categories: [], price: 0, rating: 0, page: 1, size: 8 })
+const currentArticlePage = ref(1)
+const pageSize = 8
+const hasMore = ref({
+  articles: true,
+  users: true,
+  orders: true,
+})
+
+// Fetch Articles
+const fetchArticles = async ({ query = searchQuery.value, filters = localArticleFilters.value } = {}) => {
   // Reset bei neuer Suchanfrage
   if (query !== searchQuery.value) {
     searchQuery.value = query.trim()
-    currentPage.value = 1
-    products.value = []
-    hasMore.value = true
+    currentArticlePage.value = 1
+    articles.value = []
+    hasMore.value.articles = true
   }
 
-  // Überprüfen, ob sich die Filter geändert haben und falls ja changen
-  if (filters && JSON.stringify(filters) !== JSON.stringify(localFilters.value)) {
-    localFilters.value = { ...filters } // Filter aktualisieren
-    currentPage.value = 1 // Seite zurücksetzen, wenn die Filter geändert wurden
+  // Überprüfen, ob sich die Filter geändert haben und falls ja ändern
+  if (filters && JSON.stringify(filters) !== JSON.stringify(localArticleFilters.value)) {
+    localArticleFilters.value = { ...filters } // Filter aktualisieren
+    currentArticlePage.value = 1 // Seite zurücksetzen, wenn die Filter geändert wurden
   }
 
   // Ladezustand aktivieren
-  loading.value = true
+  loading.value.articles = true
 
-  // Kategorien als kommagetrennte Liste formatieren fuer backend call
-  // Bsp: http://localhost:1337/product?categories=1,2,5&page=1&size=3
+  // Kategorien als kommagetrennte Liste formatieren für Backend Call
   const categoriesParam =
     filters.categories && filters.categories.length > 0 ? filters.categories.join(',') : undefined
 
-  // Pruefen ob price !=0 ansonsten undefiend
+  // Prüfen ob price !=0 ansonsten undefined
   const priceParam = ((p) => (p && p !== 0 ? p : undefined))(parseFloat(filters.price))
 
   try {
@@ -101,37 +242,33 @@ const fetchProducts = async ({ query, filters }) => {
         categories: categoriesParam,
         price: priceParam,
         rating: filters.rating || undefined,
-        page: currentPage.value,
+        page: currentArticlePage.value,
         size: pageSize,
       },
     })
 
     // Ergebnisse verarbeiten
-    if (currentPage.value === 1) {
-      products.value = response.data.products
+    if (currentArticlePage.value === 1) {
+      articles.value = response.data.products
     } else {
-      products.value.push(...response.data.products)
+      articles.value.push(...response.data.products)
     }
 
     // "Mehr laden" aktualisieren
-    hasMore.value = response.data.hasMore
+    hasMore.value.articles = response.data.hasMore
   } catch (error) {
     console.error('Fehler beim Laden der Artikel:', error)
+    alert('Fehler beim Laden der Artikel.') // Optional: Ersetze durch eine bessere Fehleranzeige
   } finally {
-    loading.value = false
+    loading.value.articles = false
   }
 }
 
-// Produkte laden beim Mounten
-onMounted(async () => {
-  await fetchProducts({ query: '', filters: localFilters.value })
-})
-
-// "Mehr laden"-Funktion
-const loadMore = async () => {
-  if (hasMore.value) {
-    currentPage.value++
-    await fetchProducts({ query: searchQuery.value, filters: localFilters.value })
+// "Mehr laden"-Funktion für Artikel
+const loadMoreArticles = async () => {
+  if (hasMore.value.articles) {
+    currentArticlePage.value++
+    await fetchArticles({ query: searchQuery.value, filters: localArticleFilters.value })
   }
 }
 
@@ -147,7 +284,6 @@ const editArticle = (article) => {
 
 // Artikel löschen
 const deleteArticle = async (id) => {
-
   const confirmed = window.confirm("Möchten Sie diesen Artikel wirklich löschen?");
   if (!confirmed) {
     return;
@@ -155,15 +291,213 @@ const deleteArticle = async (id) => {
 
   try {
     await axios.delete(`/product/${id}`)
-    const index = products.value.findIndex((article) => article.id === id)
+    const index = articles.value.findIndex((article) => article.id === id)
     if (index !== -1) {
-      // Entferne das gelöschte Produkt aus der Liste(Frontend) nach dem API - Call
-      products.value.splice(index, 1)
+      articles.value.splice(index, 1)
+      // Optional: Zeige eine Erfolgsmeldung
+      alert('Artikel erfolgreich gelöscht.')
     }
   } catch (error) {
     console.error('Fehler beim Löschen des Artikels:', error)
+    alert('Fehler beim Löschen des Artikels.') // Optional: Ersetze durch eine bessere Fehleranzeige
   }
 }
+
+// ----------------- User verwalten -----------------
+const users = ref([])
+const userSearchQuery = ref('')
+const localUserFilters = ref({ role: '', page: 1, size: 8 })
+const currentUserPage = ref(1)
+
+// Fetch Users
+const fetchUsers = async ({ query = userSearchQuery.value, filters = localUserFilters.value } = {}) => {
+  // Reset bei neuer Suchanfrage
+  if (query !== userSearchQuery.value) {
+    userSearchQuery.value = query.trim()
+    currentUserPage.value = 1
+    users.value = []
+    hasMore.value.users = true
+  }
+
+  // Überprüfen, ob sich die Filter geändert haben und falls ja ändern
+  if (filters && JSON.stringify(filters) !== JSON.stringify(localUserFilters.value)) {
+    localUserFilters.value = { ...filters } // Filter aktualisieren
+    currentUserPage.value = 1 // Seite zurücksetzen, wenn die Filter geändert wurden
+  }
+
+  // Ladezustand aktivieren
+  loading.value.users = true
+
+  try {
+    const response = await axios.get('/users', {
+      params: {
+        search: query || undefined,
+        role: filters.role || undefined,
+        page: currentUserPage.value,
+        size: pageSize,
+      },
+    })
+
+    // Ergebnisse verarbeiten
+    if (currentUserPage.value === 1) {
+      users.value = response.data.users
+    } else {
+      users.value.push(...response.data.users)
+    }
+
+    // "Mehr laden" aktualisieren
+    hasMore.value.users = response.data.hasMore
+  } catch (error) {
+    console.error('Fehler beim Laden der User:', error)
+    alert('Fehler beim Laden der User.') // Optional: Ersetze durch eine bessere Fehleranzeige
+  } finally {
+    loading.value.users = false
+  }
+}
+
+// "Mehr laden"-Funktion für User
+const loadMoreUsers = async () => {
+  if (hasMore.value.users) {
+    currentUserPage.value++
+    await fetchUsers({ query: userSearchQuery.value, filters: localUserFilters.value })
+  }
+}
+
+// User bearbeiten
+const editUser = (user) => {
+  router.push(`/admin/edit-user/${user.id}`)
+}
+
+// User löschen
+const deleteUser = async (id) => {
+  const confirmed = window.confirm("Möchten Sie diesen User wirklich löschen?");
+  if (!confirmed) {
+    return;
+  }
+
+  try {
+    await axios.delete(`/users/${id}`)
+    const index = users.value.findIndex((user) => user.id === id)
+    if (index !== -1) {
+      users.value.splice(index, 1)
+      // Optional: Zeige eine Erfolgsmeldung
+      alert('User erfolgreich gelöscht.')
+    }
+  } catch (error) {
+    console.error('Fehler beim Löschen des Users:', error)
+    alert('Fehler beim Löschen des Users.') // Optional: Ersetze durch eine bessere Fehleranzeige
+  }
+}
+
+// ----------------- Bestellungen verwalten -----------------
+const orders = ref([])
+const orderSearchQuery = ref('')
+const localOrderFilters = ref({ status: '', page: 1, size: 8 })
+const currentOrderPage = ref(1)
+
+// Fetch Orders
+const fetchOrders = async ({ query = orderSearchQuery.value, filters = localOrderFilters.value } = {}) => {
+  // Reset bei neuer Suchanfrage
+  if (query !== orderSearchQuery.value) {
+    orderSearchQuery.value = query.trim()
+    currentOrderPage.value = 1
+    orders.value = []
+    hasMore.value.orders = true
+  }
+
+  // Überprüfen, ob sich die Filter geändert haben und falls ja ändern
+  if (filters && JSON.stringify(filters) !== JSON.stringify(localOrderFilters.value)) {
+    localOrderFilters.value = { ...filters } // Filter aktualisieren
+    currentOrderPage.value = 1 // Seite zurücksetzen, wenn die Filter geändert wurden
+  }
+
+  // Ladezustand aktivieren
+  loading.value.orders = true
+
+  try {
+    const response = await axios.get('/orders', {
+      params: {
+        search: query || undefined,
+        status: filters.status || undefined,
+        page: currentOrderPage.value,
+        size: pageSize,
+      },
+    })
+
+    // Ergebnisse verarbeiten
+    if (currentOrderPage.value === 1) {
+      orders.value = response.data.orders
+    } else {
+      orders.value.push(...response.data.orders)
+    }
+
+    // "Mehr laden" aktualisieren
+    hasMore.value.orders = response.data.hasMore
+  } catch (error) {
+    console.error('Fehler beim Laden der Bestellungen:', error)
+    alert('Fehler beim Laden der Bestellungen.') // Optional: Ersetze durch eine bessere Fehleranzeige
+  } finally {
+    loading.value.orders = false
+  }
+}
+
+// "Mehr laden"-Funktion für Bestellungen
+const loadMoreOrders = async () => {
+  if (hasMore.value.orders) {
+    currentOrderPage.value++
+    await fetchOrders({ query: orderSearchQuery.value, filters: localOrderFilters.value })
+  }
+}
+
+// Bestellungen anzeigen
+const viewOrder = (order) => {
+  router.push(`/admin/view-order/${order.id}`)
+}
+
+// Bestellungen löschen
+const deleteOrder = async (id) => {
+  const confirmed = window.confirm("Möchten Sie diese Bestellung wirklich löschen?");
+  if (!confirmed) {
+    return;
+  }
+
+  try {
+    await axios.delete(`/orders/${id}`)
+    const index = orders.value.findIndex((order) => order.id === id)
+    if (index !== -1) {
+      orders.value.splice(index, 1)
+      // Optional: Zeige eine Erfolgsmeldung
+      alert('Bestellung erfolgreich gelöscht.')
+    }
+  } catch (error) {
+    console.error('Fehler beim Löschen der Bestellung:', error)
+    alert('Fehler beim Löschen der Bestellung.') // Optional: Ersetze durch eine bessere Fehleranzeige
+  }
+}
+
+// ----------------- Panel Management -----------------
+const selectPanel = (panelKey) => {
+  currentPanel.value = panelKey
+  // Daten neu laden, wenn ein Panel ausgewählt wird
+  switch (panelKey) {
+    case 'articles':
+      fetchArticles()
+      break
+    case 'users':
+      fetchUsers()
+      break
+    case 'orders':
+      fetchOrders()
+      break
+    default:
+      break
+  }
+}
+
+// Initiales Laden der Standard-Panels
+onMounted(() => {
+  fetchArticles()
+})
 </script>
 
 <style scoped>
@@ -171,6 +505,30 @@ const deleteArticle = async (id) => {
   padding: 20px;
 }
 
+/* Navigationsmenü Styles */
+.navigation {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+.btn-active {
+  background-color: #c06e52;
+  color: #fff;
+}
+
+.btn-outline {
+  background-color: transparent;
+  border: 1px solid #c06e52;
+  color: #c06e52;
+}
+
+.btn-outline:hover {
+  background-color: #c06e52;
+  color: #fff;
+}
+
+/* Restliche Styles bleiben unverändert */
 .cardset-admin-button {
   display: flex; /* Buttons nebeneinander anordnen */
   gap: 2px; /* Abstand zwischen den Buttons */

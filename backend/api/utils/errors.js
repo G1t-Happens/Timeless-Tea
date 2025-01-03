@@ -66,10 +66,22 @@ class ForbiddenError extends CustomError {
   }
 }
 
+class ConflictError  extends CustomError {
+  /**
+   * Erstellt einen Conflict (HTTP-Status 409).
+   *
+   * @param {string} message - Die Fehlermeldung (Standard: 'Conflict').
+   */
+  constructor(message = 'Conflict') {
+    super(message, 409);
+  }
+}
+
 module.exports = {
   CustomError,
   BadRequestError,
   NotFoundError,
   UnauthorizedError,
-  ForbiddenError
+  ForbiddenError,
+  ConflictError
 };

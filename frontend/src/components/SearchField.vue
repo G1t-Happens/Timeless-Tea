@@ -8,11 +8,16 @@
           v-model="searchQuery"
           class="search-input"
           type="search"
-          placeholder="Finde deinen Tee..."
+          :placeholder="placeholder"
         />
 
-        <!-- Filter Button -->
-        <button class="btn btn-image" type="button" @click="toggleFilter">
+        <!-- Filter Button nur anzeigen, wenn showFilter true ist -->
+        <button
+          v-if="showFilter"
+          class="btn btn-image"
+          type="button"
+          @click="toggleFilter"
+        >
           <img
             src="../../src/assets/icons/filter.png"
             class="oval-icon-responsive"
@@ -31,9 +36,9 @@
       </form>
     </div>
 
-    <!-- Filter-Popup -->
+    <!-- Filter-Popup nur anzeigen, wenn showFilter true ist -->
     <FilterPopup
-      v-if="isFilterVisible"
+      v-if="isFilterVisible && showFilter"
       :filters="filters"
       @close="toggleFilter"
       @applyFilters="applyFilters"
@@ -45,7 +50,24 @@
 import { ref } from 'vue'
 import FilterPopup from './FilterPopup.vue'
 
-const searchQuery = ref('')
+// Definiere Props
+const props = defineProps({
+  modelValue: {
+    type: String,
+    default: '',
+  },
+  placeholder: {
+    type: String,
+    default: '',
+  },
+  showFilter: {
+    type: Boolean,
+    default: false,
+  },
+})
+
+// Lokaler Zustand
+const searchQuery = ref(props.modelValue)
 const isFilterVisible = ref(false)
 const filters = ref({
   taste: [],
@@ -55,7 +77,7 @@ const filters = ref({
 })
 
 // Emit für das Senden der Suchanfrage
-const emit = defineEmits(['search'])
+const emit = defineEmits(['update:modelValue', 'search'])
 
 // Handle search mit den übergebenen Filterdaten
 const handleSearch = () => {
@@ -69,7 +91,9 @@ const handleSearch = () => {
 
 // Toggle Filter-Modal
 const toggleFilter = () => {
-  isFilterVisible.value = !isFilterVisible.value
+  if (props.showFilter) {
+    isFilterVisible.value = !isFilterVisible.value
+  }
 }
 
 // Empfange Filterdaten, setze sie in den Zustand und suche

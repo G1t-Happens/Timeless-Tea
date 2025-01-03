@@ -20,6 +20,14 @@ module.exports.policies = {
   //Globale Standard-Policy
   '*': 'isLoggedIn',
 
+  UserController: {
+    create: 'isAdmin',
+    patch: 'isAdmin',
+    destroy: 'isAdmin',
+    find: 'isAdmin',
+    findOne: ['isLoggedIn', 'isOwnerOrAdmin'],
+  },
+
   // Override globale Standard-Policy
   LoginController:{
     '*': true,

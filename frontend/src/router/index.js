@@ -38,6 +38,12 @@ const router = createRouter({
       component: () => import('@/views/EditArticle.vue'),
     },
     {
+      path: '/admin/edit-user/:id',
+      name: 'EditUser',
+      meta: {requiresAdmin: true},
+      component: () => import('@/views/EditUser.vue'),
+    },
+    {
       path: '/user',
       name: 'UserDashboard',
       meta: {requiresAuth: true},
