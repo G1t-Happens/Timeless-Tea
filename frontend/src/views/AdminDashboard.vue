@@ -33,10 +33,8 @@
 
           <!-- Buttons für Bearbeiten und Löschen -->
           <div class="text-center mb-5 cardset-admin-button">
-            <button @click="editArticle(product)" class="btn btn-warning btn-sm">Bearbeiten</button>
-            <button @click="deleteArticle(product.id)" class="btn btn-danger btn-sm">
-              Löschen
-            </button>
+            <button @click="editArticle(product)" class="btn btn-warning">Bearbeiten</button>
+            <button @click="deleteArticle(product.id)" class="btn btn-danger">Löschen</button>
           </div>
         </div>
       </div>
@@ -149,6 +147,12 @@ const editArticle = (article) => {
 
 // Artikel löschen
 const deleteArticle = async (id) => {
+
+  const confirmed = window.confirm("Möchten Sie diesen Artikel wirklich löschen?");
+  if (!confirmed) {
+    return;
+  }
+
   try {
     await axios.delete(`/product/${id}`)
     const index = products.value.findIndex((article) => article.id === id)
@@ -168,9 +172,47 @@ const deleteArticle = async (id) => {
 }
 
 .cardset-admin-button {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
+  display: flex; /* Buttons nebeneinander anordnen */
+  gap: 2px; /* Abstand zwischen den Buttons */
+  position: relative; /* Buttons bleiben in ihrem Bereich */
+  top: -20px; /* Buttons nach oben verschieben */
+  z-index: 1; /* Sicherstellen, dass die Buttons anklickbar bleiben */
+}
+
+.cardset-admin-button button {
+  flex: 1; /* Jeder Button nimmt gleichmäßig Platz ein */
+  padding: 10px 20px; /* Einheitliche Polsterung */
+  font-size: 14px; /* Einheitliche Schriftgröße */
+  border: none;
+  border-radius: 8px; /* Abgerundete Kanten */
+  transition: all 0.3s ease; /* Sanfter Übergang bei Hover- und Active-Zuständen */
+  text-align: center; /* Text im Button zentrieren */
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1)
+}
+
+/* Bearbeiten-Button */
+.cardset-admin-button .btn-warning {
+  background-color: #4a5043; /* Gelbe Farbe */
+  color: #fff; /* Weißer Text */
+}
+
+.cardset-admin-button .btn-warning:hover {
+  background-color: #9fa86d; /* Dunkleres Gelb beim Hover */
+}
+
+/* Löschen-Button */
+.cardset-admin-button .btn-danger {
+  background-color: #C06E52; /* Rote Farbe */
+  color: #fff; /* Weißer Text */
+}
+
+.cardset-admin-button .btn-danger:hover {
+  background-color: #c0392b; /* Dunkleres Rot beim Hover */
+}
+
+.cardset-admin-button button:active {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Schatten verringern bei Klick */
+  transform: translateY(2px); /* Leichte Bewegung nach unten */
 }
 
 .text-center button {

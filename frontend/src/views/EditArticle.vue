@@ -188,6 +188,12 @@ const handleSave = async () => {
 
 // Artikel löschen
 const deleteArticle = async (id) => {
+
+  const confirmed = window.confirm("Möchten Sie diesen Artikel wirklich löschen?");
+  if (!confirmed) {
+    return;
+  }
+
   try {
     await axios.delete(`/product/${id}`)
     // Nach dem Löschen auf das Admin-Dashboard weiterleiten
@@ -284,12 +290,12 @@ button {
   font-size: 1rem;
   border-radius: 5px;
   transition: background-color 0.3s;
+  border: none;
 }
 
 .btn-primary {
   background-color: #4a5043;
   color: white;
-  border: none;
 }
 
 .btn-primary:hover {
@@ -297,13 +303,12 @@ button {
 }
 
 .btn-danger {
-  background-color: #dc3545;
+  background-color: #C06E52;
   color: white;
-  border: none;
 }
 
 .btn-danger:hover {
-  background-color: #c82333;
+  background-color: #c0392b;
 }
 
 /* Dropdown-Menü */
