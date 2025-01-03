@@ -12,6 +12,12 @@
     <div v-else>
       <!-- Formular für die Bearbeitung eines Artikels -->
       <form @submit.prevent="handleSave" class="form-container">
+
+        <!-- Bildvorschau -->
+        <div v-if="product.image" class="image-preview">
+          <img :src="product.image" alt="Vorschau des hochgeladenen Bildes" class="preview-image" />
+        </div>
+
         <!-- Eingabefeld für den Artikelnamen -->
         <div class="form-group">
           <label for="name" class="form-label">Artikelname</label>
@@ -66,6 +72,12 @@
           <div v-if="selectedCategories.length" class="selected-options">
             <strong>Ausgewählt:</strong> {{ getCategoryNames().join(', ') }}
           </div>
+        </div>
+
+        <!-- Eingabefeld für das Bild -->
+        <div class="form-group">
+          <label for="image" class="form-label">Bild hochladen</label>
+          <input type="file" id="image" class="form-control" @change="onFileChange" accept="image/*" />
         </div>
 
         <!-- Button zum Speichern der Änderungen -->
@@ -189,6 +201,14 @@ const deleteArticle = async (id) => {
 const toggleDropdown = (dropdown) => {
   activeDropdown.value = activeDropdown.value === dropdown ? null : dropdown
 }
+
+//Vorschau des Bilds
+const onFileChange = (event) => {
+  const files = event.target.files;
+  if (files && files[0]) {
+    product.value.image = URL.createObjectURL(files[0]);
+  }
+};
 </script>
 
 <style scoped>
@@ -200,6 +220,23 @@ const toggleDropdown = (dropdown) => {
   background-color: #fff;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   border-radius: 8px;
+}
+
+.image-preview {
+  margin-top: 10px;
+  text-align: center;
+}
+
+.preview-image {
+  width: 100%; /* Passt die Breite des Bildes an den Container an */
+  max-width: 100%; /* Begrenzung auf die maximale Breite des Containers */
+  max-height: 400px; /* Begrenzung auf eine maximale Höhe */
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  object-fit: contain; /* Zeigt das gesamte Bild an, ohne etwas abzuschneiden */
+  display: block; /* Zentriert das Bild im Container */
+  margin: 0 auto; /* Zentrierung für das Bild */
+  background-color: #f8f9fa; /* Optional: Hintergrundfarbe für Leerflächen */
 }
 
 /* Titel */

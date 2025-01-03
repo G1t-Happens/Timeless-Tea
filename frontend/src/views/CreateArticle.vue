@@ -6,6 +6,12 @@
 
     <!-- Formular für die Artikeldaten -->
     <form @submit.prevent="createArticle" class="form-container" method="post" enctype="multipart/form-data">
+
+      <!-- Bildvorschau -->
+      <div v-if="imagePreview" class="image-preview">
+        <img :src="imagePreview" alt="Vorschau des hochgeladenen Bildes" class="preview-image" />
+      </div>
+
       <!-- Eingabefeld für den Artikelnamen -->
       <div class="form-group">
         <label for="name" class="form-label">Artikelname</label>
@@ -75,7 +81,8 @@ const price = ref('');
 const selectedCategories = ref([]); // Array für ausgewählte Kategorien-IDs
 const organizedCategories = ref([]); // Liste der Kategorien, nach Typ gruppiert
 const activeDropdown = ref(null); // Aktuell geöffnetes Dropdown-Menü
-const imageFile = ref(null); // Reaktive Variable für die Bilddatei
+const imageFile = ref(null);
+const imagePreview = ref(null);
 
 // Router-Instanz für Navigation nach erfolgreicher Erstellung des Artikels
 const router = useRouter();
@@ -121,6 +128,7 @@ const onFileChange = (event) => {
   const files = event.target.files;
   if (files && files[0]) {
     imageFile.value = files[0];
+    imagePreview.value = URL.createObjectURL(files[0]); // Erzeuge eine temporäre URL für die Vorschau
   }
 };
 
@@ -155,6 +163,24 @@ const createArticle = async () => {
 </script>
 
 <style scoped>
+
+.image-preview {
+  margin-top: 10px;
+  text-align: center;
+}
+
+.preview-image {
+  width: 100%; /* Passt die Breite des Bildes an den Container an */
+  max-width: 100%; /* Begrenzung auf die maximale Breite des Containers */
+  max-height: 400px; /* Begrenzung auf eine maximale Höhe */
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  object-fit: contain; /* Zeigt das gesamte Bild an, ohne etwas abzuschneiden */
+  display: block; /* Zentriert das Bild im Container */
+  margin: 0 auto; /* Zentrierung für das Bild */
+  background-color: #f8f9fa; /* Optional: Hintergrundfarbe für Leerflächen */
+}
+
 /* Stil für den Hauptcontainer der Seite */
 .create-article {
   padding: 30px;
