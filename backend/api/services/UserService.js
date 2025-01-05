@@ -293,6 +293,10 @@ module.exports = {
         throw new errors.CustomError('Fehler beim Löschen des Benutzers.', 500);
       }
     });
+  },
+
+  countUsers: async function () {
+    return await User.count();
   }
 
 };

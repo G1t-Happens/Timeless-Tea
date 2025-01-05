@@ -32,6 +32,7 @@ module.exports.routes = {
   'GET /users': 'UserController.find',
   'PATCH /users/:id': 'UserController.patch',
   'DELETE /users/:id': 'UserController.destroy',
+  'GET /users/count': 'UserController.count',
 
   //ProductController.js
   'POST /product': { controller: 'ProductController', action: 'create' },
@@ -39,6 +40,8 @@ module.exports.routes = {
   'GET /product/:id': 'product.findOne',
   'DELETE /product/:id': 'product.destroy',
   'PATCH /product/:id': 'product.patch',
+  'GET /product/count': 'ProductController.count',
+
   //CategoryController.js
   'GET /category': 'CategoryController.find'
 

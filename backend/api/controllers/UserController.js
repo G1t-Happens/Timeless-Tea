@@ -142,4 +142,19 @@ module.exports = {
     }
   },
 
+  count: async function (req, res) {
+    try {
+      const userCount = await UserService.countUsers();
+      return res.json(userCount);
+    } catch (err) {
+      sails.log.error('Error:', err.message);
+
+      if (err instanceof errors.CustomError) {
+        return res.status(err.status).json({ error: err.message });
+      }
+
+      return res.serverError('An unexpected error occurred.');
+    }
+  }
+
 };

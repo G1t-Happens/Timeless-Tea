@@ -241,7 +241,13 @@ module.exports = {
       // Aktualisiertes Produkt mit Kategorien zurückgeben
       return await Product.findOne({ id: productId }).populate('productCategories').usingConnection(db);
     });
+  },
+
+  countArticles: async function () {
+    // Zähle die Anzahl der Artikel
+    return await Product.count();
   }
+
 };
 
 

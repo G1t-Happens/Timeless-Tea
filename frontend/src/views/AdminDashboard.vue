@@ -1,6 +1,22 @@
 <template>
   <div class="admin-dashboard">
-    <h2 class="text-center mb-4">Admin Dashboard</h2>
+    <div class="header">
+      <h2 class="text-center admin-title">Admin Dashboard</h2>
+      <div class="stats-row">
+        <div class="stat-card">
+          <h3>{{ articlesCount || 0 }}</h3>
+          <p>Artikel</p>
+        </div>
+        <div class="stat-card">
+          <h3>{{ usersCount || 0 }}</h3>
+          <p>User</p>
+        </div>
+        <div class="stat-card">
+          <h3>{{ orders.length }}</h3>
+          <p>Bestellungen</p>
+        </div>
+      </div>
+    </div>
 
     <!-- Navigationsmenü -->
     <div class="navigation mb-4">
@@ -8,7 +24,7 @@
         v-for="panel in panels"
         :key="panel.key"
         @click="selectPanel(panel.key)"
-        :class="['btn', currentPanel === panel.key ? 'btn-active' : 'btn-outline']"
+        :class="['btn navigation-btn', currentPanel === panel.key ? 'btn-active' : 'btn-outline']"
       >
         {{ panel.name }}
       </button>
@@ -199,6 +215,7 @@ const loading = ref({
 
 // ----------------- Artikel verwalten -----------------
 const articles = ref([])
+const articlesCount = ref([])
 const searchQuery = ref('')
 const localArticleFilters = ref({ categories: [], price: 0, rating: 0, page: 1, size: 8 })
 const currentArticlePage = ref(1)
@@ -305,6 +322,7 @@ const deleteArticle = async (id) => {
 
 // ----------------- User verwalten -----------------
 const users = ref([])
+const usersCount = ref([])
 const userSearchQuery = ref('')
 const localUserFilters = ref({ role: '', page: 1, size: 8 })
 const currentUserPage = ref(1)
@@ -475,6 +493,25 @@ const deleteOrder = async (id) => {
   }
 }
 
+const fetchMetaData = async () => {
+  try {
+    const productCountResponse = await axios.get('/product/count');
+    articlesCount.value = productCountResponse.data;
+  } catch (error) {
+    console.error('Fehler beim Abrufen der Artikel Metadaten:', error.message);
+  }
+
+  try {
+    const userCountResponse = await axios.get('/users/count');
+    usersCount.value = userCountResponse.data;
+  } catch (error) {
+    console.error('Fehler beim Abrufen der User Metadaten:', error.message);
+  }
+
+};
+
+
+
 // ----------------- Panel Management -----------------
 const selectPanel = (panelKey) => {
   currentPanel.value = panelKey
@@ -497,38 +534,65 @@ const selectPanel = (panelKey) => {
 // Initiales Laden der Standard-Panels
 onMounted(() => {
   fetchArticles()
+  fetchMetaData()
 })
 </script>
 
 <style scoped>
-.admin-dashboard {
-  padding: 20px;
+.admin-title {
+  font-size: 2.5rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
 }
 
 /* Navigationsmenü Styles */
 .navigation {
   display: flex;
+  flex-wrap: wrap; /* Erlaubt Zeilenumbruch bei kleineren Bildschirmen */
   justify-content: center;
   gap: 10px;
+  padding-bottom: 100px;
 }
 
-.btn-active {
-  background-color: #c06e52;
-  color: #fff;
+.navigation-btn {
+  font-size: 1.2rem; /* Größere Schriftgröße */
+  font-weight: bold; /* Fettdruck */
+  text-transform: uppercase; /* Großbuchstaben */
+  letter-spacing: 1px; /* Leichte Zeichenabstände */
+  padding: 12px 25px; /* Größere Polsterung */
+  border-radius: 10px; /* Runde Ecken */
+  border: transparent; /* Klare Rahmenfarbe */
+  background: linear-gradient(135deg, #D4B483, #C06E52); /* Farbverlauf mit den gewünschten Farben */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Leichter Schatten */
+  transition: all 0.3s ease; /* Sanfte Übergänge */
+  flex: 1 1 calc(33.33% - 20px); /* Responsive Breite */
+  text-align: center;
+  color: #F1E2C5;
 }
 
-.btn-outline {
-  background-color: transparent;
-  border: 1px solid #c06e52;
-  color: #c06e52;
+.navigation-btn:hover {
+  background: linear-gradient(135deg, #C06E52, #D4B483); /* Umgekehrter Farbverlauf beim Hover */
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3); /* Stärkerer Schatten beim Hover */
+  transform: translateY(-3px); /* Leichtes Anheben */
+  color: white;
 }
 
-.btn-outline:hover {
-  background-color: #c06e52;
-  color: #fff;
+.navigation-btn:active {
+  transform: translateY(1px); /* Leichtes Absenken beim Klick */
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Schatten zurücksetzen */
+  color: white;
 }
 
-/* Restliche Styles bleiben unverändert */
+.navigation-btn.btn-active {
+  background: linear-gradient(135deg, #C06E52, #8F4C37); /* Aktive Farbe */
+  box-shadow: 0 6px 8px rgba(0, 0, 0, 0.2); /* Betonung des aktiven Buttons */
+  color: white;
+}
+
+/* Produktkarten-Buttons */
 .cardset-admin-button {
   display: flex; /* Buttons nebeneinander anordnen */
   gap: 2px; /* Abstand zwischen den Buttons */
@@ -545,27 +609,32 @@ onMounted(() => {
   border-radius: 8px; /* Abgerundete Kanten */
   transition: all 0.3s ease; /* Sanfter Übergang bei Hover- und Active-Zuständen */
   text-align: center; /* Text im Button zentrieren */
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1)
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 /* Bearbeiten-Button */
 .cardset-admin-button .btn-warning {
-  background-color: #4a5043; /* Gelbe Farbe */
+  background-color: #4A5043; /* Neue Farbe */
   color: #fff; /* Weißer Text */
 }
 
 .cardset-admin-button .btn-warning:hover {
-  background-color: #9fa86d; /* Dunkleres Gelb beim Hover */
+  background-color: #9FA86D; /* Hover-Farbe */
+}
+
+.cardset-admin-button button:hover {
+  transform: translateY(-2px); /* Leichtes Anheben */
+  box-shadow: 0 6px 8px rgba(0, 0, 0, 0.2); /* Verstärkter Schatten */
 }
 
 /* Löschen-Button */
 .cardset-admin-button .btn-danger {
-  background-color: #C06E52; /* Rote Farbe */
+  background-color: #C06E52; /* Neue Farbe */
   color: #fff; /* Weißer Text */
 }
 
 .cardset-admin-button .btn-danger:hover {
-  background-color: #c0392b; /* Dunkleres Rot beim Hover */
+  background-color: #A3523B; /* Dunkleres Rot beim Hover */
 }
 
 .cardset-admin-button button:active {
@@ -587,25 +656,52 @@ onMounted(() => {
 
 /* Stil für den Button */
 .btn-primary {
-  background-color: #c06e52; /* Orangefarbener Hintergrund */
-  border-color: #c06e52; /* Orangefarbener Rand */
+  background-color: #C06E52; /* Orangefarbener Hintergrund */
+  border-color: #C06E52; /* Orangefarbener Rand */
   border-radius: 8px; /* Abgerundete Ecken */
 }
 
 /* Stil für den Hover-Zustand */
 .btn-primary:hover {
-  background-color: #a35a44; /* Dunkleres Orange beim Hover */
-  border-color: #a35a44; /* Dunklerer Rand beim Hover */
+  background-color: #8F4C37; /* Dunkleres Orange beim Hover */
+  border-color: #8F4C37; /* Dunklerer Rand beim Hover */
 }
 
 /* Stil für den Active- (Klick-) Zustand */
 .btn-primary:active {
-  background-color: #8f4c37; /* Noch dunkleres Orange bei Klick */
-  border-color: #8f4c37; /* Noch dunklerer Rand bei Klick */
+  background-color: #D4B483; /* Noch dunkleres Orange bei Klick */
+  border-color: #D4B483; /* Noch dunklerer Rand bei Klick */
 }
 
 /* Optional: Stil für den Fokus-Zustand (wenn der Button fokussiert wird) */
 .btn-primary:focus {
   box-shadow: 0 0 0 0.2rem rgba(192, 110, 82, 0.5); /* Ein sanfter Schatten beim Fokussieren */
 }
+
+.admin-dashboard {
+  padding: 50px;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+.stats-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.stat-card {
+  background: rgb(253, 253, 253);
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 5px 4px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  flex: 1;
+}
 </style>
+
+
+
