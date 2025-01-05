@@ -134,11 +134,6 @@ const onFileChange = (event) => {
 
 // Funktion zum Erstellen eines neuen Artikels
 const createArticle = async () => {
-  if (!imageFile.value) {
-    alert('Bitte wähle ein Bild aus.');
-    return;
-  }
-
   const formData = new FormData();
   formData.append('name', name.value);
   formData.append('description', description.value);

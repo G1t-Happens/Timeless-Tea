@@ -23,11 +23,11 @@
     <!-- Formular zur Bearbeitung des Artikels, nur wenn nicht geladen -->
     <div v-else>
       <!-- Formular für die Bearbeitung eines Artikels -->
-      <form @submit.prevent="handleSave" class="form-container">
+      <form @submit.prevent="handleSave" class="form-container" method="post" enctype="multipart/form-data">
 
         <!-- Bildvorschau -->
-        <div v-if="product.image" class="image-preview">
-          <img :src="product.image" alt="Vorschau des hochgeladenen Bildes" class="preview-image" />
+        <div v-if="imagePreview" class="image-preview">
+          <img :src="imagePreview" alt="Vorschau des hochgeladenen Bildes" class="preview-image" />
         </div>
 
         <!-- Eingabefeld für den Artikelnamen -->
@@ -116,13 +116,15 @@ const loading = ref(true) // Flag, ob die Daten noch geladen werden
 const selectedCategories = ref([]) // Ausgewählte Kategorien-IDs
 const organizedCategories = ref([]) // Kategorien, gruppiert nach Typ
 const activeDropdown = ref(null) // Verfolgt, welches Dropdown aktiv ist
+const imagePreview = ref(null);
 const product = ref({
   id: null,
   name: '',
   description: '',
   price: 0,
   categories: [],
-}) // Artikel, der bearbeitet werden soll
+  image: null,
+})
 
 // Funktion zum Gruppieren von Kategorien nach ihrem Typ
 const organizeCategoriesByType = (categories) => {
@@ -149,6 +151,7 @@ const getCategoryNames = () => {
 onMounted(async () => {
   await fetchCategories() // Kategorien abrufen
   await fetchArticle(route.params.id) // Artikel anhand der ID abrufen
+  imagePreview.value = product.value.image; // Aktuellstes Bild ins preview laden
 })
 
 // Funktion zum Abrufen aller Kategorien
@@ -179,17 +182,18 @@ const fetchArticle = async (id) => {
 
 // Funktion zum Speichern der Änderungen
 const handleSave = async () => {
-  try {
-    // Daten für den Patch-Aufruf vorbereiten
-    const updatedData = {
-      name: product.value.name,
-      description: product.value.description,
-      price: product.value.price,
-      productCategories: selectedCategories.value,
-    }
 
+
+  const formData = new FormData();
+  formData.append('name', product.value.name);
+  formData.append('description', product.value.description);
+  formData.append('price', product.value.price);
+  formData.append('categories', JSON.stringify(selectedCategories.value));
+  formData.append('image', product.value.image);
+
+  try {
     // PATCH-Anfrage, um den Artikel zu aktualisieren
-    await axios.patch(`/product/${product.value.id}`, updatedData)
+    await axios.patch(`/product/${product.value.id}`, formData)
 
     // Nach dem Speichern auf das Admin-Dashboard weiterleiten
     await router.push('/admin')
@@ -224,7 +228,8 @@ const toggleDropdown = (dropdown) => {
 const onFileChange = (event) => {
   const files = event.target.files;
   if (files && files[0]) {
-    product.value.image = URL.createObjectURL(files[0]);
+    product.value.image = files[0];
+    imagePreview.value = URL.createObjectURL(files[0]);
   }
 };
 

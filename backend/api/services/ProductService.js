@@ -199,7 +199,7 @@ module.exports = {
     }
 
     // Erwartete Daten aus dem Body
-    const { name, description, price, productCategories } = req.body;
+    const { name, description, categories, price } = req.body;
 
     // Produkt anhand der ID laden
     const product = await Product.findOne({ id: productId });
@@ -209,23 +209,35 @@ module.exports = {
       throw new errors.NotFoundError(`Product with id ${productId} not found.`);
     }
 
+    const optimizedUrl = await uploadFileToCloudinary(req, 'image');
+
+    // Kategorien validieren und verarbeiten
+    let categoryArray = [];
+    if (categories) {
+      // Kategorien verarbeiten (String -> Array)
+      categoryArray = typeof categories === 'string' ? JSON.parse(categories) : categories;
+      // Prüfen, ob alle Elemente numerisch sind
+      if (!Array.isArray(categoryArray) || categoryArray.some((id) => typeof id !== 'number')) {
+        throw new errors.BadRequestError('Categories must be an array of numeric IDs.');
+      }
+    }
+
     // Update-Vorgang in einer Transaktion
     return await sails.getDatastore().transaction(async (db) => {
       // Produkt aktualisieren
       await Product.updateOne({ id: productId })
-        .set({ name, description, price })
+        .set({ name, description, price, image: optimizedUrl })
         .usingConnection(db);
 
       // Kategorien neu setzen, falls übergeben
-      if (productCategories) {
+      if (categoryArray.length > 0) {
         await ProductCategory.destroy({ product: productId }).usingConnection(db);
-        const newCategories = productCategories.map((categoryId) => ({
+        const newCategories = categoryArray.map((categoryId) => ({
           product: productId,
           category: categoryId
         }));
         await ProductCategory.createEach(newCategories).usingConnection(db);
       }
-
       // Aktualisiertes Produkt mit Kategorien zurückgeben
       return await Product.findOne({ id: productId }).populate('productCategories').usingConnection(db);
     });
