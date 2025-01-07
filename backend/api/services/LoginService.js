@@ -75,11 +75,6 @@ module.exports = {
    * @throws {BadRequestError} Falls z. B. die E-Mail schon belegt ist oder andere Validierungsfehler auftreten
    */
   registerUser: async function (params, session) {
-
-    // --- Prüfe E-Mail ---
-    if (!params.emailAddress) {
-      throw new errors.BadRequestError('Missing emailAddress');
-    }
     const newEmailAddress = params.emailAddress.toLowerCase();
 
     // --- Prüfe Adress-Objekt ---
