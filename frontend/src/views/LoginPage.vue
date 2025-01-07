@@ -46,14 +46,17 @@
 
 <script setup>
 import { ref } from 'vue'
-import { useUserStore } from "../stores/user";
-const userStore = useUserStore();
-let email = ref("");
-let password =ref("");
+import { useUserStore } from '../stores/user'
+
+const userStore = useUserStore()
+
+let email = ref('')
+let password = ref('')
+
 async function login() {
-  await userStore.signIn(email.value, password.value);
+  await userStore.signIn(email.value, password.value)
   if (useUserStore.user) {
-    console.log("Logged in")
+    console.log('Logged in')
   }
 }
 </script>

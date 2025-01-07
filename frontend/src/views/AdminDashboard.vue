@@ -227,7 +227,10 @@ const hasMore = ref({
 })
 
 // Fetch Articles
-const fetchArticles = async ({ query = searchQuery.value, filters = localArticleFilters.value } = {}) => {
+const fetchArticles = async ({
+  query = searchQuery.value,
+  filters = localArticleFilters.value,
+} = {}) => {
   // Reset bei neuer Suchanfrage
   if (query !== searchQuery.value) {
     searchQuery.value = query.trim()
@@ -301,9 +304,9 @@ const editArticle = (article) => {
 
 // Artikel löschen
 const deleteArticle = async (id) => {
-  const confirmed = window.confirm("Möchten Sie diesen Artikel wirklich löschen?");
+  const confirmed = window.confirm('Möchten Sie diesen Artikel wirklich löschen?')
   if (!confirmed) {
-    return;
+    return
   }
 
   try {
@@ -328,7 +331,10 @@ const localUserFilters = ref({ role: '', page: 1, size: 8 })
 const currentUserPage = ref(1)
 
 // Fetch Users
-const fetchUsers = async ({ query = userSearchQuery.value, filters = localUserFilters.value } = {}) => {
+const fetchUsers = async ({
+  query = userSearchQuery.value,
+  filters = localUserFilters.value,
+} = {}) => {
   // Reset bei neuer Suchanfrage
   if (query !== userSearchQuery.value) {
     userSearchQuery.value = query.trim()
@@ -388,9 +394,9 @@ const editUser = (user) => {
 
 // User löschen
 const deleteUser = async (id) => {
-  const confirmed = window.confirm("Möchten Sie diesen User wirklich löschen?");
+  const confirmed = window.confirm('Möchten Sie diesen User wirklich löschen?')
   if (!confirmed) {
-    return;
+    return
   }
 
   try {
@@ -414,7 +420,10 @@ const localOrderFilters = ref({ status: '', page: 1, size: 8 })
 const currentOrderPage = ref(1)
 
 // Fetch Orders
-const fetchOrders = async ({ query = orderSearchQuery.value, filters = localOrderFilters.value } = {}) => {
+const fetchOrders = async ({
+  query = orderSearchQuery.value,
+  filters = localOrderFilters.value,
+} = {}) => {
   // Reset bei neuer Suchanfrage
   if (query !== orderSearchQuery.value) {
     orderSearchQuery.value = query.trim()
@@ -474,9 +483,9 @@ const viewOrder = (order) => {
 
 // Bestellungen löschen
 const deleteOrder = async (id) => {
-  const confirmed = window.confirm("Möchten Sie diese Bestellung wirklich löschen?");
+  const confirmed = window.confirm('Möchten Sie diese Bestellung wirklich löschen?')
   if (!confirmed) {
-    return;
+    return
   }
 
   try {
@@ -495,22 +504,19 @@ const deleteOrder = async (id) => {
 
 const fetchMetaData = async () => {
   try {
-    const productCountResponse = await axios.get('/product/count');
-    articlesCount.value = productCountResponse.data;
+    const productCountResponse = await axios.get('/product/count')
+    articlesCount.value = productCountResponse.data
   } catch (error) {
-    console.error('Fehler beim Abrufen der Artikel Metadaten:', error.message);
+    console.error('Fehler beim Abrufen der Artikel Metadaten:', error.message)
   }
 
   try {
-    const userCountResponse = await axios.get('/user/count');
-    usersCount.value = userCountResponse.data;
+    const userCountResponse = await axios.get('/user/count')
+    usersCount.value = userCountResponse.data
   } catch (error) {
-    console.error('Fehler beim Abrufen der User Metadaten:', error.message);
+    console.error('Fehler beim Abrufen der User Metadaten:', error.message)
   }
-
-};
-
-
+}
 
 // ----------------- Panel Management -----------------
 const selectPanel = (panelKey) => {
@@ -565,16 +571,20 @@ onMounted(() => {
   padding: 12px 25px; /* Größere Polsterung */
   border-radius: 10px; /* Runde Ecken */
   border: transparent; /* Klare Rahmenfarbe */
-  background: linear-gradient(135deg, #D4B483, #C06E52); /* Farbverlauf mit den gewünschten Farben */
+  background: linear-gradient(
+    135deg,
+    #d4b483,
+    #c06e52
+  ); /* Farbverlauf mit den gewünschten Farben */
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Leichter Schatten */
   transition: all 0.3s ease; /* Sanfte Übergänge */
   flex: 1 1 calc(33.33% - 20px); /* Responsive Breite */
   text-align: center;
-  color: #F1E2C5;
+  color: #f1e2c5;
 }
 
 .navigation-btn:hover {
-  background: linear-gradient(135deg, #C06E52, #D4B483); /* Umgekehrter Farbverlauf beim Hover */
+  background: linear-gradient(135deg, #c06e52, #d4b483); /* Umgekehrter Farbverlauf beim Hover */
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3); /* Stärkerer Schatten beim Hover */
   transform: translateY(-3px); /* Leichtes Anheben */
   color: white;
@@ -587,7 +597,7 @@ onMounted(() => {
 }
 
 .navigation-btn.btn-active {
-  background: linear-gradient(135deg, #C06E52, #8F4C37); /* Aktive Farbe */
+  background: linear-gradient(135deg, #c06e52, #8f4c37); /* Aktive Farbe */
   box-shadow: 0 6px 8px rgba(0, 0, 0, 0.2); /* Betonung des aktiven Buttons */
   color: white;
 }
@@ -614,12 +624,12 @@ onMounted(() => {
 
 /* Bearbeiten-Button */
 .cardset-admin-button .btn-warning {
-  background-color: #4A5043; /* Neue Farbe */
+  background-color: #4a5043; /* Neue Farbe */
   color: #fff; /* Weißer Text */
 }
 
 .cardset-admin-button .btn-warning:hover {
-  background-color: #9FA86D; /* Hover-Farbe */
+  background-color: #9fa86d; /* Hover-Farbe */
 }
 
 .cardset-admin-button button:hover {
@@ -629,12 +639,12 @@ onMounted(() => {
 
 /* Löschen-Button */
 .cardset-admin-button .btn-danger {
-  background-color: #C06E52; /* Neue Farbe */
+  background-color: #c06e52; /* Neue Farbe */
   color: #fff; /* Weißer Text */
 }
 
 .cardset-admin-button .btn-danger:hover {
-  background-color: #A3523B; /* Dunkleres Rot beim Hover */
+  background-color: #a3523b; /* Dunkleres Rot beim Hover */
 }
 
 .cardset-admin-button button:active {
@@ -656,21 +666,21 @@ onMounted(() => {
 
 /* Stil für den Button */
 .btn-primary {
-  background-color: #C06E52; /* Orangefarbener Hintergrund */
-  border-color: #C06E52; /* Orangefarbener Rand */
+  background-color: #c06e52; /* Orangefarbener Hintergrund */
+  border-color: #c06e52; /* Orangefarbener Rand */
   border-radius: 8px; /* Abgerundete Ecken */
 }
 
 /* Stil für den Hover-Zustand */
 .btn-primary:hover {
-  background-color: #8F4C37; /* Dunkleres Orange beim Hover */
-  border-color: #8F4C37; /* Dunklerer Rand beim Hover */
+  background-color: #8f4c37; /* Dunkleres Orange beim Hover */
+  border-color: #8f4c37; /* Dunklerer Rand beim Hover */
 }
 
 /* Stil für den Active- (Klick-) Zustand */
 .btn-primary:active {
-  background-color: #D4B483; /* Noch dunkleres Orange bei Klick */
-  border-color: #D4B483; /* Noch dunklerer Rand bei Klick */
+  background-color: #d4b483; /* Noch dunkleres Orange bei Klick */
+  border-color: #d4b483; /* Noch dunklerer Rand bei Klick */
 }
 
 /* Optional: Stil für den Fokus-Zustand (wenn der Button fokussiert wird) */
@@ -702,6 +712,3 @@ onMounted(() => {
   flex: 1;
 }
 </style>
-
-
-

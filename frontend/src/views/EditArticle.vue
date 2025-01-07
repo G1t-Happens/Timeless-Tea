@@ -1,12 +1,20 @@
 <template>
   <div class="edit-article">
-
     <!-- Zurück-Button -->
     <div>
       <button type="button" @click="goBack" class="btn-back" title="Zurück zur vorherigen Seite">
         <!-- SVG-Icon für den Zurück-Pfeil -->
-        <svg xmlns="http://www.w3.org/2000/svg" class="back-icon" viewBox="0 0 20 20" fill="currentColor">
-          <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class="back-icon"
+          viewBox="0 0 20 20"
+          fill="currentColor"
+        >
+          <path
+            fill-rule="evenodd"
+            d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"
+            clip-rule="evenodd"
+          />
         </svg>
         Zurück
       </button>
@@ -23,8 +31,12 @@
     <!-- Formular zur Bearbeitung des Artikels, nur wenn nicht geladen -->
     <div v-else>
       <!-- Formular für die Bearbeitung eines Artikels -->
-      <form @submit.prevent="handleSave" class="form-container" method="post" enctype="multipart/form-data">
-
+      <form
+        @submit.prevent="handleSave"
+        class="form-container"
+        method="post"
+        enctype="multipart/form-data"
+      >
         <!-- Bildvorschau -->
         <div v-if="imagePreview" class="image-preview">
           <img :src="imagePreview" alt="Vorschau des hochgeladenen Bildes" class="preview-image" />
@@ -89,7 +101,13 @@
         <!-- Eingabefeld für das Bild -->
         <div class="form-group">
           <label for="image" class="form-label">Neues Bild hochladen</label>
-          <input type="file" id="image" class="form-control" @change="onFileChange" accept="image/*" />
+          <input
+            type="file"
+            id="image"
+            class="form-control"
+            @change="onFileChange"
+            accept="image/*"
+          />
         </div>
 
         <!-- Button zum Speichern der Änderungen -->
@@ -116,7 +134,7 @@ const loading = ref(true) // Flag, ob die Daten noch geladen werden
 const selectedCategories = ref([]) // Ausgewählte Kategorien-IDs
 const organizedCategories = ref([]) // Kategorien, gruppiert nach Typ
 const activeDropdown = ref(null) // Verfolgt, welches Dropdown aktiv ist
-const imagePreview = ref(null);
+const imagePreview = ref(null)
 const product = ref({
   id: null,
   name: '',
@@ -151,7 +169,7 @@ const getCategoryNames = () => {
 onMounted(async () => {
   await fetchCategories() // Kategorien abrufen
   await fetchArticle(route.params.id) // Artikel anhand der ID abrufen
-  imagePreview.value = product.value.image; // Aktuellstes Bild ins preview laden
+  imagePreview.value = product.value.image // Aktuellstes Bild ins preview laden
 })
 
 // Funktion zum Abrufen aller Kategorien
@@ -182,37 +200,35 @@ const fetchArticle = async (id) => {
 
 // Funktion zum Speichern der Änderungen
 const handleSave = async () => {
-  const formData = new FormData();
+  const formData = new FormData()
 
   // Pflichtfelder hinzufügen
-  formData.append('name', product.value.name);
-  formData.append('description', product.value.description);
-  formData.append('price', product.value.price);
-  formData.append('categories', JSON.stringify(selectedCategories.value));
+  formData.append('name', product.value.name)
+  formData.append('description', product.value.description)
+  formData.append('price', product.value.price)
+  formData.append('categories', JSON.stringify(selectedCategories.value))
 
   // Optional: Bild nur anhängen, wenn ein neues Bild hochgeladen wurde
   if (product.value.image instanceof File) {
-    formData.append('image', product.value.image);
+    formData.append('image', product.value.image)
   }
 
   try {
     // PATCH-Anfrage, um den Artikel zu aktualisieren
-    await axios.patch(`/product/${product.value.id}`, formData);
+    await axios.patch(`/product/${product.value.id}`, formData)
 
     // Nach dem Speichern auf das Admin-Dashboard weiterleiten
-    await router.push('/admin');
+    await router.push('/admin')
   } catch (error) {
-    console.error('Fehler beim Speichern des Artikels:', error);
+    console.error('Fehler beim Speichern des Artikels:', error)
   }
-};
-
+}
 
 // Artikel löschen
 const deleteArticle = async (id) => {
-
-  const confirmed = window.confirm("Möchten Sie diesen Artikel wirklich löschen?");
+  const confirmed = window.confirm('Möchten Sie diesen Artikel wirklich löschen?')
   if (!confirmed) {
-    return;
+    return
   }
 
   try {
@@ -231,12 +247,12 @@ const toggleDropdown = (dropdown) => {
 
 //Vorschau des Bilds
 const onFileChange = (event) => {
-  const files = event.target.files;
+  const files = event.target.files
   if (files && files[0]) {
-    product.value.image = files[0];
-    imagePreview.value = URL.createObjectURL(files[0]);
+    product.value.image = files[0]
+    imagePreview.value = URL.createObjectURL(files[0])
   }
-};
+}
 
 // Funktion um zur letzen Seite zu gelangen
 const goBack = () => {
@@ -337,7 +353,7 @@ button {
 }
 
 .btn-danger {
-  background-color: #C06E52;
+  background-color: #c06e52;
   color: white;
 }
 
@@ -395,7 +411,9 @@ button {
   font-size: 1rem; /* Schriftgröße */
   display: flex; /* Flexbox für Icon und Text */
   align-items: center; /* Vertikale Zentrierung */
-  transition: background-color 0.3s, color 0.3s; /* Übergangseffekte */
+  transition:
+    background-color 0.3s,
+    color 0.3s; /* Übergangseffekte */
 }
 
 .btn-back:hover {

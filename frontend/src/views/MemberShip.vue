@@ -39,13 +39,7 @@
                 <!-- Eingabefeld für die E-Mail-Adresse -->
                 <div class="mb-3">
                   <label for="email" class="form-label">E-Mail*</label>
-                  <input
-                    type="email"
-                    v-model="email"
-                    id="email"
-                    class="form-control"
-                    required
-                  />
+                  <input type="email" v-model="email" id="email" class="form-control" required />
                 </div>
 
                 <!-- Eingabefeld für das Passwort -->
@@ -78,36 +72,19 @@
                 <!-- Land -->
                 <div class="mb-3">
                   <label for="country" class="form-label">Land*</label>
-                  <input
-                    type="text"
-                    v-model="country"
-                    id="country"
-                    class="form-control"
-                    required
-                  />
+                  <input type="text" v-model="country" id="country" class="form-control" required />
                 </div>
 
                 <!-- Bundesland (optional) -->
                 <div class="mb-3">
                   <label for="state" class="form-label">Bundesland (optional)</label>
-                  <input
-                    type="text"
-                    v-model="state"
-                    id="state"
-                    class="form-control"
-                  />
+                  <input type="text" v-model="state" id="state" class="form-control" />
                 </div>
 
                 <!-- Stadt -->
                 <div class="mb-3">
                   <label for="city" class="form-label">Stadt*</label>
-                  <input
-                    type="text"
-                    v-model="city"
-                    id="city"
-                    class="form-control"
-                    required
-                  />
+                  <input type="text" v-model="city" id="city" class="form-control" required />
                 </div>
 
                 <!-- Postleitzahl -->
@@ -125,13 +102,7 @@
                 <!-- Straße -->
                 <div class="mb-3">
                   <label for="street" class="form-label">Straße*</label>
-                  <input
-                    type="text"
-                    v-model="street"
-                    id="street"
-                    class="form-control"
-                    required
-                  />
+                  <input type="text" v-model="street" id="street" class="form-control" required />
                 </div>
 
                 <!-- Hausnummer -->
@@ -178,9 +149,9 @@
 
 <script setup>
 import { ref } from 'vue'
-import { useUserStore } from "../stores/user";
+import { useUserStore } from '../stores/user'
 
-const userStore = useUserStore();
+const userStore = useUserStore()
 
 // Reaktive Variablen für die Eingabefelder (Namen, E-Mail, Passwörter)
 const firstName = ref('')
@@ -214,7 +185,7 @@ async function register() {
     await userStore.signUp({
       firstName: firstName.value,
       lastName: lastName.value,
-      emailAddress: email.value,  // entsprechend deinem User-Modell: 'emailAddress'
+      emailAddress: email.value, // entsprechend deinem User-Modell: 'emailAddress'
       password: password.value,
       address: {
         country: country.value,
@@ -223,13 +194,13 @@ async function register() {
         postalCode: postalCode.value,
         street: street.value,
         houseNumber: houseNumber.value,
-        addressAddition: addressAddition.value || '' // optional
-      }
+        addressAddition: addressAddition.value || '', // optional
+      },
       // Falls du Payment-Informationen bereits hier abfragen möchtest, füge sie analog hinzu.
-    });
+    })
 
     if (userStore.user) {
-      console.log("Erfolgreich registriert und eingeloggt!")
+      console.log('Erfolgreich registriert und eingeloggt!')
     }
 
     // Felder nach erfolgreicher Registrierung leeren

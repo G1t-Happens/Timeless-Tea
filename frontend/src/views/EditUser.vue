@@ -1,12 +1,20 @@
 <template>
   <div class="edit-user">
-
     <!-- Zurück-Button -->
     <div>
       <button type="button" @click="goBack" class="btn-back" title="Zurück zur vorherigen Seite">
         <!-- SVG-Icon für den Zurück-Pfeil -->
-        <svg xmlns="http://www.w3.org/2000/svg" class="back-icon" viewBox="0 0 20 20" fill="currentColor">
-          <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class="back-icon"
+          viewBox="0 0 20 20"
+          fill="currentColor"
+        >
+          <path
+            fill-rule="evenodd"
+            d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"
+            clip-rule="evenodd"
+          />
         </svg>
         Zurück
       </button>
@@ -20,10 +28,9 @@
       <p>Lade Benutzer...</p>
     </div>
 
-    <!-- Formular zur Bearbeitung des Benutzers, nur wenn nicht geladen -->
+    <!-- Formular zur Bearbeitung des Benutzers -->
     <div v-else>
       <form @submit.prevent="handleSave" class="form-container">
-
         <!-- Bildvorschau (optional) -->
         <div v-if="user.profileImage" class="image-preview">
           <img :src="user.profileImage" alt="Vorschau des Profilbildes" class="preview-image" />
@@ -32,13 +39,25 @@
         <!-- Eingabefeld für die E-Mail-Adresse -->
         <div class="form-group">
           <label for="email" class="form-label">E-Mail-Adresse</label>
-          <input v-model="user.emailAddress" type="email" id="email" class="form-control" required />
+          <input
+            v-model="user.emailAddress"
+            type="email"
+            id="email"
+            class="form-control"
+            required
+          />
         </div>
 
         <!-- Vornamen -->
         <div class="form-group">
           <label for="firstName" class="form-label">Vorname</label>
-          <input v-model="user.firstName" type="text" id="firstName" class="form-control" required />
+          <input
+            v-model="user.firstName"
+            type="text"
+            id="firstName"
+            class="form-control"
+            required
+          />
         </div>
 
         <!-- Nachnamen -->
@@ -48,7 +67,7 @@
         </div>
 
         <!-- Toggle-Switch für Admin-Status -->
-        <div class="form-group toggle-switch">
+        <div v-if="currentUser.isAdmin" class="form-group toggle-switch">
           <label class="form-label" for="isAdmin">Admin</label>
           <label class="switch" aria-labelledby="isAdmin">
             <input v-model="user.isAdmin" type="checkbox" id="isAdmin" />
@@ -63,16 +82,31 @@
           <input v-model="user.address.street" type="text" id="street" class="form-control" />
 
           <label for="houseNumber" class="form-label">Hausnummer*</label>
-          <input v-model="user.address.houseNumber" type="text" id="houseNumber" class="form-control" />
+          <input
+            v-model="user.address.houseNumber"
+            type="text"
+            id="houseNumber"
+            class="form-control"
+          />
 
           <label for="addressAddition" class="form-label">Adresszusatz</label>
-          <input v-model="user.address.addressAddition" type="text" id="addressAddition" class="form-control" />
+          <input
+            v-model="user.address.addressAddition"
+            type="text"
+            id="addressAddition"
+            class="form-control"
+          />
 
           <label for="city" class="form-label">Stadt</label>
           <input v-model="user.address.city" type="text" id="city" class="form-control" />
 
           <label for="postalCode" class="form-label">Postleitzahl*</label>
-          <input v-model="user.address.postalCode" type="text" id="postalCode" class="form-control" />
+          <input
+            v-model="user.address.postalCode"
+            type="text"
+            id="postalCode"
+            class="form-control"
+          />
 
           <label for="country" class="form-label">Land*</label>
           <input v-model="user.address.country" type="text" id="country" class="form-control" />
@@ -88,7 +122,11 @@
             <div class="payment-fields">
               <div class="form-group">
                 <label for="paymentOption" class="form-label">Zahlungsoption</label>
-                <select v-model="user.payment.paymentOption" id="paymentOption" class="form-control">
+                <select
+                  v-model="user.payment.paymentOption"
+                  id="paymentOption"
+                  class="form-control"
+                >
                   <option value="credit card">Kreditkarte</option>
                   <option value="bank transfer">Banküberweisung</option>
                   <option value="paypal">PayPal</option>
@@ -96,7 +134,12 @@
               </div>
               <div class="form-group">
                 <label for="currency" class="form-label">Währung</label>
-                <input v-model="user.payment.currency" type="text" id="currency" class="form-control" />
+                <input
+                  v-model="user.payment.currency"
+                  type="text"
+                  id="currency"
+                  class="form-control"
+                />
               </div>
               <div class="form-group">
                 <label for="iban" class="form-label">IBAN</label>
@@ -109,7 +152,12 @@
         <!-- Button-Gruppe für Speichern und Löschen -->
         <div class="button-group">
           <button type="submit" class="btn btn-primary">Speichern</button>
-          <button type="button" @click="deleteUser(user.id)" class="btn btn-danger">
+          <button
+            v-if="currentUser.isAdmin"
+            type="button"
+            @click="deleteUser(user.id)"
+            class="btn btn-danger"
+          >
             Löschen
           </button>
         </div>
@@ -119,16 +167,19 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
+import { useUserStore } from '@/stores/user'
+
+const userStore = useUserStore()
+const currentUser = computed(() => userStore.user)
 import { useRoute, useRouter } from 'vue-router'
 import axios from 'axios'
 
 const route = useRoute()
 const router = useRouter()
-
 const loading = ref(true)
 const activeDropdown = ref(null)
-
+const basePath = computed(() => (currentUser.value?.isAdmin ? '/admin' : '/user'))
 const user = ref({
   id: null,
   emailAddress: '',
@@ -149,7 +200,7 @@ const user = ref({
     currency: 'EUR',
     iban: '',
   },
-  profileImage: null,    // Falls du Bilder verwaltest
+  profileImage: null, // Falls du Bilder verwaltest
 })
 
 // Daten laden
@@ -178,27 +229,27 @@ const handleSave = async () => {
       lastName: user.value.lastName,
       isAdmin: user.value.isAdmin,
       address: user.value.address,
-    };
+    }
 
     // PATCH /user/:id
-    await axios.patch(`/user/${user.value.id}`, updatedData);
+    await axios.patch(`/user/${user.value.id}`, updatedData)
 
     // Erfolgreich gespeichert => z.B. zurück zur Admin-Übersicht
-    await router.push('/admin');
+    await router.push(basePath.value)
   } catch (error) {
-    console.error('Fehler beim Speichern des Benutzers:', error);
-    alert('Fehler beim Speichern des Benutzers');
+    console.error('Fehler beim Speichern des Benutzers:', error)
+    alert('Fehler beim Speichern des Benutzers')
   }
-};
+}
 
 // Benutzer löschen
 const deleteUser = async (id) => {
-  const confirmed = window.confirm("Möchten Sie diesen Benutzer wirklich löschen?");
+  const confirmed = window.confirm('Möchten Sie diesen Benutzer wirklich löschen?')
   if (!confirmed) return
 
   try {
     await axios.delete(`/user/${id}`)
-    await router.push('/admin')
+    await router.push(basePath.value)
   } catch (error) {
     console.error('Fehler beim Löschen des Benutzers:', error)
   }
@@ -206,7 +257,7 @@ const deleteUser = async (id) => {
 
 // Dropdowns ein-/ausklappen
 const toggleDropdown = (dropdown) => {
-  activeDropdown.value = (activeDropdown.value === dropdown) ? null : dropdown
+  activeDropdown.value = activeDropdown.value === dropdown ? null : dropdown
 }
 
 // Zurück-Button
@@ -218,8 +269,6 @@ const goBack = () => {
   }
 }
 </script>
-
-
 
 <style scoped>
 /* Stil für den Hauptcontainer */
@@ -310,7 +359,7 @@ button {
 }
 
 .btn-danger {
-  background-color: #C06E52;
+  background-color: #c06e52;
   color: white;
 }
 
@@ -379,7 +428,7 @@ button {
 
 .slider:before {
   position: absolute;
-  content: "";
+  content: '';
   height: 26px;
   width: 26px;
   left: 4px;
@@ -437,7 +486,9 @@ input:checked + .slider:before {
   font-size: 1rem; /* Schriftgröße */
   display: flex; /* Flexbox für Icon und Text */
   align-items: center; /* Vertikale Zentrierung */
-  transition: background-color 0.3s, color 0.3s; /* Übergangseffekte */
+  transition:
+    background-color 0.3s,
+    color 0.3s; /* Übergangseffekte */
 }
 
 .btn-back:hover {
@@ -451,5 +502,4 @@ input:checked + .slider:before {
   height: 20px; /* Höhe des Icons */
   margin-right: 8px; /* Abstand zwischen Icon und Text */
 }
-
 </style>

@@ -11,5 +11,3 @@ import HeaderBar from '@/components/navigation/HeaderBar.vue'
 import { RouterView } from 'vue-router'
 import FooterBar from '@/components/navigation/FooterBar.vue'
 </script>
-
-<style scoped></style>

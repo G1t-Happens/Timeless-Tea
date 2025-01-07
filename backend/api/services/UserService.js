@@ -127,11 +127,24 @@ module.exports = {
     // Daten aus dem Request-Body extrahieren
     const { emailAddress, password, firstName, lastName, isAdmin, address } = req.body;
 
+    // Aktuellen Benutzer aus der Session holen
+    const currentUserId = req.session.userId;
+    const currentUser = await User.findOne({ id: currentUserId });
+
+    if (!currentUser) {
+      throw new errors.NotFoundError('Aktueller Benutzer nicht gefunden.');
+    }
+
     //User suchen
     const existingUser = await User.findOne({ id: userId });
 
     if (!existingUser) {
       throw new errors.NotFoundError(`Benutzer mit ID ${userId} nicht gefunden.`);
+    }
+
+    // Allgemein immer sicherstellen, dass nur ein Admin die isAdmin-Flag auf true setzen kann
+    if (!req.session.user.isAdmin && (isAdmin !== undefined && isAdmin !== false)) {
+      throw new errors.ForbiddenError('Nur Admins dürfen die Admin-Flag auf true setzen.');
     }
 
     //Passwort ggf. hashen falls neues vorhanden
@@ -143,26 +156,28 @@ module.exports = {
     //Transaktion starten, zuerst Addresse Updaten und dann User Updaten
     return await sails.getDatastore().transaction(async (db) => {
       await Address.updateOne({ id: existingUser.address })
-            .set({
-              country: address.country || existingUser.address.country,
-              state: address.state || existingUser.address.state,
-              city: address.city || existingUser.address.city,
-              postalCode: address.postalCode || existingUser.address.postalCode,
-              street: address.street || existingUser.address.street,
-              houseNumber: address.houseNumber || existingUser.address.houseNumber,
-              addressAddition: address.addressAddition || existingUser.address.addressAddition,
-            })
-            .usingConnection(db);
+        .set({
+          country: address.country || existingUser.address.country,
+          state: address.state || existingUser.address.state,
+          city: address.city || existingUser.address.city,
+          postalCode: address.postalCode || existingUser.address.postalCode,
+          street: address.street || existingUser.address.street,
+          houseNumber: address.houseNumber || existingUser.address.houseNumber,
+          addressAddition: address.addressAddition || existingUser.address.addressAddition,
+        })
+        .usingConnection(db);
+
       const updatedUser = await User.updateOne({ id: userId })
-          .set({
-            emailAddress: emailAddress || existingUser.emailAddress,
-            password: hashedPassword,
-            firstName: firstName || existingUser.firstName,
-            lastName: lastName || existingUser.lastName,
-            isAdmin: typeof isAdmin === 'boolean' ? isAdmin : existingUser.isAdmin,
-            address: address.id
-          })
-          .usingConnection(db);
+        .set({
+          emailAddress: emailAddress || existingUser.emailAddress,
+          password: hashedPassword,
+          firstName: firstName || existingUser.firstName,
+          lastName: lastName || existingUser.lastName,
+          isAdmin: typeof isAdmin === 'boolean' ? isAdmin : existingUser.isAdmin,
+          address: address.id,
+        })
+        .usingConnection(db);
+
       delete updatedUser.password;
       return updatedUser;
     });

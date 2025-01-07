@@ -21,8 +21,7 @@ module.exports.policies = {
   '*': 'isLoggedIn',
 
   UserController: {
-    create: 'isAdmin',
-    patch: 'isAdmin',
+    patch: ['isLoggedIn', 'isOwnerOrAdmin'],
     destroy: 'isAdmin',
     find: 'isAdmin',
     findOne: ['isLoggedIn', 'isOwnerOrAdmin'],

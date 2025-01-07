@@ -1,5 +1,5 @@
-import { defineStore } from 'pinia';
-import axios from 'axios';
+import { defineStore } from 'pinia'
+import axios from 'axios'
 
 export const useCartStore = defineStore('cart', {
   state: () => ({
@@ -13,15 +13,15 @@ export const useCartStore = defineStore('cart', {
   getters: {
     // Anzahl der Artikel im Warenkorb
     cartItemCount(state) {
-      return state.cart.reduce((count, item) => count + item.quantity, 0);
+      return state.cart.reduce((count, item) => count + item.quantity, 0)
     },
     // Gesamtkosten der Artikel im Warenkorb
     cartTotal(state) {
-      return state.cart.reduce((total, item) => total + item.price * item.quantity, 0);
+      return state.cart.reduce((total, item) => total + item.price * item.quantity, 0)
     },
     // Prüft, ob die Bestellung abgeschlossen werden kann
     canPlaceOrder(state) {
-      return state.cart.length > 0 && state.shippingAddress && state.paymentMethod;
+      return state.cart.length > 0 && state.shippingAddress && state.paymentMethod
     },
   },
 
@@ -31,11 +31,11 @@ export const useCartStore = defineStore('cart', {
      * @param {Object} product { id, name, price, quantity }
      */
     addToCart(product) {
-      const existingProduct = this.cart.find(item => item.id === product.id);
+      const existingProduct = this.cart.find((item) => item.id === product.id)
       if (existingProduct) {
-        existingProduct.quantity += product.quantity;
+        existingProduct.quantity += product.quantity
       } else {
-        this.cart.push({ ...product });
+        this.cart.push({ ...product })
       }
     },
 
@@ -44,14 +44,14 @@ export const useCartStore = defineStore('cart', {
      * @param {number} productId
      */
     removeFromCart(productId) {
-      this.cart = this.cart.filter(item => item.id !== productId);
+      this.cart = this.cart.filter((item) => item.id !== productId)
     },
 
     /**
      * Warenkorb leeren
      */
     clearCart() {
-      this.cart = [];
+      this.cart = []
     },
 
     /**
@@ -59,7 +59,7 @@ export const useCartStore = defineStore('cart', {
      * @param {Object} address { street, city, postalCode, country }
      */
     setShippingAddress(address) {
-      this.shippingAddress = address;
+      this.shippingAddress = address
     },
 
     /**
@@ -67,7 +67,7 @@ export const useCartStore = defineStore('cart', {
      * @param {Object} paymentMethod { type, details }
      */
     setPaymentMethod(paymentMethod) {
-      this.paymentMethod = paymentMethod;
+      this.paymentMethod = paymentMethod
     },
 
     /**
@@ -75,8 +75,8 @@ export const useCartStore = defineStore('cart', {
      */
     async placeOrder() {
       if (!this.canPlaceOrder) {
-        this.error = 'Bitte füllen Sie alle Felder aus, bevor Sie die Bestellung aufgeben.';
-        return;
+        this.error = 'Bitte füllen Sie alle Felder aus, bevor Sie die Bestellung aufgeben.'
+        return
       }
 
       try {
@@ -85,17 +85,17 @@ export const useCartStore = defineStore('cart', {
           shippingAddress: this.shippingAddress,
           paymentMethod: this.paymentMethod,
           totalAmount: this.cartTotal,
-        };
+        }
 
-        const response = await axios.post('/api/orders', payload);
-        this.orderDetails = response.data;
+        const response = await axios.post('/api/orders', payload)
+        this.orderDetails = response.data
 
         // Warenkorb nach erfolgreicher Bestellung leeren
-        this.clearCart();
+        this.clearCart()
       } catch (err) {
-        console.error(err);
-        this.error = 'Fehler beim Platzieren der Bestellung. Bitte versuchen Sie es später erneut.';
+        console.error(err)
+        this.error = 'Fehler beim Platzieren der Bestellung. Bitte versuchen Sie es später erneut.'
       }
     },
   },
-});
+})

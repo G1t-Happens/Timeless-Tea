@@ -7,36 +7,26 @@
 
     <!-- Navigation Buttons -->
     <div class="navigation mb-4">
-      <button
-        @click="navigateToOrders"
-        class="btn navigation-btn"
-      >
-        Meine Bestellungen
-      </button>
-      <button
-        @click="navigateToFavorites"
-        class="btn navigation-btn"
-      >
-        Meine Favoriten
-      </button>
+      <button @click="navigateToOrders" class="btn navigation-btn">Meine Bestellungen</button>
+      <button @click="navigateToFavorites" class="btn navigation-btn">Meine Favoriten</button>
     </div>
   </div>
 </template>
 
 <script setup>
-import { useRouter } from "vue-router";
+import { useRouter } from 'vue-router'
 
-const router = useRouter();
+const router = useRouter()
 
 // Navigation zu Bestellungen
 const navigateToOrders = () => {
-  router.push("/user/orders");
-};
+  router.push('/user/orders')
+}
 
 // Navigation zu Favoriten
 const navigateToFavorites = () => {
-  router.push("/user/favorites");
-};
+  router.push('/user/favorites')
+}
 </script>
 
 <style scoped>
@@ -66,15 +56,19 @@ const navigateToFavorites = () => {
   padding: 12px 25px; /* Größere Polsterung */
   border-radius: 10px; /* Runde Ecken */
   border: transparent; /* Klare Rahmenfarbe */
-  background: linear-gradient(135deg, #D4B483, #C06E52); /* Farbverlauf mit den gewünschten Farben */
+  background: linear-gradient(
+    135deg,
+    #d4b483,
+    #c06e52
+  ); /* Farbverlauf mit den gewünschten Farben */
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Leichter Schatten */
   transition: all 0.3s ease; /* Sanfte Übergänge */
-  color: #F1E2C5;
+  color: #f1e2c5;
   text-align: center;
 }
 
 .navigation-btn:hover {
-  background: linear-gradient(135deg, #C06E52, #D4B483); /* Umgekehrter Farbverlauf beim Hover */
+  background: linear-gradient(135deg, #c06e52, #d4b483); /* Umgekehrter Farbverlauf beim Hover */
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3); /* Stärkerer Schatten beim Hover */
   transform: translateY(-3px); /* Leichtes Anheben */
   color: white;

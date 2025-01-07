@@ -1,13 +1,21 @@
 <template>
   <!-- Hauptcontainer für die Artikel-Erstellung -->
   <div class="create-article">
-
     <!-- Zurück-Button -->
     <div>
       <button type="button" @click="goBack" class="btn-back" title="Zurück zur vorherigen Seite">
         <!-- SVG-Icon für den Zurück-Pfeil -->
-        <svg xmlns="http://www.w3.org/2000/svg" class="back-icon" viewBox="0 0 20 20" fill="currentColor">
-          <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class="back-icon"
+          viewBox="0 0 20 20"
+          fill="currentColor"
+        >
+          <path
+            fill-rule="evenodd"
+            d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"
+            clip-rule="evenodd"
+          />
         </svg>
         Zurück
       </button>
@@ -17,8 +25,12 @@
     <h2 class="page-title">Neuen Artikel erstellen</h2>
 
     <!-- Formular für die Artikeldaten -->
-    <form @submit.prevent="createArticle" class="form-container" method="post" enctype="multipart/form-data">
-
+    <form
+      @submit.prevent="createArticle"
+      class="form-container"
+      method="post"
+      enctype="multipart/form-data"
+    >
       <!-- Bildvorschau -->
       <div v-if="imagePreview" class="image-preview">
         <img :src="imagePreview" alt="Vorschau des hochgeladenen Bildes" class="preview-image" />
@@ -72,7 +84,13 @@
       <!-- Eingabefeld für das Bild -->
       <div class="form-group">
         <label for="image" class="form-label">Bild hochladen</label>
-        <input type="file" id="image" class="form-control" @change="onFileChange" accept="image/*" />
+        <input
+          type="file"
+          id="image"
+          class="form-control"
+          @change="onFileChange"
+          accept="image/*"
+        />
       </div>
 
       <!-- Submit-Button für das Formular -->
@@ -82,76 +100,76 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
-import { useRouter } from 'vue-router';
-import axios from 'axios';
+import { ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+import axios from 'axios'
 
 // Reaktive Variablen für Formulardaten
-const name = ref('');
-const description = ref('');
-const price = ref('');
-const selectedCategories = ref([]); // Array für ausgewählte Kategorien-IDs
-const organizedCategories = ref([]); // Liste der Kategorien, nach Typ gruppiert
-const activeDropdown = ref(null); // Aktuell geöffnetes Dropdown-Menü
-const imageFile = ref(null);
-const imagePreview = ref(null);
+const name = ref('')
+const description = ref('')
+const price = ref('')
+const selectedCategories = ref([]) // Array für ausgewählte Kategorien-IDs
+const organizedCategories = ref([]) // Liste der Kategorien, nach Typ gruppiert
+const activeDropdown = ref(null) // Aktuell geöffnetes Dropdown-Menü
+const imageFile = ref(null)
+const imagePreview = ref(null)
 
 // Router-Instanz für Navigation nach erfolgreicher Erstellung des Artikels
-const router = useRouter();
+const router = useRouter()
 
 // Funktion zum Gruppieren von Kategorien nach Typ
 const organizeCategoriesByType = (categories) => {
   const grouped = categories.reduce((group, category) => {
-    const type = category.type || 'Andere'; // Standardwert 'Andere', falls kein Typ definiert ist
-    group[type] = group[type] || [];
-    group[type].push(category);
-    return group;
-  }, {});
+    const type = category.type || 'Andere' // Standardwert 'Andere', falls kein Typ definiert ist
+    group[type] = group[type] || []
+    group[type].push(category)
+    return group
+  }, {})
 
   // Rückgabe als Array mit Typ und zugehörigen Kategorien
-  return Object.entries(grouped).map(([type, categories]) => ({ type, categories }));
-};
+  return Object.entries(grouped).map(([type, categories]) => ({ type, categories }))
+}
 
 // Beim Laden der Komponente: Kategoriedaten abrufen und gruppieren
 onMounted(async () => {
   try {
-    const response = await axios.get('/category');
-    organizedCategories.value = organizeCategoriesByType(response.data);
+    const response = await axios.get('/category')
+    organizedCategories.value = organizeCategoriesByType(response.data)
   } catch (error) {
-    console.error('Fehler beim Laden der Kategorien:', error);
+    console.error('Fehler beim Laden der Kategorien:', error)
   }
-});
+})
 
 // Funktion zum Umschalten des geöffneten Dropdown-Menüs
 const toggleDropdown = (dropdown) => {
-  activeDropdown.value = activeDropdown.value === dropdown ? null : dropdown;
-};
+  activeDropdown.value = activeDropdown.value === dropdown ? null : dropdown
+}
 
 // Funktion, um die Namen der ausgewählten Kategorien zu erhalten
 const getCategoryNames = () => {
   return selectedCategories.value.map(
     (id) =>
-      organizedCategories.value.flatMap((group) => group.categories).find((c) => c.id === id)?.name
-  );
-};
+      organizedCategories.value.flatMap((group) => group.categories).find((c) => c.id === id)?.name,
+  )
+}
 
 // Funktion zur Verarbeitung der Bildauswahl
 const onFileChange = (event) => {
-  const files = event.target.files;
+  const files = event.target.files
   if (files && files[0]) {
-    imageFile.value = files[0];
-    imagePreview.value = URL.createObjectURL(files[0]); // Erzeuge eine temporäre URL für die Vorschau
+    imageFile.value = files[0]
+    imagePreview.value = URL.createObjectURL(files[0]) // Erzeuge eine temporäre URL für die Vorschau
   }
-};
+}
 
 // Funktion zum Erstellen eines neuen Artikels
 const createArticle = async () => {
-  const formData = new FormData();
-  formData.append('name', name.value);
-  formData.append('description', description.value);
-  formData.append('price', price.value);
-  formData.append('categories', JSON.stringify(selectedCategories.value));
-  formData.append('image', imageFile.value);
+  const formData = new FormData()
+  formData.append('name', name.value)
+  formData.append('description', description.value)
+  formData.append('price', price.value)
+  formData.append('categories', JSON.stringify(selectedCategories.value))
+  formData.append('image', imageFile.value)
 
   try {
     // Anfrage zum Erstellen des Artikels auf dem Server
@@ -159,14 +177,14 @@ const createArticle = async () => {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
-    });
+    })
 
     // Nach erfolgreicher Erstellung zur Admin-Seite navigieren
-    await router.push('/admin');
+    await router.push('/admin')
   } catch (error) {
-    console.error('Fehler beim Erstellen des Artikels:', error);
+    console.error('Fehler beim Erstellen des Artikels:', error)
   }
-};
+}
 
 // Zurück-Button
 const goBack = () => {
@@ -190,7 +208,9 @@ const goBack = () => {
   font-size: 1rem; /* Schriftgröße */
   display: flex; /* Flexbox für Icon und Text */
   align-items: center; /* Vertikale Zentrierung */
-  transition: background-color 0.3s, color 0.3s; /* Übergangseffekte */
+  transition:
+    background-color 0.3s,
+    color 0.3s; /* Übergangseffekte */
 }
 
 .btn-back:hover {

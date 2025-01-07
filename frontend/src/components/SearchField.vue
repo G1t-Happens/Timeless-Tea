@@ -12,12 +12,7 @@
         />
 
         <!-- Filter Button nur anzeigen, wenn showFilter true ist -->
-        <button
-          v-if="showFilter"
-          class="btn btn-image"
-          type="button"
-          @click="toggleFilter"
-        >
+        <button v-if="showFilter" class="btn btn-image" type="button" @click="toggleFilter">
           <img
             src="../../src/assets/icons/filter.png"
             class="oval-icon-responsive"

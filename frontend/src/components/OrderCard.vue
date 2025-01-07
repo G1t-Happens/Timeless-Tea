@@ -3,15 +3,9 @@
   <div class="card h-100 shadow-sm">
     <div class="card-body">
       <h5 class="card-title">Bestellung #{{ order.id }}</h5>
-      <p class="card-text">
-        <strong>Status:</strong> {{ order.status }}
-      </p>
-      <p class="card-text">
-        <strong>Gesamt:</strong> {{ order.total | currency }}
-      </p>
-      <p class="card-text">
-        <strong>Erstellt am:</strong> {{ formatDate(order.createdAt) }}
-      </p>
+      <p class="card-text"><strong>Status:</strong> {{ order.status }}</p>
+      <p class="card-text"><strong>Gesamt:</strong> {{ order.total | currency }}</p>
+      <p class="card-text"><strong>Erstellt am:</strong> {{ formatDate(order.createdAt) }}</p>
     </div>
   </div>
 </template>

@@ -1,7 +1,6 @@
 <template>
   <header class="py-2">
     <div class="header-container">
-
       <!-- Einstellungen -->
       <div class="position-relative icon-wrapper" ref="settingsContainerRef">
         <img
@@ -14,19 +13,19 @@
         <!-- Settings-Popup -->
         <transition name="fade">
           <div
-            v-if="showSettingsPopup"
+            v-if="showSettingsPopup && user"
             ref="settingsPopupRef"
             class="settings-popup"
             @click.stop
           >
-            <a
+            <router-link
               v-for="link in filteredLinks"
               :key="link.label"
-              :href="`${basePath}/${link.path}`"
+              :to="getDynamicPath(link)"
               class="popup-link"
             >
               {{ link.label }}
-            </a>
+            </router-link>
           </div>
         </transition>
       </div>
@@ -57,18 +56,13 @@
 
         <!-- Logout-Popup -->
         <transition name="fade">
-          <div
-            v-if="user && showLogoutPopup"
-            ref="popupRef"
-            class="logout-popup"
-            @click.stop
-          >
+          <div v-if="user && showLogoutPopup" ref="popupRef" class="logout-popup" @click.stop>
             <button @click="logout" class="btn btn-danger">Abmelden</button>
           </div>
         </transition>
 
         <!-- Shopping Cart -->
-        <a href="/search.html" class="icon-wrapper" aria-label="ShoppingCart">
+        <a class="icon-wrapper" aria-label="ShoppingCart">
           <img
             src="@/assets/icons/shopingcart.png"
             alt="ShoppingCart"
@@ -80,197 +74,199 @@
   </header>
 </template>
 
-
 <script setup>
-  import { ref, computed, onMounted, onBeforeUnmount } from "vue";
-  import { useRouter } from "vue-router";
-  import { useUserStore } from "@/stores/user.js";
-  import accountIcon from "@/assets/icons/account.png";
-  import accountLoggedInIcon from "@/assets/icons/accountLoggedIn.png";
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
+import { useRouter } from 'vue-router'
+import { useUserStore } from '@/stores/user.js'
+import accountIcon from '@/assets/icons/account.png'
+import accountLoggedInIcon from '@/assets/icons/accountLoggedIn.png'
 
-  const userStore = useUserStore();
-  const router = useRouter();
-  const user = computed(() => userStore.user);
+const userStore = useUserStore()
+const router = useRouter()
+const user = computed(() => userStore.user)
 
-  // Popup-Refs
-  const showSettingsPopup = ref(false);
-  const showLogoutPopup = ref(false);
-  const settingsPopupRef = ref(null);
-  const settingsContainerRef = ref(null);
-  const popupRef = ref(null);
-  const accountContainerRef = ref(null);
+// Popup-Refs
+const showSettingsPopup = ref(false)
+const showLogoutPopup = ref(false)
+const settingsPopupRef = ref(null)
+const settingsContainerRef = ref(null)
+const popupRef = ref(null)
+const accountContainerRef = ref(null)
 
-  // Dynamische Basis-URL basierend auf Benutzerrolle
-  const basePath = computed(() => (user.value?.isAdmin ? "/admin" : "/user"));
+// Dynamische Basis-URL basierend auf Benutzerrolle
+const basePath = computed(() => (user.value?.isAdmin ? '/admin' : '/user'))
 
-  // Alle möglichen Links
-  const links = [
-    { label: "Meine Bestellungen", path: "orders", forAdmin: false },
-    { label: "Dashboard", path: "", forAdmin: true },
-    { label: "Favoriten", path: "favorites", forAdmin: false },
-    { label: "Kontoeinstellungen", path: "account-settings", forAdmin: false },
-  ];
+// Alle möglichen Links
+const links = [
+  { label: 'Meine Bestellungen', path: 'orders', forAdmin: false },
+  { label: 'Dashboard', path: '', forAdmin: true },
+  { label: 'Favoriten', path: 'favorites', forAdmin: false },
+  { label: 'Kontoeinstellungen', path: 'edit-user', forAdmin: false, dynamicId: true },
+]
 
-  // Gefilterte Links basierend auf Benutzerrolle
-  const filteredLinks = computed(() => {
-    return links.filter(link => (user.value?.isAdmin ? link.forAdmin : true));
-  });
+// Gefilterte Links basierend auf Benutzerrolle
+const filteredLinks = computed(() => {
+  return links.filter((link) => (user.value?.isAdmin ? link.forAdmin : true))
+})
 
-  // Account-Icon dynamisch auswählen
-  const currentAccountIcon = computed(() => {
-    return user.value ? accountLoggedInIcon : accountIcon;
-  });
+// Dynamischer Pfad basierend auf Benutzer-ID
+const getDynamicPath = (link) => {
+  if (link.dynamicId && user.value) {
+    return `${basePath.value}/${link.path}/${user.value.id}`
+  }
+  return `${basePath.value}/${link.path}`
+}
 
-  // Globale Klick-Listener registrieren
-  const handleGlobalClick = (event) => {
-    const target = event.target;
+// Account-Icon dynamisch auswählen
+const currentAccountIcon = computed(() => {
+  return user.value ? accountLoggedInIcon : accountIcon
+})
 
-    // Settings-Popup schließen
-    if (
-      showSettingsPopup.value &&
-      settingsPopupRef.value &&
-      !settingsContainerRef.value.contains(target)
-    ) {
-      showSettingsPopup.value = false;
-    }
+// Globale Klick-Listener registrieren
+const handleGlobalClick = (event) => {
+  const target = event.target
 
-    // Logout-Popup schließen
-    if (
-      showLogoutPopup.value &&
-      popupRef.value &&
-      !accountContainerRef.value.contains(target)
-    ) {
-      showLogoutPopup.value = false;
-    }
-  };
+  // Settings-Popup schließen
+  if (
+    showSettingsPopup.value &&
+    settingsPopupRef.value &&
+    !settingsContainerRef.value.contains(target)
+  ) {
+    showSettingsPopup.value = false
+  }
 
-  onMounted(() => {
-    window.addEventListener("click", handleGlobalClick);
-  });
+  // Logout-Popup schließen
+  if (showLogoutPopup.value && popupRef.value && !accountContainerRef.value.contains(target)) {
+    showLogoutPopup.value = false
+  }
+}
 
-  onBeforeUnmount(() => {
-    window.removeEventListener("click", handleGlobalClick);
-  });
+onMounted(() => {
+  window.addEventListener('click', handleGlobalClick)
+})
 
-  // Einstellungen-Icon klicken
-  const handleSettingsIconClick = () => {
-    showSettingsPopup.value = !showSettingsPopup.value;
-  };
+onBeforeUnmount(() => {
+  window.removeEventListener('click', handleGlobalClick)
+})
 
-  // Account-Icon klicken
-  const handleAccountIconClick = () => {
-    if (!user.value) {
-      router.push("/login");
-    } else {
-      showLogoutPopup.value = !showLogoutPopup.value;
-    }
-  };
+// Einstellungen-Icon klicken
+const handleSettingsIconClick = () => {
+  if (!user.value) {
+    router.push('/login')
+  } else {
+    showSettingsPopup.value = !showSettingsPopup.value
+  }
+}
 
-  // Logout-Funktion
-  const logout = async () => {
-    try {
-      await userStore.logout();
-      showLogoutPopup.value = false;
-      await router.push("/");
-    } catch (error) {
-      console.error("Fehler beim Logout:", error);
-    }
-  };
+// Account-Icon klicken
+const handleAccountIconClick = () => {
+  if (!user.value) {
+    router.push('/login')
+  } else {
+    showLogoutPopup.value = !showLogoutPopup.value
+  }
+}
+
+// Logout-Funktion
+const logout = async () => {
+  try {
+    await userStore.logout()
+    showLogoutPopup.value = false
+    await router.push('/')
+  } catch (error) {
+    console.error('Fehler beim Logout:', error)
+  }
+}
 </script>
 
-
-
-
 <style scoped>
-  /* Header */
-  header {
-    background-image: url('@/assets/images/banner.png');
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
-  }
+/* Header */
+header {
+  background-image: url('@/assets/images/banner.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+}
 
-  .header-container {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    width: 100%;
-    padding: 0 15px;
-  }
+.header-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 0 15px;
+}
 
-  .icon-wrapper {
-    margin: 0 10px;
-    display: inline-flex;
-    align-items: center;
-    cursor: pointer;
-  }
+.icon-wrapper {
+  margin: 0 10px;
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+}
 
-  /* Logo */
-  .logo-center {
-    flex: 1;
-    text-align: center;
-  }
+/* Logo */
+.logo-center {
+  flex: 1;
+  text-align: center;
+}
 
-  /* Settings-Popup */
-  .settings-popup {
-    position: absolute;
-    top: 50px;
-    left: 0;
-    background: white;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    border-radius: 8px;
-    padding: 12px 16px;
-    z-index: 1000;
-    min-width: 200px;
-  }
+/* Settings-Popup */
+.settings-popup {
+  position: absolute;
+  top: 50px;
+  left: 0;
+  background: white;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border-radius: 8px;
+  padding: 12px 16px;
+  z-index: 1000;
+  min-width: 200px;
+}
 
-  .popup-link {
-    display: block;
-    text-decoration: none;
-    color: #333;
-    padding: 8px 0;
-    font-weight: bold;
-    border-bottom: 1px solid #ddd;
-    transition: color 0.2s ease;
-  }
+.popup-link {
+  display: block;
+  text-decoration: none;
+  color: #333;
+  padding: 8px 0;
+  font-weight: bold;
+  border-bottom: 1px solid #ddd;
+  transition: color 0.2s ease;
+}
 
-  .popup-link:last-child {
-    border-bottom: none;
-  }
+.popup-link:last-child {
+  border-bottom: none;
+}
 
-  .popup-link:hover {
-    color: #c06e52;
-  }
+.popup-link:hover {
+  color: #c06e52;
+}
 
-  /* Logout-Popup */
-  .logout-popup {
-    position: absolute;
-    top: 70px;
-    right: 15px;
-    background: white;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    border-radius: 8px;
-    padding: 12px 16px;
-    z-index: 1000;
-    min-width: 130px;
-  }
+/* Logout-Popup */
+.logout-popup {
+  position: absolute;
+  top: 70px;
+  right: 15px;
+  background: white;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border-radius: 8px;
+  padding: 12px 16px;
+  z-index: 1000;
+  min-width: 130px;
+}
 
-  .logout-popup button {
-    width: 100%;
-    padding: 8px 12px;
-    cursor: pointer;
-    border: none;
-    border-radius: 4px;
-    background-color: #c06e52;
-    color: white;
-    font-weight: bold;
-    transition: background-color 0.2s ease;
-  }
+.logout-popup button {
+  width: 100%;
+  padding: 8px 12px;
+  cursor: pointer;
+  border: none;
+  border-radius: 4px;
+  background-color: #c06e52;
+  color: white;
+  font-weight: bold;
+  transition: background-color 0.2s ease;
+}
 
-  .logout-popup button:hover {
-    background-color: #8f4c37;
-  }
+.logout-popup button:hover {
+  background-color: #8f4c37;
+}
 </style>
-
-
