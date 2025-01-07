@@ -1,42 +1,11 @@
-// api/controllers/UserController.js
-
 /**
  * UserController
  *
  * @description :: Server-side actions for handling incoming requests related to Users.
  */
-
 const errors = require('../utils/errors');
 
 module.exports = {
-
-  /**
-   * `UserController.create()`
-   *
-   * @description
-   * Erstellt einen neuen Benutzer anhand der im Request-Body übergebenen Daten.
-   * Hash das Passwort vor der Speicherung.
-   * Gibt bei Erfolg den neu erstellten Benutzer (HTTP 201 Created) zurück.
-   *
-   * @param {Request} req - Der eingehende HTTP-Request mit Benutzerdaten im Body.
-   * @param {Response} res - Die HTTP-Response, um das Ergebnis zurückzugeben.
-   * @returns {Response} Der neu erstellte Benutzer oder ein Fehlerstatus.
-   */
-  create: async function (req, res) {
-    try {
-      const user = await UserService.createUser(req);
-      return res.status(201).json(user);
-    } catch (err) {
-      sails.log.error('Error in UserController.create:', err);
-
-      if (err instanceof errors.CustomError) {
-        return res.status(err.status).json({ error: err.message });
-      }
-
-      return res.serverError('Ein unerwarteter Fehler ist aufgetreten.');
-    }
-  },
-
   /**
    * `UserController.findOne()`
    *
@@ -142,6 +111,17 @@ module.exports = {
     }
   },
 
+  /**
+   * `UserController.count()`
+   *
+   * @description
+   * Zaehlt alle bestehenden User.
+   * Gibt die Anzahl an User (HTTP 200 OK) zurück.
+   *
+   * @param {Request} req - Der eingehende HTTP-Request(Hier nicht benoetigt)
+   * @param {Response} res - Die HTTP-Response, um die Anzahl an User zurückzugeben.
+   * @returns {Response} userCount oder ein Fehlerstatus.
+   */
   count: async function (req, res) {
     try {
       const userCount = await UserService.countUsers();

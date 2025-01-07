@@ -13,7 +13,7 @@
     </div>
 
     <!-- Titel für die Bearbeitungsseite -->
-    <h2 class="page-title">Benutzer bearbeiten</h2>
+    <h2 class="page-title form-label">Benutzer bearbeiten</h2>
 
     <!-- Ladeanzeige während der Datenabfrage -->
     <div v-if="loading" class="text-center">
@@ -22,10 +22,9 @@
 
     <!-- Formular zur Bearbeitung des Benutzers, nur wenn nicht geladen -->
     <div v-else>
-      <!-- Formular für die Bearbeitung eines Benutzers -->
       <form @submit.prevent="handleSave" class="form-container">
 
-        <!-- Bildvorschau -->
+        <!-- Bildvorschau (optional) -->
         <div v-if="user.profileImage" class="image-preview">
           <img :src="user.profileImage" alt="Vorschau des Profilbildes" class="preview-image" />
         </div>
@@ -36,13 +35,13 @@
           <input v-model="user.emailAddress" type="email" id="email" class="form-control" required />
         </div>
 
-        <!-- Eingabefeld für den Vornamen -->
+        <!-- Vornamen -->
         <div class="form-group">
           <label for="firstName" class="form-label">Vorname</label>
           <input v-model="user.firstName" type="text" id="firstName" class="form-control" required />
         </div>
 
-        <!-- Eingabefeld für den Nachnamen -->
+        <!-- Nachnamen -->
         <div class="form-group">
           <label for="lastName" class="form-label">Nachname</label>
           <input v-model="user.lastName" type="text" id="lastName" class="form-control" required />
@@ -50,59 +49,41 @@
 
         <!-- Toggle-Switch für Admin-Status -->
         <div class="form-group toggle-switch">
-          <label class="form-label" for="isAdmin">Admin</label>
-          <label class="switch">
-            <input v-model="user.isAdmin" type="checkbox" id="isAdmin">
+          <label class="switch form-label" for="isAdmin">
+            Admin
+            <input v-model="user.isAdmin" type="checkbox" id="isAdmin" />
             <span class="slider round"></span>
           </label>
         </div>
 
-        <!-- Abschnitt für die Adresse (optional) -->
-        <div class="form-group">
-          <label class="form-label">Adresse</label>
-          <button class="dropdown-button" type="button" @click="toggleDropdown('address')">
-            ▾ Adresse bearbeiten
-          </button>
+        <!-- Adressfelder -->
+        <h3 class="mt-4 form-label">Adressenangabe</h3>
+        <div class="form-group address-fields">
+          <label for="street" class="form-label">Straße*</label>
+          <input v-model="user.address.street" type="text" id="street" class="form-control" />
 
-          <!-- Dropdown-Menü für die Adresse -->
-          <div v-if="activeDropdown === 'address'" class="dropdown-menu">
-            <div class="address-fields">
-              <div class="form-group">
-                <label for="street" class="form-label">Straße</label>
-                <input v-model="user.address.street" type="text" id="street" class="form-control" />
-              </div>
-              <div class="form-group">
-                <label for="houseNumber" class="form-label">Hausnummer</label>
-                <input v-model="user.address.houseNumber" type="text" id="houseNumber" class="form-control" />
-              </div>
-              <div class="form-group">
-                <label for="addressAddition" class="form-label">Adresszusatz</label>
-                <input v-model="user.address.addressAddition" type="text" id="addressAddition" class="form-control" />
-              </div>
-              <div class="form-group">
-                <label for="city" class="form-label">Stadt</label>
-                <input v-model="user.address.city" type="text" id="city" class="form-control" />
-              </div>
-              <div class="form-group">
-                <label for="postalCode" class="form-label">Postleitzahl</label>
-                <input v-model="user.address.postalCode" type="text" id="postalCode" class="form-control" />
-              </div>
-              <div class="form-group">
-                <label for="country" class="form-label">Land</label>
-                <input v-model="user.address.country" type="text" id="country" class="form-control" />
-              </div>
-            </div>
-          </div>
+          <label for="houseNumber" class="form-label">Hausnummer*</label>
+          <input v-model="user.address.houseNumber" type="text" id="houseNumber" class="form-control" />
+
+          <label for="addressAddition" class="form-label">Adresszusatz</label>
+          <input v-model="user.address.addressAddition" type="text" id="addressAddition" class="form-control" />
+
+          <label for="city" class="form-label">Stadt</label>
+          <input v-model="user.address.city" type="text" id="city" class="form-control" />
+
+          <label for="postalCode" class="form-label">Postleitzahl*</label>
+          <input v-model="user.address.postalCode" type="text" id="postalCode" class="form-control" />
+
+          <label for="country" class="form-label">Land*</label>
+          <input v-model="user.address.country" type="text" id="country" class="form-control" />
         </div>
 
-        <!-- Abschnitt für die Zahlungsmethode (optional) -->
+        <!-- Zahlungsmethode (optional) -->
         <div class="form-group">
-          <label class="form-label">Zahlungsmethode</label>
+          <h3 class="form-label">Zahlungsmethode</h3>
           <button class="dropdown-button" type="button" @click="toggleDropdown('payment')">
             ▾ Zahlungsmethode bearbeiten
           </button>
-
-          <!-- Dropdown-Menü für die Zahlungsmethode -->
           <div v-if="activeDropdown === 'payment'" class="dropdown-menu">
             <div class="payment-fields">
               <div class="form-group">
@@ -142,19 +123,20 @@ import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import axios from 'axios'
 
-// Reaktive Variablen
-const route = useRoute() // Holt die aktuellen Routenparameter
-const router = useRouter() // Für Navigation nach dem Speichern
-const loading = ref(true) // Flag, ob die Daten noch geladen werden
-const activeDropdown = ref(null) // Verfolgt, welches Dropdown aktiv ist
+const route = useRoute()
+const router = useRouter()
+
+const loading = ref(true)
+const activeDropdown = ref(null)
+
 const user = ref({
-  id: null,
+  id: null,              // Wichtig, damit wir /user/:id patchen können
   emailAddress: '',
   firstName: '',
   lastName: '',
   isAdmin: false,
-  role: 'user', // Standardrolle
   address: {
+    id: null,
     street: '',
     houseNumber: '',
     addressAddition: '',
@@ -167,84 +149,77 @@ const user = ref({
     currency: 'EUR',
     iban: '',
   },
-  profileImage: null, // URL des Profilbildes
-}) // Benutzer, der bearbeitet werden soll
-
-// Funktion, die beim Laden der Seite aufgerufen wird
-onMounted(async () => {
-  await fetchUser(route.params.id) // Benutzer anhand der ID abrufen
+  profileImage: null,    // Falls du Bilder verwaltest
 })
 
-// Funktion zum Abrufen des Benutzers, der bearbeitet werden soll
+// Daten laden
+onMounted(async () => {
+  await fetchUser(route.params.id)
+})
+
 const fetchUser = async (id) => {
-  loading.value = true // Setzt das Loading-Flag auf true, um die Ladeanzeige zu zeigen
+  loading.value = true
   try {
-    const { data } = await axios.get(`/user/${id}`)
-    user.value = data // Benutzerdaten zuweisen
+    const response = await axios.get(`/user/${id}`)
+    user.value = response.data
   } catch (error) {
     console.error('Fehler beim Laden des Benutzers:', error)
   } finally {
-    loading.value = false // Ladeanzeige ausblenden
+    loading.value = false
   }
 }
 
-// Funktion zum Speichern der Änderungen
 const handleSave = async () => {
   try {
-    // Daten für den Patch-Aufruf vorbereiten
+    // Nur die Felder, die du an dein Backend schicken willst
     const updatedData = {
       emailAddress: user.value.emailAddress,
       firstName: user.value.firstName,
       lastName: user.value.lastName,
       isAdmin: user.value.isAdmin,
-      role: user.value.role,
-      address: user.value.address,
-      payment: user.value.payment,
-      // Profilbild wird separat hochgeladen, falls vorhanden
+      address: user.value.address.id,
     }
 
-    // PATCH-Anfrage, um den Benutzer zu aktualisieren
+    // PATCH /user/:id
     await axios.patch(`/user/${user.value.id}`, updatedData)
 
-    // Nach dem Speichern auf das Benutzer-Dashboard oder eine andere Seite weiterleiten
-    await router.push('/admin')
+    // Erfolgreich gespeichert => z.B. zurück zur Admin-Übersicht
+    router.push('/admin')
   } catch (error) {
     console.error('Fehler beim Speichern des Benutzers:', error)
+    alert('Fehler beim Speichern des Benutzers')
   }
 }
 
 // Benutzer löschen
 const deleteUser = async (id) => {
-
   const confirmed = window.confirm("Möchten Sie diesen Benutzer wirklich löschen?");
-  if (!confirmed) {
-    return;
-  }
+  if (!confirmed) return
 
   try {
     await axios.delete(`/user/${id}`)
-    // Nach dem Löschen auf das Benutzer-Dashboard weiterleiten
-    await router.push('/admin')
+    router.push('/admin')
   } catch (error) {
     console.error('Fehler beim Löschen des Benutzers:', error)
   }
 }
 
-// Funktion zum Umschalten des Dropdown-Menüs
+// Dropdowns ein-/ausklappen
 const toggleDropdown = (dropdown) => {
-  activeDropdown.value = activeDropdown.value === dropdown ? null : dropdown
+  activeDropdown.value = (activeDropdown.value === dropdown) ? null : dropdown
 }
 
-// Funktion um zur letzen Seite zu gelangen
+// Zurück-Button
 const goBack = () => {
   if (window.history.length > 1) {
     router.back()
   } else {
-    router.push('/admin') // Fallback zu einer Standardseite
+    router.push('/admin')
   }
 }
-
 </script>
+
+
 
 <style scoped>
 /* Stil für den Hauptcontainer */

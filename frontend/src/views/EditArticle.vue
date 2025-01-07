@@ -182,25 +182,30 @@ const fetchArticle = async (id) => {
 
 // Funktion zum Speichern der Änderungen
 const handleSave = async () => {
-
-
   const formData = new FormData();
+
+  // Pflichtfelder hinzufügen
   formData.append('name', product.value.name);
   formData.append('description', product.value.description);
   formData.append('price', product.value.price);
   formData.append('categories', JSON.stringify(selectedCategories.value));
-  formData.append('image', product.value.image);
+
+  // Optional: Bild nur anhängen, wenn ein neues Bild hochgeladen wurde
+  if (product.value.image instanceof File) {
+    formData.append('image', product.value.image);
+  }
 
   try {
     // PATCH-Anfrage, um den Artikel zu aktualisieren
-    await axios.patch(`/product/${product.value.id}`, formData)
+    await axios.patch(`/product/${product.value.id}`, formData);
 
     // Nach dem Speichern auf das Admin-Dashboard weiterleiten
-    await router.push('/admin')
+    await router.push('/admin');
   } catch (error) {
-    console.error('Fehler beim Speichern des Artikels:', error)
+    console.error('Fehler beim Speichern des Artikels:', error);
   }
-}
+};
+
 
 // Artikel löschen
 const deleteArticle = async (id) => {

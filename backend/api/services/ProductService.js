@@ -209,7 +209,8 @@ module.exports = {
       throw new errors.NotFoundError(`Product with id ${productId} not found.`);
     }
 
-    const optimizedUrl = await uploadFileToCloudinary(req, 'image');
+    //Hochladen der
+    const optimizedUrl = await uploadFileToCloudinary(req, 'image', product.image);
 
     // Kategorien validieren und verarbeiten
     let categoryArray = [];
@@ -230,19 +231,24 @@ module.exports = {
         .usingConnection(db);
 
       // Kategorien neu setzen, falls übergeben
-      if (categoryArray.length > 0) {
-        await ProductCategory.destroy({ product: productId }).usingConnection(db);
-        const newCategories = categoryArray.map((categoryId) => ({
-          product: productId,
-          category: categoryId
-        }));
-        await ProductCategory.createEach(newCategories).usingConnection(db);
-      }
+      await ProductCategory.destroy({ product: productId }).usingConnection(db);
+      const newCategories = categoryArray.map((categoryId) => ({
+        product: productId,
+        category: categoryId
+      }));
+      await ProductCategory.createEach(newCategories).usingConnection(db);
       // Aktualisiertes Produkt mit Kategorien zurückgeben
       return await Product.findOne({ id: productId }).populate('productCategories').usingConnection(db);
     });
   },
 
+  /**
+   * Zaehlt die Produkt
+   *
+   * @description
+   * Zaehlt alle vorhandenen Produkte in der Datenbank und liefert die Anzahl zurueck
+   *
+   */
   countArticles: async function () {
     // Zähle die Anzahl der Artikel
     return await Product.count();
@@ -492,23 +498,33 @@ async function executeProductQuery(baseQuery, queryParams, page, size, totalCoun
  *
  * @param {object} req - Das Sails.js-Request-Objekt
  * @param {string} fieldName - Der Name des Datei-Feldes im Request
+ * @param {null} productImage - (Optional) Backup Image, falls Cloudinary upload fehlschlaegt
  * @returns {Promise<string>} - Die URL der hochgeladenen und optimierten Datei
  * @throws {errors.BadRequestError} - Wenn keine Datei hochgeladen wurde oder ein Fehler auftritt
  */
+async function uploadFileToCloudinary(req, fieldName, productImage = null) {
+  const upstream = req.file(fieldName);
+  const newFile = upstream._files[0];
 
-async function uploadFileToCloudinary(req, fieldName) {
-  // Configure Cloudinary
-  cloudinary.config(sails.config);
+  if (newFile) {
+    // Konfig
+    cloudinary.config(sails.config);
 
-  // Get the uploaded file or throw an error if none exists
-  const file = await new Promise((resolve, reject) =>
-    req.file(fieldName).upload((err, files) =>
-      err || !files.length ? reject(new errors.BadRequestError('No file uploaded.')) : resolve(files[0])
-    )
-  );
+    // Holen der hochgeladenen file oder Fehler werfen
+    const file = await new Promise((resolve, reject) =>
+      req.file(fieldName).upload((err, files) =>
+        err || !files.length ? reject(new errors.BadRequestError('No file uploaded.')) : resolve(files[0])
+      )
+    );
 
-  // Upload the file to Cloudinary and return the URL
-  const { public_id } = await cloudinary.uploader.upload(file.fd, { public_id: `product/${Date.now()}` });
-  return cloudinary.url(public_id, { fetch_format: 'auto', quality: 'auto' });
+    // Hochladen der File in Cloudinary und URL zurueckliefern
+    const { public_id } = await cloudinary.uploader.upload(file.fd, { public_id: `product/${Date.now()}` });
+    return cloudinary.url(public_id, { fetch_format: 'auto', quality: 'auto' });
+  } else {
+    // Keine neue Datei: Bestehendes Bild zurückgeben oder `null` falls nichts übergeben wurde
+    upstream.noMoreFiles();
+    return productImage;
+  }
 }
+
 

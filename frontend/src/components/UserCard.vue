@@ -8,28 +8,6 @@
       <p class="card-text">
         <strong>Rolle:</strong> {{ user.isAdmin ? 'Admin' : 'Benutzer' }}
       </p>
-
-      <!-- Adresse anzeigen oder eine Standardnachricht -->
-      <p class="card-text">
-        <strong>Adresse:</strong>
-        <span v-if="user.address">
-          {{ user.address.street }}, {{ user.address.city }}, {{ user.address.zipCode }}, {{ user.address.country }}
-        </span>
-        <span v-else>
-          Noch nicht ausgefüllt
-        </span>
-      </p>
-
-      <!-- Zahlungsmethode anzeigen oder eine Standardnachricht -->
-      <p class="card-text">
-        <strong>Zahlungsmethode:</strong>
-        <span v-if="user.payment">
-          {{ user.payment.method }}
-        </span>
-        <span v-else>
-          Noch nicht ausgefüllt
-        </span>
-      </p>
     </div>
   </div>
 </template>

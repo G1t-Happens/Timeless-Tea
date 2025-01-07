@@ -27,7 +27,6 @@ module.exports.routes = {
   'GET /logout': 'login.logout',
 
   // Benutzer-Routen
-  'POST /users': 'UserController.create',
   'GET /users/:id': 'UserController.findOne',
   'GET /users': 'UserController.find',
   'PATCH /users/:id': 'UserController.patch',

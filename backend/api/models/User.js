@@ -55,13 +55,12 @@ module.exports = {
 
     address: {
       model: 'address',
-      //required: true,
+      required: true,
       description: 'The address associated with this user.'
     },
 
     payment: {
       model: 'payment',
-      //required: true,
       description: 'The payment information associated with this user.'
     }
 

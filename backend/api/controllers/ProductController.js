@@ -145,6 +145,17 @@ module.exports = {
     }
   },
 
+  /**
+   * `ProductController.count()`
+   *
+   * @description
+   * Zaehlt alle bestehenden Produkte.
+   * Gibt die Anzahl an Produkten (HTTP 200 OK) zurück.
+   *
+   * @param {Request} req - Der eingehende HTTP-Request(Hier nicht benoetigt)
+   * @param {Response} res - Die HTTP-Response, um die Anzahl an Produkten zurückzugeben.
+   * @returns {Response} articleCount oder ein Fehlerstatus.
+   */
   count: async function (req, res) {
     try {
       const articleCount = await ProductService.countArticles();

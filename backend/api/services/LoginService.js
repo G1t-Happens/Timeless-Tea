@@ -75,28 +75,51 @@ module.exports = {
    * @throws {BadRequestError} Falls z. B. die E-Mail schon belegt ist oder andere Validierungsfehler auftreten
    */
   registerUser: async function (params, session) {
-    let newEmailAddress = params.emailAddress.toLowerCase();
-    let user;
 
-    // User in der Datenbank anlegen
-    user = await User.create({
+    // --- Prüfe E-Mail ---
+    if (!params.emailAddress) {
+      throw new errors.BadRequestError('Missing emailAddress');
+    }
+    const newEmailAddress = params.emailAddress.toLowerCase();
+
+    // --- Prüfe Adress-Objekt ---
+    if (!params.address) {
+      throw new errors.BadRequestError('Missing address object');
+    }
+
+    // Adresse anlegen
+    const newAddress = await Address.create({
+      country: params.address.country,
+      state: params.address.state || '',
+      city: params.address.city,
+      postalCode: params.address.postalCode,
+      street: params.address.street,
+      houseNumber: params.address.houseNumber,
+      addressAddition: params.address.addressAddition || ''
+    })
+      .intercept('UsageError', () => {
+        throw new errors.BadRequestError('Invalid address data');
+      })
+      .fetch();
+
+    // User anlegen
+    const user = await User.create({
       emailAddress: newEmailAddress,
       firstName: params.firstName,
       lastName: params.lastName,
       isAdmin: false,
       password: await sails.helpers.passwords.hashPassword(params.password),
+      address: newAddress.id
     })
-        .intercept('E_UNIQUE', () => {
-          // Falls die E-Mail schon in Benutzung ist
-          throw new errors.BadRequestError('Email already in use');
-        })
-        .intercept({ name: 'UsageError' }, () => {
-          // Falls Validierungsfehler auftreten
-          throw new errors.BadRequestError('Invalid data');
-        })
-        .fetch();
+      .intercept('E_UNIQUE', () => {
+        throw new errors.BadRequestError('Email already in use');
+      })
+      .intercept('UsageError', () => {
+        throw new errors.BadRequestError('Invalid user data');
+      })
+      .fetch();
 
-    // User in die Session schreiben
+    // Session aktualisieren
     session.userId = user.id;
     session.user = user;
 

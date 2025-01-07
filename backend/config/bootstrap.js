@@ -1,15 +1,51 @@
 module.exports.bootstrap = async function() {
   sails.log.info('Bootstrapping application...');
 
-  // Create SuperAdmin User if not exist
+  // Anzahl existierender User prüfen
   const userCount = await User.count();
   if (userCount === 0) {
-    await User.createEach([
-      { emailAddress: 'admin@example.com', firstName: 'Daniel', lastName: 'Boxheimer', isAdmin: true, password: await
-      sails.helpers.passwords.hashPassword('admin') },
-      { emailAddress: 'user@example.com', firstName: 'Yasin', lastName: 'Oyman', isAdmin: false, password: await
-      sails.helpers.passwords.hashPassword('user') }
-    ]);
+
+    // Feste Adressdaten anlegen
+    const adminAddress = await Address.create({
+      country: 'Germany',
+      state: 'Bayern',
+      city: 'Munich',
+      postalCode: '80331',
+      street: 'Marienplatz',
+      houseNumber: '1',
+      addressAddition: ''
+    }).fetch();
+
+    const normalUserAddress = await Address.create({
+      country: 'Germany',
+      state: 'Berlin',
+      city: 'Berlin',
+      postalCode: '10117',
+      street: 'Unter den Linden',
+      houseNumber: '12A',
+      addressAddition: 'Hinterhaus'
+    }).fetch();
+
+    // SuperAdmin User erstellen und mit der Adresse verknüpfen
+    await User.create({
+      emailAddress: 'admin@example.com',
+      firstName: 'Daniel',
+      lastName: 'Boxheimer',
+      isAdmin: true,
+      password: await sails.helpers.passwords.hashPassword('admin'),
+      address: adminAddress.id  // Referenz auf die neu erstellte Adresse
+    });
+
+    // Normaler User erstellen und mit der Adresse verknüpfen
+    await User.create({
+      emailAddress: 'user@example.com',
+      firstName: 'Yasin',
+      lastName: 'Oyman',
+      isAdmin: false,
+      password: await sails.helpers.passwords.hashPassword('user'),
+      address: normalUserAddress.id  // Referenz auf die neu erstellte Adresse
+    });
+
   }
 
   // Create categories and ratings if they do not exist

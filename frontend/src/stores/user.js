@@ -44,21 +44,31 @@ export const useUserStore = defineStore("user", {
           console.error("Login failed:", error);
         });
     },
-    async signUp(firstName, lastName, email, password) {
+    async signUp(userData) {
+      // Baue das Objekt für den Request
       let registerInformation = {
-        firstName: firstName,
-        lastName: lastName,
-        emailAddress: email,
-        password: password,
+        firstName: userData.firstName,
+        lastName: userData.lastName,
+        emailAddress: userData.emailAddress,
+        password: userData.password,
+        address: {
+          country: userData.address.country,
+          city: userData.address.city,
+          postalCode: userData.address.postalCode,
+          street: userData.address.street,
+          houseNumber: userData.address.houseNumber,
+          state: userData.address.state,
+          addressAddition: userData.address.addressAddition
+        }
       };
       axios
         .post("/register", registerInformation)
         .then((response) => {
-          this.user = response;
+          this.user = response.data;
           router.push("/user");
         })
         .catch((error) => {
-          console.error("Login failed:", error);
+          console.error("Registration failed:", error);
         });
     },
     async logout() {
