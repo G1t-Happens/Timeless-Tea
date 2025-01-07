@@ -1,8 +1,8 @@
 <template>
   <div class="edit-user">
 
-    <!-- Header mit Zurück-Button und Titel -->
-    <div class="header">
+    <!-- Zurück-Button -->
+    <div>
       <button type="button" @click="goBack" class="btn-back" title="Zurück zur vorherigen Seite">
         <!-- SVG-Icon für den Zurück-Pfeil -->
         <svg xmlns="http://www.w3.org/2000/svg" class="back-icon" viewBox="0 0 20 20" fill="currentColor">
@@ -424,13 +424,6 @@ input:checked + .slider:before {
   display: flex;
   justify-content: space-between;
   gap: 10px;
-}
-
-/* Header mit Zurück-Button und Titel */
-.header {
-  display: flex;
-  align-items: center;
-  margin-bottom: 30px;
 }
 
 /* Stil für den Zurück-Button */
