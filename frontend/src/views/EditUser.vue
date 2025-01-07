@@ -49,8 +49,8 @@
 
         <!-- Toggle-Switch für Admin-Status -->
         <div class="form-group toggle-switch">
-          <label class="switch form-label" for="isAdmin">
-            Admin
+          <label class="form-label" for="isAdmin">Admin</label>
+          <label class="switch" aria-labelledby="isAdmin">
             <input v-model="user.isAdmin" type="checkbox" id="isAdmin" />
             <span class="slider round"></span>
           </label>
@@ -130,6 +130,7 @@ const loading = ref(true)
 const activeDropdown = ref(null)
 
 const user = ref({
+  id: null,
   emailAddress: '',
   firstName: '',
   lastName: '',
@@ -183,7 +184,7 @@ const handleSave = async () => {
     await axios.patch(`/user/${user.value.id}`, updatedData);
 
     // Erfolgreich gespeichert => z.B. zurück zur Admin-Übersicht
-    router.push('/admin');
+    await router.push('/admin');
   } catch (error) {
     console.error('Fehler beim Speichern des Benutzers:', error);
     alert('Fehler beim Speichern des Benutzers');
@@ -197,7 +198,7 @@ const deleteUser = async (id) => {
 
   try {
     await axios.delete(`/user/${id}`)
-    router.push('/admin')
+    await router.push('/admin')
   } catch (error) {
     console.error('Fehler beim Löschen des Benutzers:', error)
   }
@@ -350,19 +351,12 @@ button {
   gap: 10px;
 }
 
-.selected-options {
-  margin-top: 10px;
-  font-size: 14px;
-  color: #555;
-}
-
 /* Stil für den Toggle-Switch */
 .switch {
   position: relative;
   display: inline-block;
   width: 60px;
   height: 34px;
-  margin-left: 10px;
 }
 
 .switch input {
