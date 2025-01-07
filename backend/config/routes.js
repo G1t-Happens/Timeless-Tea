@@ -27,11 +27,11 @@ module.exports.routes = {
   'GET /logout': 'login.logout',
 
   // Benutzer-Routen
-  'GET /users/:id': 'UserController.findOne',
-  'GET /users': 'UserController.find',
-  'PATCH /users/:id': 'UserController.patch',
-  'DELETE /users/:id': 'UserController.destroy',
-  'GET /users/count': 'UserController.count',
+  'GET /user/:id': 'UserController.findOne',
+  'GET /user': 'UserController.find',
+  'PATCH /user/:id': 'UserController.patch',
+  'DELETE /user/:id': 'UserController.destroy',
+  'GET /user/count': 'UserController.count',
 
   //ProductController.js
   'POST /product': { controller: 'ProductController', action: 'create' },

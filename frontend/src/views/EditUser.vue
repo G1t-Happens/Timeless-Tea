@@ -130,7 +130,6 @@ const loading = ref(true)
 const activeDropdown = ref(null)
 
 const user = ref({
-  id: null,              // Wichtig, damit wir /user/:id patchen können
   emailAddress: '',
   firstName: '',
   lastName: '',
@@ -145,7 +144,7 @@ const user = ref({
     country: '',
   },
   payment: {
-    paymentOption: 'credit card',
+    paymentOption: 'Rechnung',
     currency: 'EUR',
     iban: '',
   },
@@ -169,27 +168,27 @@ const fetchUser = async (id) => {
   }
 }
 
+//Benutzer Updaten
 const handleSave = async () => {
   try {
-    // Nur die Felder, die du an dein Backend schicken willst
     const updatedData = {
       emailAddress: user.value.emailAddress,
       firstName: user.value.firstName,
       lastName: user.value.lastName,
       isAdmin: user.value.isAdmin,
-      address: user.value.address.id,
-    }
+      address: user.value.address,
+    };
 
     // PATCH /user/:id
-    await axios.patch(`/user/${user.value.id}`, updatedData)
+    await axios.patch(`/user/${user.value.id}`, updatedData);
 
     // Erfolgreich gespeichert => z.B. zurück zur Admin-Übersicht
-    router.push('/admin')
+    router.push('/admin');
   } catch (error) {
-    console.error('Fehler beim Speichern des Benutzers:', error)
-    alert('Fehler beim Speichern des Benutzers')
+    console.error('Fehler beim Speichern des Benutzers:', error);
+    alert('Fehler beim Speichern des Benutzers');
   }
-}
+};
 
 // Benutzer löschen
 const deleteUser = async (id) => {

@@ -347,7 +347,7 @@ const fetchUsers = async ({ query = userSearchQuery.value, filters = localUserFi
   loading.value.users = true
 
   try {
-    const response = await axios.get('/users', {
+    const response = await axios.get('/user', {
       params: {
         search: query || undefined,
         role: filters.role || undefined,
@@ -394,7 +394,7 @@ const deleteUser = async (id) => {
   }
 
   try {
-    await axios.delete(`/users/${id}`)
+    await axios.delete(`/user/${id}`)
     const index = users.value.findIndex((user) => user.id === id)
     if (index !== -1) {
       users.value.splice(index, 1)
@@ -433,7 +433,7 @@ const fetchOrders = async ({ query = orderSearchQuery.value, filters = localOrde
   loading.value.orders = true
 
   try {
-    const response = await axios.get('/orders', {
+    const response = await axios.get('/order', {
       params: {
         search: query || undefined,
         status: filters.status || undefined,
@@ -480,7 +480,7 @@ const deleteOrder = async (id) => {
   }
 
   try {
-    await axios.delete(`/orders/${id}`)
+    await axios.delete(`/order/${id}`)
     const index = orders.value.findIndex((order) => order.id === id)
     if (index !== -1) {
       orders.value.splice(index, 1)
@@ -502,7 +502,7 @@ const fetchMetaData = async () => {
   }
 
   try {
-    const userCountResponse = await axios.get('/users/count');
+    const userCountResponse = await axios.get('/user/count');
     usersCount.value = userCountResponse.data;
   } catch (error) {
     console.error('Fehler beim Abrufen der User Metadaten:', error.message);

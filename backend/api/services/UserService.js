@@ -117,86 +117,56 @@ module.exports = {
    * @throws {ConflictError} Wenn die neue E-Mail-Adresse bereits von einem anderen Benutzer verwendet wird.
    */
   updateUser: async function (req) {
-    sails.log("Hello World");
     const userId = req.params.id;
 
-    // 1) Prüfen, ob userId überhaupt existiert
+    // Prüfen, ob userId überhaupt existiert
     if (!userId) {
       throw new errors.BadRequestError('Benutzer-ID ist erforderlich.');
     }
 
-    // 2) Daten aus dem Request-Body extrahieren
-    const { emailAddress, password, firstName, lastName, isAdmin, addressData, paymentData } = req.body;
+    // Daten aus dem Request-Body extrahieren
+    const { emailAddress, password, firstName, lastName, isAdmin, address } = req.body;
 
-    // 3) User laden (inkl. Address und Payment), um dessen IDs zu haben
-    const existingUser = await User.findOne({ id: userId })
-      .populate('address')
-      .populate('payment');
-
-    sails.log.error("addressData");
-    sails.log.error(addressData);
+    //User suchen
+    const existingUser = await User.findOne({ id: userId });
 
     if (!existingUser) {
       throw new errors.NotFoundError(`Benutzer mit ID ${userId} nicht gefunden.`);
     }
 
-    // 4) Passwort ggf. hashen
+    //Passwort ggf. hashen falls neues vorhanden
     let hashedPassword = existingUser.password;
     if (password) {
       hashedPassword = await sails.helpers.passwords.hashPassword(password);
     }
 
-    // 5) Transaktion starten
+    //Transaktion starten, zuerst Addresse Updaten und dann User Updaten
     return await sails.getDatastore().transaction(async (db) => {
-      try {
-        if (addressData) {
-          await Address.updateOne({ id: existingUser.address.id })
+      await Address.updateOne({ id: existingUser.address })
             .set({
-              country: addressData.country || existingUser.address.country,
-              state: addressData.state || existingUser.address.state,
-              city: addressData.city || existingUser.address.city,
-              postalCode: addressData.postalCode || existingUser.address.postalCode,
-              street: addressData.street || existingUser.address.street,
-              houseNumber: addressData.houseNumber || existingUser.address.houseNumber,
-              addressAddition: addressData.addressAddition || existingUser.address.addressAddition,
+              country: address.country || existingUser.address.country,
+              state: address.state || existingUser.address.state,
+              city: address.city || existingUser.address.city,
+              postalCode: address.postalCode || existingUser.address.postalCode,
+              street: address.street || existingUser.address.street,
+              houseNumber: address.houseNumber || existingUser.address.houseNumber,
+              addressAddition: address.addressAddition || existingUser.address.addressAddition,
             })
             .usingConnection(db);
-        }
-
-
-        sails.log.error("User.updateOne");
-        const updatedUser = await User.updateOne({ id: userId })
+      const updatedUser = await User.updateOne({ id: userId })
           .set({
             emailAddress: emailAddress || existingUser.emailAddress,
             password: hashedPassword,
             firstName: firstName || existingUser.firstName,
             lastName: lastName || existingUser.lastName,
             isAdmin: typeof isAdmin === 'boolean' ? isAdmin : existingUser.isAdmin,
-
-            // address-Feld NICHT neu setzen. Das bleibt verknüpft.
-            // => existingUser.address.id bleibt erhalten
+            address: address.id
           })
           .usingConnection(db);
-
-        // D) finalen User nochmals laden (um die aktualisierte Adresse einzusehen)
-
-        sails.log.error("User.findOne");
-        const finalUser = await User.findOne({ id: updatedUser.id })
-          .populate('address')
-          .populate('payment')
-          .usingConnection(db);
-
-        // Passwort entfernen
-        delete finalUser.password;
-
-        return finalUser;
-      } catch (err) {
-        sails.log.error('Error during updateUser transaction:', err);
-        throw new errors.CustomError('Fehler beim Aktualisieren des Benutzers.', 500);
-      }
+      delete updatedUser.password;
+      return updatedUser;
     });
   },
-
 
   /**
    * Löscht einen Benutzer
