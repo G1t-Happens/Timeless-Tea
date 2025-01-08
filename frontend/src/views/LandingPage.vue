@@ -2,7 +2,12 @@
   <main class="container my-2">
     <!-- Suchfeld für Artikel -->
     <div class="search-section mb-4">
-      <SearchField v-model="searchQuery" @search="fetchProducts" placeholder="Artikel suchen..." />
+      <SearchField
+        v-model="searchQuery"
+        @search="fetchProducts"
+        placeholder="Artikel suchen..."
+        :showFilter="true"
+      />
     </div>
 
     <!-- Trennlinie -->

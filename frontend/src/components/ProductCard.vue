@@ -1,4 +1,5 @@
 <template>
+  <router-link :to="{ name: 'ProductDetail', params: { id: product.id } }" class="product-card">
   <div class="product-card">
     <div class="card mb-4 shadow-sm">
       <!-- Produktbild -->
@@ -65,6 +66,7 @@
       </div>
     </div>
   </div>
+  </router-link>
 </template>
 
 <script setup>
@@ -88,6 +90,7 @@ const emptyStars = computed(() => 5 - fullStars.value)
 <style scoped>
 .product-card {
   display: flex;
+  text-decoration: none; /* Entferne den Unterstrich des Links */
   flex-direction: column;
   height: 100%;
   width: 100%;
