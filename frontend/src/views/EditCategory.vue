@@ -1,5 +1,10 @@
 <template>
   <div class="edit-category">
+    <!-- Verwende die BackButton-Komponente -->
+    <div class="back-button-wrapper">
+      <BackButton class="back-button" />
+    </div>
+
     <h2 class="page-title">Kategorien bearbeiten</h2>
 
     <p class="info-text">
@@ -79,6 +84,7 @@
 <script setup>
 import { ref, computed, reactive, onMounted } from 'vue'
 import axios from 'axios'
+import BackButton from '@/components/navigation/BackButton.vue'
 
 // Reaktive Daten
 const categories = ref([])
@@ -195,6 +201,19 @@ onMounted(fetchCategories)
 </script>
 
 <style scoped>
+.back-button-wrapper {
+  display: flex;
+  justify-content: flex-start;
+  margin-top: 5px;
+  margin-left: 5px;
+  width: 100%;
+}
+
+.back-button {
+  max-width: 150px;
+  text-align: left;
+}
+
 /* Hinweistext */
 .info-text {
   text-align: center;
