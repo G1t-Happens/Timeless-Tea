@@ -45,6 +45,12 @@ const router = createRouter({
       component: () => import('@/views/EditArticle.vue'),
     },
     {
+      path: '/admin/edit-category',
+      name: 'EditCategory',
+      meta: { requiresAdmin: true },
+      component: () => import('@/views/EditCategory.vue'),
+    },
+    {
       path: '/admin/edit-user/:id',
       name: 'EditUser',
       meta: { requiresAdmin: true },
@@ -66,7 +72,7 @@ const router = createRouter({
       path: '/product/:id',
       name: 'ProductDetail',
       component: () => import('@/views/ProductDetail.vue'),
-    }
+    },
   ],
 })
 
@@ -87,7 +93,7 @@ router.beforeEach(async (to, from, next) => {
 
   // Überprüfen, ob die Antwort `false` oder `null` ist -> dann kein User in der Session und ab zum Login
   if (response === false || response === null) {
-    return next({ name: 'Login' });
+    return next({ name: 'Login' })
   }
 
   if (to.matched.some((record) => record.meta.requiresAuth)) {

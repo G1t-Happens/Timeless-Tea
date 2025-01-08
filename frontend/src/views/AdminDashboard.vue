@@ -43,14 +43,14 @@
       </div>
 
       <!-- Button zum Hinzufügen eines neuen Artikels -->
-      <div class="text-center mt-4 mb-4" style="display: flex; justify-content: center; gap: 10px;">
-        <button @click="createNewArticle" class="btn btn-primary" style="width: 100%;">
+      <div class="text-center mt-4 mb-4" style="display: flex; justify-content: center; gap: 10px">
+        <button @click="createNewArticle" class="btn btn-primary" style="width: 100%">
           Neuen Artikel erstellen
         </button>
-        <button @click="createNewCategory" class="btn btn-primary" style="width: 100%;">
+        <button @click="createNewCategory" class="btn btn-primary" style="width: 100%">
           Neue Kategorien erstellen
         </button>
-        <button @click="editCategories" class="btn btn-primary" style="width: 100%;">
+        <button @click="editCategories" class="btn btn-primary" style="width: 100%">
           Kategorien bearbeiten
         </button>
       </div>
@@ -306,6 +306,11 @@ const createNewArticle = () => {
 // Kategorie erstellen
 const createNewCategory = () => {
   router.push('/admin/create-category')
+}
+
+// Kategorien bearbeiten
+const editCategories = () => {
+  router.push('/admin/edit-category')
 }
 
 // Artikel bearbeiten
