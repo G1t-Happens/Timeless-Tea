@@ -29,7 +29,7 @@
         <p v-if="product.price" class="price">Preis: {{ product.price }}€</p>
         <p v-if="product.description">{{ product.description }}</p>
         <div class="actions">
-          <label for="quantity-input" class="quantity-label">Menge (g):</label>
+          <label for="quantity-input" class="quantity-label">Menge in Gramm (g):</label>
           <input
             id="quantity-input"
             type="number"

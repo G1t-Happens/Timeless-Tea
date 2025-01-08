@@ -142,12 +142,13 @@ onMounted(() => {
 
 <style scoped>
 .user-title {
-  font-size: 2rem;
+  font-size: 2.5rem;
   font-weight: bold;
   text-transform: uppercase;
   letter-spacing: 2px;
   text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.1);
   margin-bottom: 20px;
+  margin-top: 20px;
 }
 
 /* Navigation Buttons */
