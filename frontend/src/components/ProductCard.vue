@@ -1,71 +1,71 @@
 <template>
   <router-link :to="{ name: 'ProductDetail', params: { id: product.id } }" class="product-card">
-  <div class="product-card">
-    <div class="card mb-4 shadow-sm">
-      <!-- Produktbild -->
-      <img :src="product.image" class="card-img-top" alt="Produktbild" loading="lazy" />
-      <div class="card-body">
-        <!-- Produktname -->
-        <h5 class="card-title">{{ product.name }}</h5>
+    <div class="product-card">
+      <div class="card mb-4 shadow-sm">
+        <!-- Produktbild -->
+        <img :src="product.image" class="card-img-top" alt="Produktbild" loading="lazy" />
+        <div class="card-body">
+          <!-- Produktname -->
+          <h5 class="card-title">{{ product.name }}</h5>
 
-        <!-- Kategorien als Badges -->
-        <div class="categories-section mb-3">
-          <span
-            v-for="category in product.productCategories"
-            :key="category.id"
-            class="badge category-badge"
-          >
-            {{ category.name }}
-          </span>
+          <!-- Kategorien als Badges -->
+          <div class="categories-section mb-3">
+            <span
+              v-for="category in product.productCategories"
+              :key="category.id"
+              class="badge category-badge"
+            >
+              {{ category.name }}
+            </span>
+          </div>
+
+          <!-- Sternebewertung -->
+          <div class="card-icons">
+            <img
+              v-for="n in fullStars"
+              :key="'full-star-' + n"
+              src="../../src/assets/icons/starFull.png"
+              alt="Voller Stern"
+              class="card-rating"
+            />
+            <img
+              v-for="n in emptyStars"
+              :key="'empty-star-' + n"
+              src="../../src/assets/icons/starEmpty.png"
+              alt="Leerer Stern"
+              class="card-rating"
+            />
+            <p>({{ product.reviews }})</p>
+          </div>
+
+          <!-- Preis -->
+          <p class="card-text">Ab {{ product.price }}€ erhältlich</p>
+
+          <!-- Produktbeschreibung -->
+          <div class="product-description">
+            <p class="card-text">{{ truncatedDescription }}</p>
+          </div>
         </div>
 
-        <!-- Sternebewertung -->
-        <div class="card-icons">
-          <img
-            v-for="n in fullStars"
-            :key="'full-star-' + n"
-            src="../../src/assets/icons/starFull.png"
-            alt="Voller Stern"
-            class="card-rating"
-          />
-          <img
-            v-for="n in emptyStars"
-            :key="'empty-star-' + n"
-            src="../../src/assets/icons/starEmpty.png"
-            alt="Leerer Stern"
-            class="card-rating"
-          />
-          <p>({{ product.reviews }})</p>
+        <!-- Buttons für "Like" und "In den Warenkorb" -->
+        <div class="bottom-buttons">
+          <button class="btn btn-image" type="button">
+            <img
+              src="../../src/assets/icons/likeEmpty.png"
+              alt="Tee nicht geliket."
+              class="card-button me-4"
+            />
+          </button>
+          <button class="btn btn-image" type="button">
+            <img
+              src="../../src/assets/icons/shopingcart.png"
+              alt="Zum Einkaufswagen hinzufügen"
+              class="card-button"
+            />
+          </button>
         </div>
-
-        <!-- Preis -->
-        <p class="card-text">Ab {{ product.price }}€ erhältlich</p>
-
-        <!-- Produktbeschreibung -->
-        <div class="product-description">
-          <p class="card-text">{{ product.description }}</p>
-        </div>
-      </div>
-
-      <!-- Buttons für "Like" und "In den Warenkorb" -->
-      <div class="bottom-buttons">
-        <button class="btn btn-image" type="button">
-          <img
-            src="../../src/assets/icons/likeEmpty.png"
-            alt="Tee nicht geliket."
-            class="card-button me-4"
-          />
-        </button>
-        <button class="btn btn-image" type="button">
-          <img
-            src="../../src/assets/icons/shopingcart.png"
-            alt="Zum Einkaufswagen hinzufügen"
-            class="card-button"
-          />
-        </button>
       </div>
     </div>
-  </div>
   </router-link>
 </template>
 
@@ -85,6 +85,13 @@ const fullStars = computed(() => Math.floor(props.product.averageRating))
 
 // Berechnete Eigenschaft: Anzahl der leeren Sterne, sodass die Summe immer 5 ergibt
 const emptyStars = computed(() => 5 - fullStars.value)
+
+// Berechnete Eigenschaft: Abgeschnittene Beschreibung
+const truncatedDescription = computed(() => {
+  const maxLength = 100 // Maximale Zeichenanzahl
+  const description = props.product.description || ''
+  return description.length > maxLength ? description.slice(0, maxLength) + '...' : description
+})
 </script>
 
 <style scoped>
@@ -115,7 +122,7 @@ const emptyStars = computed(() => 5 - fullStars.value)
 
 /* Das Produktbild */
 .card-img-top {
-  height: 150px; /* Einheitliche Höhe für das Bild */
+  height: 200px; /* Einheitliche Höhe für das Bild */
   object-fit: cover; /* Bild füllt den Raum ohne Verzerrung */
   border-top-left-radius: 15px;
   border-top-right-radius: 15px;

@@ -23,7 +23,7 @@ module.exports = {
      */
     description: {
       type: 'string',
-      columnType: 'varchar(256)'
+      columnType: 'varchar(1024)'
     },
 
     /**
