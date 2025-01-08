@@ -21,13 +21,12 @@ module.exports.policies = {
   '*': 'isLoggedIn',
 
   UserController: {
-    patch: ['isLoggedIn', 'isOwnerOrAdmin'],
+    patch: ['isOwnerOrAdmin'],
     destroy: 'isAdmin',
     find: 'isAdmin',
-    findOne: ['isLoggedIn', 'isOwnerOrAdmin'],
+    findOne: ['isOwnerOrAdmin'],
   },
 
-  // Override globale Standard-Policy
   LoginController:{
     '*': true,
   },
@@ -37,4 +36,8 @@ module.exports.policies = {
     findOne: true,
     find: true,
   },
+
+  CategoryController: {
+    create: 'isAdmin'
+  }
 };
