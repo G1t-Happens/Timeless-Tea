@@ -21,10 +21,10 @@ module.exports.routes = {
   '/': { view: 'pages/homepage' },
 
   //LoginController.js
-  'POST /login': 'login.login',
-  'POST /register': 'login.register',
-  'GET /sessionUser': 'login.sessionUser',
-  'GET /logout': 'login.logout',
+  'POST /login': 'LoginController.login',
+  'POST /register': 'LoginController.register',
+  'GET /sessionUser': 'LoginController.sessionUser',
+  'GET /logout': 'LoginController.logout',
 
   // Benutzer-Routen
   'GET /user/:id': 'UserController.findOne',
@@ -42,7 +42,9 @@ module.exports.routes = {
   'GET /product/count': 'ProductController.count',
 
   //CategoryController.js
+  'POST /category': { controller: 'CategoryController', action: 'create' },
   'GET /category': 'CategoryController.find'
+
 
 
   /***************************************************************************

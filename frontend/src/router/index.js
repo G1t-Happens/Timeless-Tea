@@ -33,6 +33,12 @@ const router = createRouter({
       component: () => import('@/views/CreateArticle.vue'),
     },
     {
+      path: '/admin/create-category',
+      name: 'CreateCategory',
+      meta: { requiresAdmin: true },
+      component: () => import('@/views/CreateCategory.vue'),
+    },
+    {
       path: '/admin/edit-article/:id',
       name: 'EditArticle',
       meta: { requiresAdmin: true },
