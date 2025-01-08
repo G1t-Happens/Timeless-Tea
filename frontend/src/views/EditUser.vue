@@ -14,9 +14,10 @@
     <!-- Formular zur Bearbeitung des Benutzers -->
     <div v-else>
       <form @submit.prevent="handleSave" class="form-container">
-        <!-- Bildvorschau (optional) -->
-        <div v-if="user.profileImage" class="image-preview">
-          <img :src="user.profileImage" alt="Vorschau des Profilbildes" class="preview-image" />
+        <!-- Anzeige der UserID -->
+        <div class="form-group">
+          <label for="userId" class="form-label">User ID</label>
+          <div id="userId" class="form-control static-field">{{ user.id }}</div>
         </div>
 
         <!-- Eingabefeld für die E-Mail-Adresse -->
@@ -183,7 +184,6 @@ const user = ref({
     currency: 'EUR',
     iban: '',
   },
-  profileImage: null, // Falls du Bilder verwaltest
 })
 
 // Daten laden
@@ -255,21 +255,13 @@ const toggleDropdown = (dropdown) => {
   border-radius: 8px;
 }
 
-.image-preview {
-  margin-top: 10px;
-  text-align: center;
-}
-
-.preview-image {
-  width: 100%; /* Passt die Breite des Bildes an den Container an */
-  max-width: 100%; /* Begrenzung auf die maximale Breite des Containers */
-  max-height: 400px; /* Begrenzung auf eine maximale Höhe */
+.static-field {
+  background-color: #f8f9fa;
   border: 1px solid #ddd;
-  border-radius: 8px;
-  object-fit: contain; /* Zeigt das gesamte Bild an, ohne etwas abzuschneiden */
-  display: block; /* Zentriert das Bild im Container */
-  margin: 0 auto; /* Zentrierung für das Bild */
-  background-color: #f8f9fa; /* Optional: Hintergrundfarbe für Leerflächen */
+  padding: 10px;
+  border-radius: 4px;
+  font-size: 1rem;
+  color: #6c757d;
 }
 
 /* Titel */
