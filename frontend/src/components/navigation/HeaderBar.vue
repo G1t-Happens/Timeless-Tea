@@ -48,7 +48,7 @@
         <!-- Account-Icon -->
         <img
           :src="currentAccountIcon"
-          :class="['round-icon-responsive', user ? 'icon-glow' : '']"
+          :class="['round-icon-responsive']"
           alt="Account-Icon"
           @click="handleAccountIconClick"
           class="icon-wrapper"

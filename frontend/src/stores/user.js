@@ -1,7 +1,7 @@
 // /store/user.js
 import { defineStore } from 'pinia'
 import axios from 'axios'
-import router from '@/router' // Import the router
+import router from '@/router'
 
 export const useUserStore = defineStore('user', {
   state: () => ({
@@ -16,12 +16,7 @@ export const useUserStore = defineStore('user', {
           this.user = response.data
           return this.user
         } catch (error) {
-          if (error.response && error.response.status === 403) {
-            console.log('No user session found.')
-            this.user = null
-          } else {
-            console.error('Error fetching user:', error)
-          }
+          console.error('Error fetching user:', error)
           return null
         }
       }

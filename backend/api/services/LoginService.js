@@ -52,15 +52,11 @@ module.exports = {
    * Liest den User aus der Session aus.
    *
    * @param {Object} session - Die aktuelle Session (req.session)
-   * @returns {Object} Der User aus der Session
-   * @throws {UnauthorizedError} Falls kein User in der Session vorhanden ist
+   * @returns {Object} Der User aus der Session oder false falls kein User vorhanden
    */
   getSessionUser: function (session) {
-    if (!session.user) {
-      // Falls kein User in der Session, Fehler werfen
-      throw new errors.ForbiddenError('No user in session');
-    }
-    return session.user;
+    // Überprüfen, ob ein Benutzer in der Session existiert
+    return session.user ? session.user : false;
   },
 
   /**

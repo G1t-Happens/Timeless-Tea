@@ -7,6 +7,7 @@ const router = createRouter({
   routes: [
     {
       path: '/',
+      name: 'LandingPage',
       component: LandingPage,
     },
     {
@@ -67,8 +68,21 @@ router.beforeEach(async (to, from, next) => {
   console.log('Check route....')
   const userStore = useUserStore()
 
+  // Routen, die keine Authentifizierung erfordern
+  const publicRoutes = ['LandingPage', 'Login', 'ProductDetail', 'MemberShip']
+
+  // Wenn die Route in `publicRoutes` ist, überspringe die Authentifizierung
+  if (publicRoutes.includes(to.name)) {
+    return next()
+  }
+
   // Nutzer laden
-  await userStore.fetchUser()
+  const response = await userStore.fetchUser()
+
+  // Überprüfen, ob die Antwort `false` oder `null` ist -> dann kein User in der Session und ab zum Login
+  if (response === false || response === null) {
+    return next({ name: 'Login' });
+  }
 
   if (to.matched.some((record) => record.meta.requiresAuth)) {
     console.log('Must be logged...')

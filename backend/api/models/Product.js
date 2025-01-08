@@ -47,17 +47,6 @@ module.exports = {
     },
 
     /**
-     * @description Die Menge des Produkts in Gramm.
-     * @type {number}
-     * @example Für Productbestellung: 250 (für 250 Gramm)
-     */
-    quantity: {
-      type: 'number',
-      columnType: 'decimal(10,2)',
-      required: false
-    },
-
-    /**
      * @description Beziehung zu ProductRating, um Produktbewertungen abzubilden (Many-to-Many über Rating).
      * Ein Produkt kann mehrere Ratings besitzen.
      * Eine Rating z.B. 5 Stars kann jeweils zu mehreren Produkten zugeordnet werden.
