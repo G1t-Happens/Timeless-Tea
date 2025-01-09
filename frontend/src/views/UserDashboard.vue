@@ -59,12 +59,12 @@ const router = useRouter()
 
 // Navigation zu Bestellungen
 const navigateToOrders = () => {
-  router.push('/user/orders')
+  router.push('/user/order')
 }
 
 // Navigation zu Favoriten
 const navigateToFavorites = () => {
-  router.push('/user/favorites')
+  router.push('/user/favorite')
 }
 
 // Artikel-Daten

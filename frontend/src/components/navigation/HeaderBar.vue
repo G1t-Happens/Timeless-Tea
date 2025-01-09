@@ -131,7 +131,7 @@ const basePath = computed(() => (user.value?.isAdmin ? '/admin' : '/user'))
 
 // Alle möglichen Links
 const links = [
-  { label: 'Meine Bestellungen', path: 'orders', forAdmin: false },
+  { label: 'Meine Bestellungen', path: 'order', forAdmin: false },
   { label: 'Dashboard', path: '', forAdmin: true },
   { label: 'Favoriten', path: 'favorites', forAdmin: false },
   { label: 'Kontoeinstellungen', path: 'edit-user', forAdmin: false, dynamicId: true },
