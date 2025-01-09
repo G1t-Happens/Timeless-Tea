@@ -1,7 +1,5 @@
 <template>
   <div class="contact-page">
-    <!-- Verwende die BackButton-Komponente -->
-    <BackButton />
     <h1>Kontakt</h1>
     <p class="intro-text">
       Hast du Fragen, Anliegen oder Feedback? <br />
@@ -60,8 +58,8 @@
           wir die häufigsten Themen wie Bestellungen, Versand oder Rückgaben übersichtlich für dich
           zusammengestellt.
           <router-link to="/faq" class="contact-link"
-            >Hier klicken, um die FAQs anzusehen</router-link
-          >
+            >Hier klicken, um die FAQs anzusehen
+          </router-link>
         </p>
       </div>
 
@@ -72,8 +70,8 @@
           Falls du ein Produkt zurückgeben oder umtauschen möchtest, findest du alle relevanten
           Informationen im Bereich Rückgabe & Umtausch.
           <router-link to="/returns" class="contact-link"
-            >Hier klicken, um mehr zu erfahren</router-link
-          >
+            >Hier klicken, um mehr zu erfahren
+          </router-link>
         </p>
       </div>
 
@@ -82,7 +80,9 @@
         <h2>Kontaktformular</h2>
         <p>
           Nutze unser Kontaktformular, um uns direkt eine Nachricht zu senden.
-          <router-link to="/contact_form" class="btn btn-primary">Zum Kontaktformular</router-link>
+          <router-link :to="{ name: 'ContactForm' }" class="btn btn-primary"
+            >Zum Kontaktformular</router-link
+          >
         </p>
       </div>
     </div>

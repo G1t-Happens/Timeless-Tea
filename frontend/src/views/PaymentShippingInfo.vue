@@ -1,7 +1,5 @@
 <template>
   <div class="info-page">
-    <!-- Verwende die BackButton-Komponente -->
-    <BackButton />
     <section class="shipping-section">
       <h1>Versand & Lieferung</h1>
       <p>
@@ -90,7 +88,7 @@
         Falls du noch Fragen zu unserem Versand oder unseren Zahlungsmethoden hast, zögere nicht,
         uns zu kontaktieren. Unser Kundenservice hilft dir gerne weiter!
       </p>
-      <button @click="contactSupport" class="btn-contact">
+      <button @click="navigateToContact" class="btn-contact">
         Hier klicken, um uns zu kontaktieren
       </button>
     </section>
@@ -98,11 +96,11 @@
 </template>
 
 <script setup>
-// Dummy-Klick-Handler für den Kontakt-Button
-import BackButton from '@/components/navigation/BackButton.vue'
+import { useRouter } from 'vue-router'
 
-const contactSupport = () => {
-  alert('Kundenservice wird kontaktiert!')
+const router = useRouter()
+const navigateToContact = () => {
+  router.push({ name: 'ContactForm' }) // Navigiert zur Route mit Namen 'ContactForm'
 }
 </script>
 

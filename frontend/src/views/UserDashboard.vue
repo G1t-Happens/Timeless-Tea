@@ -8,6 +8,7 @@
     <div class="navigation mb-4">
       <button @click="navigateToOrders" class="btn navigation-btn">Meine Bestellungen</button>
       <button @click="navigateToFavorites" class="btn navigation-btn">Meine Favoriten</button>
+      <button @click="navigateToUserSettings" class="btn navigation-btn">Meine Kontoeinstellungen</button>
     </div>
 
     <!-- Suchfeld für Artikel -->
@@ -65,6 +66,10 @@ const navigateToOrders = () => {
 // Navigation zu Favoriten
 const navigateToFavorites = () => {
   router.push('/user/favorite')
+}
+
+const navigateToUserSettings = () => {
+  router.push('/user/edit-user')
 }
 
 // Artikel-Daten

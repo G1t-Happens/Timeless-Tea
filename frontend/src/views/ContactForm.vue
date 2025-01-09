@@ -1,7 +1,5 @@
 <template>
   <div class="contact-form">
-    <!-- Verwende die BackButton-Komponente -->
-    <BackButton />
     <h1>Kontaktformular</h1>
     <p>Wenn Sie Fragen haben oder Unterstützung benötigen, senden Sie uns bitte eine Nachricht.</p>
     <form @submit.prevent="submitForm" class="form">

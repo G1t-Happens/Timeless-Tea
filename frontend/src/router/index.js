@@ -2,167 +2,177 @@ import { createRouter, createWebHistory } from 'vue-router'
 import { useUserStore } from '../stores/user'
 import LandingPage from '@/views/LandingPage.vue'
 
+const authGuard = async (to, from, next) => {
+  const userStore = useUserStore()
+  await userStore.fetchUser()
+
+  if (userStore.user == null || userStore.user === false) {
+    return next({ name: 'Login' })
+  }
+  next()
+}
+
+const adminGuard = async (to, from, next) => {
+  const userStore = useUserStore()
+  await userStore.fetchUser()
+
+  if (userStore.user == null || userStore.user === false || !userStore.user.isAdmin) {
+    return next({ name: 'Login' })
+  }
+  next()
+}
+
+const routes = [
+  { path: '/', name: 'LandingPage', component: LandingPage, meta: { breadcrumb: 'TeeShop' } },
+  {
+    path: '/member',
+    name: 'MemberShip',
+    component: () => import('@/views/MemberShip.vue'),
+    meta: { breadcrumb: 'membership' },
+  },
+  {
+    path: '/login',
+    name: 'Login',
+    component: () => import('@/views/LoginPage.vue'),
+    meta: { breadcrumb: 'login' },
+  },
+  {
+    path: '/admin',
+    name: 'AdminDasboard',
+    component: () => import('@/views/AdminDashboard.vue'),
+    meta: { requiresAdmin: true, breadcrumb: 'admin' },
+    beforeEnter: adminGuard,
+  },
+  {
+    path: '/admin/create-article',
+    name: 'CreateArticle',
+    component: () => import('@/views/CreateArticle.vue'),
+    meta: { breadcrumb: 'create article', requiresAdmin: true },
+    beforeEnter: adminGuard,
+  },
+  {
+    path: '/admin/create-category',
+    name: 'CreateCategory',
+    component: () => import('@/views/CreateCategory.vue'),
+    meta: { breadcrumb: 'create category', requiresAdmin: true },
+    beforeEnter: adminGuard,
+  },
+  {
+    path: '/admin/edit-category',
+    name: 'EditCategory',
+    component: () => import('@/views/EditCategory.vue'),
+    meta: { breadcrumb: 'edit category', requiresAdmin: true },
+    beforeEnter: adminGuard,
+  },
+  {
+    path: '/admin/edit-article/',
+    redirect: '/admin',
+    beforeEnter: adminGuard,
+  },
+  {
+    path: '/admin/edit-article/:id',
+    name: 'EditArticle',
+    component: () => import('@/views/EditArticle.vue'),
+    meta: { breadcrumb: 'edit article', requiresAdmin: true },
+    beforeEnter: adminGuard,
+  },
+  {
+    path: '/admin/edit-user/',
+    redirect: '/admin',
+    beforeEnter: adminGuard,
+  },
+  {
+    path: '/admin/edit-user/:id',
+    name: 'AdminEditUser',
+    component: () => import('@/views/EditUser.vue'),
+    meta: { breadcrumb: 'edit user', requiresAdmin: true },
+    beforeEnter: adminGuard,
+  },
+  {
+    path: '/user',
+    name: 'UserDashboard',
+    component: () => import('@/views/UserDashboard.vue'),
+    meta: { breadcrumb: 'user', requiresAuth: true },
+    beforeEnter: authGuard,
+  },
+  {
+    path: '/user/edit-user/',
+    name: 'UserEditUser',
+    component: () => import('@/views/EditUser.vue'),
+    meta: { breadcrumb: 'edit user', requiresAuth: true },
+    beforeEnter: authGuard,
+  },
+  {
+    path: '/user/order',
+    name: 'OrderDetail',
+    component: () => import('@/views/OrderDetail.vue'),
+    meta: { breadcrumb: 'orders', requiresAuth: true },
+    beforeEnter: authGuard,
+  },
+  {
+    path: '/product',
+    redirect: '/',
+  },
+  {
+    path: '/product/:id',
+    name: 'ProductDetail',
+    component: () => import('@/views/ProductDetail.vue'),
+    meta: { breadcrumb: 'product' },
+  },
+  {
+    path: '/cart',
+    name: 'ShoppingCart',
+    component: () => import('@/views/ShoppingCart.vue'),
+    meta: { breadcrumb: 'shopping cart' },
+  },
+  {
+    path: '/checkout',
+    name: 'CheckOut',
+    component: () => import('@/views/CheckOut.vue'),
+    meta: { breadcrumb: 'checkout', requiresAuth: true },
+    beforeEnter: authGuard,
+  },
+  {
+    path: '/contact',
+    name: 'ContactInfo',
+    component: () => import('@/views/ContactInfo.vue'),
+    meta: { breadcrumb: 'contact' },
+  },
+  {
+    path: '/contact/contact_form',
+    name: 'ContactForm',
+    component: () => import('@/views/ContactForm.vue'),
+    meta: { breadcrumb: 'contact form' },
+  },
+  {
+    path: '/returns',
+    name: 'Return',
+    component: () => import('@/views/ReturnAndExchange.vue'),
+    meta: { breadcrumb: 'returns & exchanges' },
+  },
+  {
+    path: '/faq',
+    name: 'FAQ',
+    component: () => import('@/views/FAQ.vue'),
+    meta: { breadcrumb: 'faq' },
+  },
+  {
+    path: '/impressum',
+    name: 'Impressum',
+    component: () => import('@/views/LegalNotice.vue'),
+    meta: { breadcrumb: 'legal notice' },
+  },
+  {
+    path: '/payment_shipping',
+    name: 'PaymentShippingInfo',
+    component: () => import('@/views/PaymentShippingInfo.vue'),
+    meta: { breadcrumb: 'shipping and payment' },
+  },
+]
+
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
-  routes: [
-    {
-      path: '/',
-      name: 'LandingPage',
-      component: LandingPage,
-    },
-    {
-      path: '/member',
-      name: 'MemberShip',
-      component: () => import('@/views/MemberShip.vue'),
-    },
-    {
-      path: '/login',
-      name: 'Login',
-      component: () => import('@/views/LoginPage.vue'),
-    },
-    {
-      path: '/admin',
-      name: 'Admin',
-      meta: { requiresAdmin: true },
-      component: () => import('@/views/AdminDashboard.vue'),
-    },
-    {
-      path: '/admin/create-article',
-      name: 'CreateArticle',
-      meta: { requiresAdmin: true },
-      component: () => import('@/views/CreateArticle.vue'),
-    },
-    {
-      path: '/admin/create-category',
-      name: 'CreateCategory',
-      meta: { requiresAdmin: true },
-      component: () => import('@/views/CreateCategory.vue'),
-    },
-    {
-      path: '/admin/edit-article/:id',
-      name: 'EditArticle',
-      meta: { requiresAdmin: true },
-      component: () => import('@/views/EditArticle.vue'),
-    },
-    {
-      path: '/admin/edit-category',
-      name: 'EditCategory',
-      meta: { requiresAdmin: true },
-      component: () => import('@/views/EditCategory.vue'),
-    },
-    {
-      path: '/admin/edit-user/:id',
-      name: 'EditUser',
-      meta: { requiresAdmin: true },
-      component: () => import('@/views/EditUser.vue'),
-    },
-    {
-      path: '/user',
-      name: 'UserDashboard',
-      meta: { requiresAuth: true },
-      component: () => import('@/views/UserDashboard.vue'),
-    },
-    {
-      path: '/user/order',
-      name: 'OrderDetail',
-      meta: { requiresAuth: true },
-      component: () => import('@/views/OrderDetail.vue'),
-    },
-    {
-      path: '/user/edit-user/:id',
-      name: 'EditOwnProfile',
-      meta: { requiresAuth: true },
-      component: () => import('@/views/EditUser.vue'),
-    },
-    {
-      path: '/product/:id',
-      name: 'ProductDetail',
-      component: () => import('@/views/ProductDetail.vue'),
-    },
-    {
-      path: '/cart',
-      name: 'ShoppingCart',
-      component: () => import('@/views/ShoppingCart.vue'),
-    },
-    {
-      path: '/checkout',
-      name: 'CheckOut',
-      meta: { requiresAuth: true },
-      component: () => import('@/views/CheckOut.vue'),
-    },
-    {
-      path: '/payment_shipping',
-      name: 'PaymentShippingInfo',
-      component: () => import('@/views/PaymentShippingInfo.vue'),
-    },
-    {
-      path: '/contact',
-      name: 'ContactInfo',
-      component: () => import('@/views/ContactInfo.vue'),
-    },
-    {
-      path: '/contact_form',
-      name: 'ContactForm',
-      component: () => import('@/views/ContactForm.vue'),
-    },
-    {
-      path: '/returns',
-      name: 'Return',
-      component: () => import('@/views/ReturnAndExchange.vue'),
-    },
-    {
-      path: '/faq',
-      name: 'FAQ',
-      component: () => import('@/views/FAQ.vue'),
-    },
-    {
-      path: '/impressum',
-      name: 'Impressum',
-      component: () => import('@/views/Impressum.vue'),
-    },
-  ],
-})
-
-router.beforeEach(async (to, from, next) => {
-  console.log('Check route....')
-  const userStore = useUserStore()
-
-  // // Routen, die keine Authentifizierung erfordern
-  // const publicRoutes = ['LandingPage', 'Login', 'ProductDetail', 'MemberShip', 'ShoppingCart']
-  //
-  // // Wenn die Route in `publicRoutes` ist, überspringe die Authentifizierung
-  // if (publicRoutes.includes(to.name)) {
-  //   return next()
-  // }
-  //
-  // // Nutzer laden
-  await userStore.fetchUser()
-  //
-  // // // Überprüfen, ob die Antwort `false` oder `null` ist -> dann kein User in der Session und ab zum Login
-  // // if (response === false || response === null) {
-  // //   return next({ name: 'Login' })
-  // // }
-
-  if (to.matched.some((record) => record.meta.requiresAuth)) {
-    console.log('Must be logged...')
-    if (userStore.user == null || userStore.user === false) {
-      console.log('Unauthorized -> redirect to login')
-      return next({ name: 'Login' })
-    } else {
-      return next()
-    }
-  }
-
-  if (to.matched.some((record) => record.meta.requiresAdmin)) {
-    console.log('Must be admin ...')
-    if (userStore.user == null || userStore.user === false || !userStore.user.isAdmin) {
-      console.log('Unauthorized -> redirect to login')
-      return next({ name: 'Login' })
-    } else {
-      return next()
-    }
-  }
-  return next()
+  routes,
 })
 
 export default router

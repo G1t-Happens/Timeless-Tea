@@ -1,7 +1,5 @@
 <template>
   <div class="faq-page">
-    <!-- Verwende die BackButton-Komponente -->
-    <BackButton />
     <h1>Fragen & Antworten</h1>
     <p class="intro-text">
       Hier findest du Antworten auf die häufigsten Fragen zur Nutzung von Timeless Tea. <br />
@@ -72,9 +70,7 @@
   </div>
 </template>
 
-<script setup>
-import BackButton from '@/components/navigation/BackButton.vue'
-</script>
+<script setup></script>
 
 <style scoped>
 .faq-page {
@@ -138,12 +134,5 @@ ul {
 
 li {
   margin-bottom: 5px;
-}
-
-.footer {
-  text-align: center;
-  margin-top: 30px;
-  font-size: 14px;
-  color: #777;
 }
 </style>

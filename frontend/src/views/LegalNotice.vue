@@ -1,7 +1,5 @@
 <template>
   <div class="impressum-page">
-    <!-- BackButton-Komponente -->
-    <BackButton />
     <h1>Impressum</h1>
     <p class="intro-text">Angaben gemäß § 5 TMG</p>
 
@@ -76,9 +74,7 @@
   </div>
 </template>
 
-<script setup>
-import BackButton from '@/components/navigation/BackButton.vue'
-</script>
+<script setup></script>
 
 <style scoped>
 .impressum-page {

@@ -36,9 +36,11 @@
 
 <script setup>
 import { ref, computed } from 'vue'
+import { useUserStore } from '@/stores/user'
 import axios from 'axios'
 import BackButton from '@/components/navigation/BackButton.vue'
 
+const userStore = useUserStore()
 const orders = ref([])
 const user = ref(null)
 const loading = ref(false)
@@ -89,7 +91,7 @@ const cancelOrder = (orderId) => {
 }
 
 // Initial load for user ID 2
-fetchUserAndOrders(2)
+fetchUserAndOrders(userStore.user.id)
 </script>
 
 <style scoped>

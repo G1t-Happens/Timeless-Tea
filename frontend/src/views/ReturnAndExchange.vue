@@ -1,7 +1,5 @@
 <template>
   <div class="return-page">
-    <!-- Verwende die BackButton-Komponente -->
-    <BackButton />
     <h1>Rückgabe & Umtausch</h1>
     <p class="intro-text">
       Wir bei Timeless Tea möchten sicherstellen, dass du mit deinen Einkäufen rundum zufrieden
@@ -100,9 +98,7 @@
   </div>
 </template>
 
-<script setup>
-import BackButton from '@/components/navigation/BackButton.vue'
-</script>
+<script setup></script>
 
 <style scoped>
 .return-page {

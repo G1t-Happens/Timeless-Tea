@@ -38,7 +38,8 @@ module.exports.policies = {
   },
 
   CategoryController: {
-    create: 'isAdmin'
+    create: 'isAdmin',
+    find: true
   },
 
   OrderController: {

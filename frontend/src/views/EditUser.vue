@@ -146,15 +146,12 @@ import axios from 'axios'
 import BackButton from '@/components/navigation/BackButton.vue'
 import PaymentModal from '@/components/PaymentModal.vue'
 
-// UserStore + Router
 const userStore = useUserStore()
 const currentUser = computed(() => userStore.user)
 const route = useRoute()
 const router = useRouter()
-
 const loading = ref(true)
 const showPaymentModal = ref(false)
-
 const basePath = computed(() => (currentUser.value?.isAdmin ? '/admin' : '/user'))
 
 // Lokales User-Objekt
@@ -175,7 +172,7 @@ const user = ref({
   },
   payment: {
     id: null,
-    paymentOption: '', // leer => optional
+    paymentOption: '',
     iban: '',
     creditCardNumber: '',
     expiryDate: '',
@@ -184,8 +181,10 @@ const user = ref({
   },
 })
 
+//Admins koennen auf beliebigen user per param.id zugreifen, nicht admins nur auf die eigenen user daten
 onMounted(async () => {
-  await fetchUser(route.params.id)
+  const userId = currentUser.value.isAdmin ? route.params.id : currentUser.value.id
+  await fetchUser(userId)
 })
 
 /**
