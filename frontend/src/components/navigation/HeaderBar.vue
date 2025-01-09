@@ -131,8 +131,8 @@ const basePath = computed(() => (user.value?.isAdmin ? '/admin' : '/user'))
 
 // Alle möglichen Links
 const links = [
-  { label: 'Meine Bestellungen', path: 'order', forAdmin: false },
   { label: 'Dashboard', path: '', forAdmin: true },
+  { label: 'Meine Bestellungen', path: 'order', forAdmin: false },
   { label: 'Favoriten', path: 'favorites', forAdmin: false },
   { label: 'Kontoeinstellungen', path: 'edit-user', forAdmin: false, dynamicId: true },
 ]
@@ -157,6 +157,9 @@ const currentAccountIcon = computed(() => {
 
 // Toggle Warenkorb Popup
 const toggleCart = () => {
+  if (showLogoutPopup.value) {
+    showLogoutPopup.value = false
+  }
   showCart.value = !showCart.value
 }
 
@@ -168,8 +171,6 @@ const removeItem = (productId) => {
 // Globale Klick-Listener registrieren
 const handleGlobalClick = (event) => {
   const target = event.target
-
-  // Settings-Popup schließen
   if (
     showSettingsPopup.value &&
     settingsPopupRef.value &&
@@ -178,17 +179,11 @@ const handleGlobalClick = (event) => {
     showSettingsPopup.value = false
   }
 
-  // Logout-Popup schließen
   if (showLogoutPopup.value && popupRef.value && !accountContainerRef.value.contains(target)) {
     showLogoutPopup.value = false
   }
 
-  // Warenkorb schließen, wenn außerhalb geklickt wird
-  if (
-    showCart.value &&
-    !event.target.closest('.cart-popup') &&
-    !event.target.closest('.icon-wrapper')
-  ) {
+  if (showCart.value && !target.closest('.cart-popup') && !target.closest('.icon-wrapper')) {
     showCart.value = false
   }
 }
@@ -212,6 +207,9 @@ const handleSettingsIconClick = () => {
 
 // Account-Icon klicken
 const handleAccountIconClick = () => {
+  if (showCart.value) {
+    showCart.value = false
+  }
   if (!user.value) {
     router.push('/login')
   } else {

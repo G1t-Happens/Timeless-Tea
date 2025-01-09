@@ -43,7 +43,11 @@ module.exports.routes = {
 
   //CategoryController.js
   'POST /category': { controller: 'CategoryController', action: 'create' },
-  'GET /category': 'CategoryController.find'
+  'GET /category': 'CategoryController.find',
+
+  //CategoryController.js
+  'POST /order': { controller: 'OrderController', action: 'create' },
+  'GET /order': 'OrderController.find',
 
 
 

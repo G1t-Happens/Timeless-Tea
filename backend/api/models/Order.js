@@ -15,13 +15,6 @@ module.exports = {
       example: 99.99
     },
 
-    orderDate: {
-      type: 'string',
-      columnType: 'datetime',
-      required: true,
-      example: '2024-01-10 14:30:00'
-    },
-
     orderStatus: {
       type: 'string',
       required: true,

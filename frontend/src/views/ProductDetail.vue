@@ -30,7 +30,12 @@
           Preis: {{ formattedPrice }}€ - {{ product.quantity }}g
         </p>
         <!-- Zusätzliche Preisangaben -->
-        <p class="point-out-info">Preis inkl. 7% MwSt. zzgl. Versand</p>
+        <p class="point-out-info">
+          Preis inkl. 7% MwSt.
+          <router-link :to="{ name: 'PaymentShippingInfo' }" class="shipping-link"
+            >zzgl. Versand</router-link
+          >
+        </p>
         <p class="content-info">Inhalt: {{ product.quantity }}g ({{ pricePerKg }}€ / kg)</p>
         <p v-if="product.description">{{ product.description }}</p>
         <div class="actions">
@@ -375,6 +380,16 @@ onMounted(fetchProduct)
 
 .btn.secondary:hover {
   background: #7a844b;
+}
+
+.shipping-link {
+  color: #c06e52; /* Primärfarbe des Links */
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.shipping-link:hover {
+  color: #a35b42; /* Hover-Farbe */
 }
 
 /* Responsive Anpassungen */

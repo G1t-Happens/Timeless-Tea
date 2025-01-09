@@ -63,6 +63,12 @@ const router = createRouter({
       component: () => import('@/views/UserDashboard.vue'),
     },
     {
+      path: '/user/order',
+      name: 'OrderDetail',
+      meta: { requiresAuth: true },
+      component: () => import('@/views/OrderDetail.vue'),
+    },
+    {
       path: '/user/edit-user/:id',
       name: 'EditOwnProfile',
       meta: { requiresAuth: true },
@@ -83,6 +89,36 @@ const router = createRouter({
       name: 'CheckOut',
       meta: { requiresAuth: true },
       component: () => import('@/views/CheckOut.vue'),
+    },
+    {
+      path: '/payment_shipping',
+      name: 'PaymentShippingInfo',
+      component: () => import('@/views/PaymentShippingInfo.vue'),
+    },
+    {
+      path: '/contact',
+      name: 'ContactInfo',
+      component: () => import('@/views/ContactInfo.vue'),
+    },
+    {
+      path: '/contact_form',
+      name: 'ContactForm',
+      component: () => import('@/views/ContactForm.vue'),
+    },
+    {
+      path: '/returns',
+      name: 'Return',
+      component: () => import('@/views/ReturnAndExchange.vue'),
+    },
+    {
+      path: '/faq',
+      name: 'FAQ',
+      component: () => import('@/views/FAQ.vue'),
+    },
+    {
+      path: '/impressum',
+      name: 'Impressum',
+      component: () => import('@/views/Impressum.vue'),
     },
   ],
 })

@@ -21,10 +21,10 @@ module.exports.policies = {
   '*': 'isLoggedIn',
 
   UserController: {
-    patch: ['isOwnerOrAdmin'],
+    patch: 'isOwnerOrAdmin',
     destroy: 'isAdmin',
     find: 'isAdmin',
-    findOne: ['isOwnerOrAdmin'],
+    findOne: 'isOwnerOrAdmin',
   },
 
   LoginController:{
@@ -39,5 +39,9 @@ module.exports.policies = {
 
   CategoryController: {
     create: 'isAdmin'
+  },
+
+  OrderController: {
+    find: 'isAdmin'
   }
 };
