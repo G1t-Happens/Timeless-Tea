@@ -2,11 +2,14 @@
   <!-- Footer -->
   <footer class="text-center py-3">
     <div class="footer-links">
-      <router-link to="/impressum" class="footer-link">Impressum</router-link>
-      <router-link to="/payment_shipping" class="footer-link">Versand & Zahlung</router-link>
-      <router-link to="/contact" class="footer-link">Kontakt</router-link>
-      <router-link to="/returns" class="footer-link">Rückgabe & Umtausch</router-link>
-      <router-link to="/faq" class="footer-link">FAQ</router-link>
+      <router-link :to="{ name: 'Impressum' }" class="footer-link">Impressum</router-link>
+      <router-link :to="{ name: 'Privacy Policy' }" class="footer-link">Datenschutz</router-link>
+      <router-link :to="{ name: 'PaymentShippingInfo' }" class="footer-link"
+        >Versand & Zahlung
+      </router-link>
+      <router-link :to="{ name: 'ContactInfo' }" class="footer-link">Kontakt</router-link>
+      <router-link :to="{ name: 'Return' }" class="footer-link">Rückgabe & Umtausch</router-link>
+      <router-link :to="{ name: 'FAQ' }" class="footer-link">FAQ</router-link>
     </div>
     <div class="footer-divider"></div>
     <p>&copy; 2024 Timeless Tea. Alle Rechte vorbehalten.</p>

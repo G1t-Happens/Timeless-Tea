@@ -81,17 +81,15 @@
         <p>
           Nutze unser Kontaktformular, um uns direkt eine Nachricht zu senden.
           <router-link :to="{ name: 'ContactForm' }" class="btn btn-primary"
-            >Zum Kontaktformular</router-link
-          >
+            >Zum Kontaktformular
+          </router-link>
         </p>
       </div>
     </div>
   </div>
 </template>
 
-<script setup>
-import BackButton from '@/components/navigation/BackButton.vue'
-</script>
+<script setup></script>
 
 <style scoped>
 .contact-page {

@@ -123,10 +123,10 @@ const routes = [
     path: '/cart',
     name: 'ShoppingCart',
     component: () => import('@/views/ShoppingCart.vue'),
-    meta: { breadcrumb: 'shopping cart' },
+    meta: { breadcrumb: 'cart' },
   },
   {
-    path: '/checkout',
+    path: '/cart/checkout',
     name: 'CheckOut',
     component: () => import('@/views/CheckOut.vue'),
     meta: { breadcrumb: 'checkout', requiresAuth: true },
@@ -167,6 +167,12 @@ const routes = [
     name: 'PaymentShippingInfo',
     component: () => import('@/views/PaymentShippingInfo.vue'),
     meta: { breadcrumb: 'shipping and payment' },
+  },
+  {
+    path: '/privacy',
+    name: 'Privacy Policy',
+    component: () => import('@/views/PrivacyPolicy.vue'),
+    meta: { breadcrumb: 'privacy policy' },
   },
 ]
 

@@ -134,7 +134,7 @@ const links = [
   { label: 'Dashboard', path: '', forAdmin: true },
   { label: 'Meine Bestellungen', path: 'order', forAdmin: false },
   { label: 'Favoriten', path: 'favorites', forAdmin: false },
-  { label: 'Kontoeinstellungen', path: 'edit-user', forAdmin: false, dynamicId: true },
+  { label: 'Kontoeinstellungen', path: 'edit-user', forAdmin: false },
 ]
 
 // Gefilterte Links basierend auf Benutzerrolle

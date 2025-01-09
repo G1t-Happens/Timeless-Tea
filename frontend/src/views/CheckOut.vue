@@ -41,7 +41,7 @@
         <p class="edit-hint">
           <strong>Hinweis:</strong>
           Falls Sie Ihre Rechnungsadresse ändern möchten, können Sie das
-          <router-link :to="`/user/edit-user/${userStore.user.id}`">hier</router-link>
+          <router-link :to="{ name: 'UserEditUser' }">hier</router-link>
           erledigen.
         </p>
         <div class="detail-item">
@@ -84,7 +84,7 @@
         <p class="edit-hint">
           <strong>Hinweis:</strong>
           Falls Sie Ihre Zahlungsmethode ändern möchten, können Sie das
-          <router-link :to="`/user/edit-user/${userStore.user.id}`">hier</router-link>
+          <router-link :to="{ name: 'UserEditUser' }">hier</router-link>
           erledigen.
         </p>
         <div v-if="user.payment && user.payment.paymentOption">
@@ -103,7 +103,7 @@
         <div v-else>
           <p>
             Keine Zahlungsmethode hinterlegt. Bitte
-            <router-link :to="`/user/edit-user/${userStore.user.id}`">
+            <router-link :to="{ name: 'UserEditUser' }">
               hinterlegen Sie Ihre Zahlungsdaten!
             </router-link>
             .
@@ -301,7 +301,6 @@ const obfuscatedPaypalEmail = computed(() => {
   return obfuscatedLocal + '@' + domain
 })
 
-//TODO: add backend endpoint und erstelle die bestellung ( backend price validation !)
 const submitOrder = async () => {
   if (!canCheckout.value) {
     alert('Bitte stellen Sie sicher, dass alle erforderlichen Informationen ausgefüllt sind.')
@@ -325,9 +324,8 @@ const submitOrder = async () => {
     }
 
     await axios.post('/order', orderData)
-    alert('Bestellung erfolgreich aufgegeben!')
     cartStore.clearCart()
-    await router.push('/orders')
+    await router.push({ name: 'OrderDetail' })
   } catch (error) {
     console.error('Fehler beim Abschicken der Bestellung:', error)
     if (error.response && error.response.data && error.response.data.error) {

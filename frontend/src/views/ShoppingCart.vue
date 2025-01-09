@@ -52,7 +52,7 @@
         <p>
           Gesamtsumme: <strong>{{ cartStore.totalAmount }} €</strong>
         </p>
-        <router-link to="/checkout" class="btn btn-success">Zur Kasse</router-link>
+        <router-link :to="{ name: 'CheckOut' }" class="btn btn-success">Zur Kasse</router-link>
         <button @click="clearCart" class="btn btn-secondary">Warenkorb leeren</button>
       </div>
     </div>
