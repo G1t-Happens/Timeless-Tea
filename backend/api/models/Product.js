@@ -47,6 +47,17 @@ module.exports = {
     },
 
     /**
+     * @description Die Menge in dem das Produkt in einem Stueck angeboten wird.
+     * @type {number}
+     * @example idr. 100g
+     */
+    quantity: {
+      type: 'number',
+      columnType: 'decimal(10,2)',
+      required: false
+    },
+
+    /**
      * @description Beziehung zu ProductRating, um Produktbewertungen abzubilden (Many-to-Many über Rating).
      * Ein Produkt kann mehrere Ratings besitzen.
      * Eine Rating z.B. 5 Stars kann jeweils zu mehreren Produkten zugeordnet werden.

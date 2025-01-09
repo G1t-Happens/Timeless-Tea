@@ -110,7 +110,8 @@ module.exports = {
    * Aktualisiert einen bestehenden Benutzer anhand seiner ID. Unterstützt auch die Aktualisierung von Adresse und Zahlungsmethoden.
    * Alle Änderungen erfolgen innerhalb einer Datenbanktransaktion, sodass im Fehlerfall kein halbfertiger Zustand zurückbleibt.
    *
-   * @param {Request} req - Der eingehende HTTP-Request, enthält die Benutzer-ID in req.params.id und im Body die zu aktualisierenden Felder.
+   * @param {Request} req - Der eingehende HTTP-Request, enthält die Benutzer-ID in req.params.id
+   *                        und im Body die zu aktualisierenden Felder (inkl. address & payment).
    * @returns {Object} Das aktualisierte Benutzer-Objekt ohne Passwort.
    * @throws {BadRequestError} Wenn keine Benutzer-ID übergeben wurde.
    * @throws {NotFoundError} Wenn kein Benutzer mit der übergebenen ID existiert.
@@ -119,54 +120,123 @@ module.exports = {
   updateUser: async function (req) {
     const userId = req.params.id;
 
-    // Prüfen, ob userId überhaupt existiert
+    // 1) Prüfen, ob userId überhaupt existiert
     if (!userId) {
       throw new errors.BadRequestError('Benutzer-ID ist erforderlich.');
     }
 
-    // Daten aus dem Request-Body extrahieren
-    const { emailAddress, password, firstName, lastName, isAdmin, address } = req.body;
+    // 2) Daten aus dem Request-Body extrahieren
+    const {
+      emailAddress,
+      password,
+      firstName,
+      lastName,
+      isAdmin,
+      address,
+      payment, // <== neu: Payment-Daten
+    } = req.body;
 
-    // Aktuellen Benutzer aus der Session holen
+    // 3) Aktuellen Benutzer aus der Session holen
     const currentUserId = req.session.userId;
     const currentUser = await User.findOne({ id: currentUserId });
-
     if (!currentUser) {
       throw new errors.NotFoundError('Aktueller Benutzer nicht gefunden.');
     }
 
-    //User suchen
-    const existingUser = await User.findOne({ id: userId });
+    // 4) User suchen, der aktualisiert werden soll
+    const existingUser = await User.findOne({ id: userId })
+      .populate('address') // falls Address-Daten direkt gebraucht
+      .populate('payment'); // <== neu: Payment-Daten gleich mitladen
 
     if (!existingUser) {
       throw new errors.NotFoundError(`Benutzer mit ID ${userId} nicht gefunden.`);
     }
 
-    // Allgemein immer sicherstellen, dass nur ein Admin die isAdmin-Flag auf true setzen kann
+    // 5) Nur Admins dürfen isAdmin auf true setzen
     if (!req.session.user.isAdmin && (isAdmin !== undefined && isAdmin !== false)) {
       throw new errors.ForbiddenError('Nur Admins dürfen die Admin-Flag auf true setzen.');
     }
 
-    //Passwort ggf. hashen falls neues vorhanden
+    // 6) Neues Passwort ggf. hashen
     let hashedPassword = existingUser.password;
     if (password) {
       hashedPassword = await sails.helpers.passwords.hashPassword(password);
     }
 
-    //Transaktion starten, zuerst Addresse Updaten und dann User Updaten
+    // 7) Datenbank-Transaktion
     return await sails.getDatastore().transaction(async (db) => {
-      await Address.updateOne({ id: existingUser.address })
-        .set({
-          country: address.country || existingUser.address.country,
-          state: address.state || existingUser.address.state,
-          city: address.city || existingUser.address.city,
-          postalCode: address.postalCode || existingUser.address.postalCode,
-          street: address.street || existingUser.address.street,
-          houseNumber: address.houseNumber || existingUser.address.houseNumber,
-          addressAddition: address.addressAddition || existingUser.address.addressAddition,
-        })
-        .usingConnection(db);
 
+      //--------------------------------
+      // (a) Adresse aktualisieren
+      //--------------------------------
+      if (address && existingUser.address) {
+        await Address.updateOne({ id: existingUser.address.id }) // .id, weil .address selbst das Objekt enthält
+          .set({
+            country: address.country || existingUser.address.country,
+            state: address.state ||  existingUser.address.state,
+            city: address.city ||  existingUser.address.city,
+            postalCode: address.postalCode ||  existingUser.address.postalCode,
+            street: address.street ||  existingUser.address.street,
+            houseNumber: address.houseNumber ||  existingUser.address.houseNumber,
+            addressAddition: address.addressAddition ||  existingUser.address.addressAddition,
+          })
+          .usingConnection(db);
+      }
+
+      //--------------------------------
+      // (b) Payment aktualisieren / anlegen
+      //--------------------------------
+      let newPaymentId = existingUser.payment ? existingUser.payment.id : null;
+
+      if (payment) {
+        // Gibt es bereits Payment beim User?
+        if (existingUser.payment) {
+          // Update existierendes Payment
+          await Payment.updateOne({ id: existingUser.payment.id })
+            .set({
+              paymentOption: payment.paymentOption || existingUser.payment.paymentOption,
+              iban: payment.paymentOption === 'bank transfer'
+                ? payment.iban || existingUser.payment.iban
+                : null,
+              creditCardNumber: payment.paymentOption === 'credit card'
+                ? payment.creditCardNumber || existingUser.payment.creditCardNumber
+                : null,
+              expiryDate: payment.paymentOption === 'credit card'
+                ? payment.expiryDate || existingUser.payment.expiryDate
+                : null,
+              cvc: payment.paymentOption === 'credit card'
+                ? payment.cvc || existingUser.payment.cvc
+                : null,
+              paypalEmail: payment.paymentOption === 'paypal'
+                ? payment.paypalEmail || existingUser.payment.paypalEmail
+                : null,
+            })
+            .usingConnection(db);
+
+          // ID ändert sich nicht, also beibehalten
+          newPaymentId = existingUser.payment.id;
+
+        } else {
+          // Noch kein Payment vorhanden => Neues anlegen
+          const createdPayment = await Payment.create({
+            user: existingUser.id, // Zuordnung zum aktuellen User
+            paymentOption: payment.paymentOption,
+            iban: payment.paymentOption === 'bank transfer' ? payment.iban : null,
+            creditCardNumber: payment.paymentOption === 'credit card' ? payment.creditCardNumber : null,
+            expiryDate: payment.paymentOption === 'credit card' ? payment.expiryDate : null,
+            cvc: payment.paymentOption === 'credit card' ? payment.cvc : null,
+            paypalEmail: payment.paymentOption === 'paypal' ? payment.paypalEmail : null,
+          })
+            .usingConnection(db)
+            .fetch();
+
+          newPaymentId = createdPayment.id;
+        }
+      }
+
+      //--------------------------------
+      // (c) User aktualisieren
+      //--------------------------------
       const updatedUser = await User.updateOne({ id: userId })
         .set({
           emailAddress: emailAddress || existingUser.emailAddress,
@@ -174,11 +244,18 @@ module.exports = {
           firstName: firstName || existingUser.firstName,
           lastName: lastName || existingUser.lastName,
           isAdmin: typeof isAdmin === 'boolean' ? isAdmin : existingUser.isAdmin,
-          address: address.id,
+
+          // Adresse
+          address: address.id || existingUser.address.id,
+
+          // Payment-Verknüpfung aktualisieren, falls wir ein Payment angelegt/aktualisiert haben
+          payment: newPaymentId || existingUser.payment.id || null,
         })
         .usingConnection(db);
 
+      // Passwort aus dem Rückgabeobjekt löschen
       delete updatedUser.password;
+
       return updatedUser;
     });
   },

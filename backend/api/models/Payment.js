@@ -1,22 +1,17 @@
 /**
  * Payment.js
  *
- * @description :: A model definition represents a database table/collection.
- * @docs        :: https://sailsjs.com/docs/concepts/models-and-orm/models
+ * @description :: A model definition for handling different payment types
+ *                (credit card, bank transfer, paypal).
  */
 
 module.exports = {
-
   attributes: {
 
-    iban: {
-      type: 'string',
-      required: true,
-      unique: true,
-      maxLength: 34,
-      example: 'DE89370400440532013000'
-    },
-
+    /**
+     * paymentOption
+     * "credit card", "bank transfer" oder "paypal"
+     */
     paymentOption: {
       type: 'string',
       required: true,
@@ -24,26 +19,65 @@ module.exports = {
       example: 'credit card'
     },
 
-    currency: {
+    /**
+     * Felder für Banküberweisung
+     */
+    iban: {
       type: 'string',
-      required: true,
-      maxLength: 3,
-      example: 'EUR'
+      allowNull: true,   // IBAN ist nur relevant, wenn paymentOption = 'bank transfer'
+      description: 'IBAN bei Banküberweisung. Beispiel: DE89370400440532013000'
     },
 
+    /**
+     * Felder für Kreditkarte
+     */
+    creditCardNumber: {
+      type: 'string',
+      allowNull: true,
+      description: 'Nur relevant bei credit card, z.B. 1234567890123456'
+    },
+
+    expiryDate: {
+      type: 'string',
+      allowNull: true,
+      description: 'Nur relevant bei credit card, z.B. "12/24"'
+    },
+
+    cvc: {
+      type: 'string',
+      allowNull: true,
+      description: 'Nur relevant bei credit card, z.B. "123"'
+    },
+
+    /**
+     * Felder für PayPal
+     */
+    paypalEmail: {
+      type: 'string',
+      allowNull: true,
+      isEmail: true,
+      description: 'Nur relevant bei PayPal, z.B. user@paypal.com'
+    },
+
+    /**
+     * Besitzer dieser Payment-Daten
+     * unique: true => Ein User kann nur genau EIN Payment haben
+     */
     user: {
       model: 'user',
       unique: true,
       required: true,
-      description: 'The user associated with this payment information.'
+      description: 'User zu dem dieses Payment gehört.'
     },
 
+    /**
+     * Optional: Falls du Payment-Daten auch direkt an eine Order knüpfen willst
+     */
     order: {
       model: 'order',
       unique: true,
-      description: 'The order associated with this payment information.'
+      description: 'Die zugehörige Order, falls direkt verknüpft.'
     }
-
 
   },
 };

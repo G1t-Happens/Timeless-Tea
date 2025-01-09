@@ -44,7 +44,7 @@
       </div>
 
       <!-- Account/Logout + Warenkorb -->
-      <div class="d-flex align-items-center position-relative" ref="accountContainerRef">
+      <div class="d-flex align-items-center position-relative">
         <!-- Account-Icon -->
         <img
           :src="currentAccountIcon"
@@ -52,6 +52,7 @@
           alt="Account-Icon"
           @click="handleAccountIconClick"
           class="icon-wrapper"
+          ref="accountContainerRef"
         />
 
         <!-- Logout-Popup -->
@@ -62,13 +63,41 @@
         </transition>
 
         <!-- Shopping Cart -->
-        <a class="icon-wrapper" aria-label="ShoppingCart">
+        <div class="position-relative icon-wrapper" @click="toggleCart">
           <img
             src="@/assets/icons/shopingcart.png"
             alt="ShoppingCart"
             class="round-icon-responsive"
           />
-        </a>
+          <span v-if="cartStore.totalItems > 0" class="cart-count">{{ cartStore.totalItems }}</span>
+        </div>
+
+        <!-- Warenkorb Popup -->
+        <transition name="fade">
+          <div v-if="showCart" class="cart-popup" @click.stop>
+            <div v-if="cartStore.items.length === 0" class="empty-cart">
+              <p>Ihr Warenkorb ist leer.</p>
+            </div>
+            <div v-else>
+              <ul>
+                <li v-for="item in cartStore.items" :key="item.productId" class="cart-item">
+                  <img :src="item.image" alt="Produktbild" class="cart-item-image" />
+                  <div class="cart-item-details">
+                    <p class="cart-item-name">{{ item.name }}</p>
+                    <p>{{ item.quantity }} Artikel - je {{ item.price }}€</p>
+                  </div>
+                  <button @click="removeItem(item.productId)" class="remove-button">
+                    Entfernen
+                  </button>
+                </li>
+              </ul>
+              <div class="cart-total">
+                <p>Gesamt: {{ cartStore.totalAmount }}€</p>
+                <router-link to="/cart" class="btn to-cart">Zum Warenkorb</router-link>
+              </div>
+            </div>
+          </div>
+        </transition>
       </div>
     </div>
   </header>
@@ -78,16 +107,20 @@
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/user.js'
+import { useCartStore } from '@/stores/shoppingCart.js' // Importieren des Cart Stores
 import accountIcon from '@/assets/icons/account.png'
 import accountLoggedInIcon from '@/assets/icons/accountLoggedIn.png'
 
+// Initialisieren der Stores und Router
 const userStore = useUserStore()
+const cartStore = useCartStore()
 const router = useRouter()
 const user = computed(() => userStore.user)
 
 // Popup-Refs
 const showSettingsPopup = ref(false)
 const showLogoutPopup = ref(false)
+const showCart = ref(false)
 const settingsPopupRef = ref(null)
 const settingsContainerRef = ref(null)
 const popupRef = ref(null)
@@ -122,6 +155,16 @@ const currentAccountIcon = computed(() => {
   return user.value ? accountLoggedInIcon : accountIcon
 })
 
+// Toggle Warenkorb Popup
+const toggleCart = () => {
+  showCart.value = !showCart.value
+}
+
+// Entfernen eines Artikels aus dem Warenkorb
+const removeItem = (productId) => {
+  cartStore.removeFromCart(productId)
+}
+
 // Globale Klick-Listener registrieren
 const handleGlobalClick = (event) => {
   const target = event.target
@@ -138,6 +181,15 @@ const handleGlobalClick = (event) => {
   // Logout-Popup schließen
   if (showLogoutPopup.value && popupRef.value && !accountContainerRef.value.contains(target)) {
     showLogoutPopup.value = false
+  }
+
+  // Warenkorb schließen, wenn außerhalb geklickt wird
+  if (
+    showCart.value &&
+    !event.target.closest('.cart-popup') &&
+    !event.target.closest('.icon-wrapper')
+  ) {
+    showCart.value = false
   }
 }
 
@@ -202,6 +254,7 @@ header {
   display: inline-flex;
   align-items: center;
   cursor: pointer;
+  position: relative;
 }
 
 /* Logo */
@@ -268,5 +321,84 @@ header {
 
 .logout-popup button:hover {
   background-color: #8f4c37;
+}
+
+/* Warenkorb Popup */
+.cart-popup {
+  position: absolute;
+  flex: 1;
+  top: 70px;
+  right: 10px;
+  background: white;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border-radius: 8px;
+  padding: 16px;
+  z-index: 1000;
+  width: 350px;
+}
+
+.cart-count {
+  position: absolute;
+  top: 0;
+  right: 0;
+  background: red;
+  color: white;
+  border-radius: 50%;
+  padding: 2px 6px;
+  font-size: 12px;
+}
+
+/* Cart Item Styles */
+.cart-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.cart-item-image {
+  width: 50px;
+  height: 50px;
+  object-fit: cover;
+  border-radius: 4px;
+  margin-right: 10px;
+}
+
+.cart-item-details {
+  flex: 1;
+}
+
+.cart-item-name {
+  font-weight: bold;
+}
+
+.remove-button {
+  background: none;
+  font-weight: bold;
+  border: none;
+  color: red;
+  cursor: pointer;
+}
+
+.to-cart {
+  background-color: #4a5043;
+  color: white;
+}
+
+.to-cart:hover {
+  background-color: #9fa86d;
+}
+
+/* Cart Total */
+.cart-total {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 10px;
+  flex-wrap: wrap; /* Ermöglicht das Umfließen der Elemente */
+}
+
+/* Empty Cart */
+.empty-cart {
+  text-align: center;
 }
 </style>

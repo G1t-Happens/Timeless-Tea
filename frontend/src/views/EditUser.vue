@@ -1,26 +1,22 @@
 <template>
   <div class="edit-user">
-    <!-- Verwende die BackButton-Komponente -->
     <BackButton />
-
-    <!-- Titel für die Bearbeitungsseite -->
     <h2 class="page-title form-label">Benutzer bearbeiten</h2>
 
-    <!-- Ladeanzeige während der Datenabfrage -->
     <div v-if="loading" class="text-center">
       <p>Lade Benutzer...</p>
     </div>
 
-    <!-- Formular zur Bearbeitung des Benutzers -->
     <div v-else>
+      <!-- Hauptformular -->
       <form @submit.prevent="handleSave" class="form-container">
-        <!-- Anzeige der UserID -->
+        <!-- USER-ID -->
         <div class="form-group">
           <label for="userId" class="form-label">User ID</label>
           <div id="userId" class="form-control static-field">{{ user.id }}</div>
         </div>
 
-        <!-- Eingabefeld für die E-Mail-Adresse -->
+        <!-- E-Mail -->
         <div class="form-group">
           <label for="email" class="form-label">E-Mail-Adresse</label>
           <input
@@ -32,7 +28,7 @@
           />
         </div>
 
-        <!-- Vornamen -->
+        <!-- Vorname -->
         <div class="form-group">
           <label for="firstName" class="form-label">Vorname</label>
           <input
@@ -44,13 +40,13 @@
           />
         </div>
 
-        <!-- Nachnamen -->
+        <!-- Nachname -->
         <div class="form-group">
           <label for="lastName" class="form-label">Nachname</label>
           <input v-model="user.lastName" type="text" id="lastName" class="form-control" required />
         </div>
 
-        <!-- Toggle-Switch für Admin-Status -->
+        <!-- Admin Toggle (nur für Admins) -->
         <div v-if="currentUser.isAdmin" class="form-group toggle-switch">
           <label class="form-label" for="isAdmin">Admin</label>
           <label class="switch" aria-labelledby="isAdmin">
@@ -64,7 +60,6 @@
         <div class="form-group address-fields">
           <label for="street" class="form-label">Straße*</label>
           <input v-model="user.address.street" type="text" id="street" class="form-control" />
-
           <label for="houseNumber" class="form-label">Hausnummer*</label>
           <input
             v-model="user.address.houseNumber"
@@ -72,7 +67,6 @@
             id="houseNumber"
             class="form-control"
           />
-
           <label for="addressAddition" class="form-label">Adresszusatz</label>
           <input
             v-model="user.address.addressAddition"
@@ -80,10 +74,8 @@
             id="addressAddition"
             class="form-control"
           />
-
-          <label for="city" class="form-label">Stadt</label>
+          <label for="city" class="form-label">Stadt*</label>
           <input v-model="user.address.city" type="text" id="city" class="form-control" />
-
           <label for="postalCode" class="form-label">Postleitzahl*</label>
           <input
             v-model="user.address.postalCode"
@@ -91,49 +83,42 @@
             id="postalCode"
             class="form-control"
           />
-
           <label for="country" class="form-label">Land*</label>
           <input v-model="user.address.country" type="text" id="country" class="form-control" />
         </div>
 
-        <!-- Zahlungsmethode (optional) -->
+        <!-- Zahlungsdaten: Aktuelle Methode + Bearbeiten-Button -->
         <div class="form-group">
           <h3 class="form-label">Zahlungsmethode</h3>
-          <button class="dropdown-button" type="button" @click="toggleDropdown('payment')">
-            ▾ Zahlungsmethode bearbeiten
-          </button>
-          <div v-if="activeDropdown === 'payment'" class="dropdown-menu">
-            <div class="payment-fields">
-              <div class="form-group">
-                <label for="paymentOption" class="form-label">Zahlungsoption</label>
-                <select
-                  v-model="user.payment.paymentOption"
-                  id="paymentOption"
-                  class="form-control"
-                >
-                  <option value="credit card">Kreditkarte</option>
-                  <option value="bank transfer">Banküberweisung</option>
-                  <option value="paypal">PayPal</option>
-                </select>
-              </div>
-              <div class="form-group">
-                <label for="currency" class="form-label">Währung</label>
-                <input
-                  v-model="user.payment.currency"
-                  type="text"
-                  id="currency"
-                  class="form-control"
-                />
-              </div>
-              <div class="form-group">
-                <label for="iban" class="form-label">IBAN</label>
-                <input v-model="user.payment.iban" type="text" id="iban" class="form-control" />
-              </div>
+
+          <!-- Aktuelle Zahlungsmethode anzeigen -->
+          <div class="payment-summary">
+            <strong>Aktuell:</strong>
+            <div v-if="user.payment.paymentOption === 'credit card'">
+              <p><strong>Kreditkarte</strong></p>
+              <p>Nummer: {{ obfuscatedCardNumber }}</p>
+              <p>Ablaufdatum: {{ user.payment.expiryDate || 'n/a' }}</p>
+            </div>
+            <div v-else-if="user.payment.paymentOption === 'bank transfer'">
+              <p><strong>Banküberweisung</strong></p>
+              <p>IBAN: {{ obfuscatedIban }}</p>
+            </div>
+            <div v-else-if="user.payment.paymentOption === 'paypal'">
+              <p><strong>PayPal</strong></p>
+              <p>E-Mail: {{ obfuscatedPaypalEmail }}</p>
+            </div>
+            <div v-else>
+              <p>Keine Zahlungsmethode hinterlegt.</p>
             </div>
           </div>
+
+          <!-- Button zum Öffnen des Payment-Modals -->
+          <button type="button" class="btn btn-secondary" @click="openPaymentModal">
+            Zahlungsmethode bearbeiten
+          </button>
         </div>
 
-        <!-- Button-Gruppe für Speichern und Löschen -->
+        <!-- Speichern/Löschen -->
         <div class="button-group">
           <button type="submit" class="btn btn-primary">Speichern</button>
           <button
@@ -147,6 +132,9 @@
         </div>
       </form>
     </div>
+
+    <!-- PaymentModal -->
+    <PaymentModal :show="showPaymentModal" :payment="user.payment" @close="closePaymentModal" />
   </div>
 </template>
 
@@ -156,14 +144,20 @@ import { useUserStore } from '@/stores/user'
 import { useRoute, useRouter } from 'vue-router'
 import axios from 'axios'
 import BackButton from '@/components/navigation/BackButton.vue'
+import PaymentModal from '@/components/PaymentModal.vue'
 
+// UserStore + Router
 const userStore = useUserStore()
 const currentUser = computed(() => userStore.user)
 const route = useRoute()
 const router = useRouter()
+
 const loading = ref(true)
-const activeDropdown = ref(null)
+const showPaymentModal = ref(false)
+
 const basePath = computed(() => (currentUser.value?.isAdmin ? '/admin' : '/user'))
+
+// Lokales User-Objekt
 const user = ref({
   id: null,
   emailAddress: '',
@@ -180,33 +174,55 @@ const user = ref({
     country: '',
   },
   payment: {
-    paymentOption: 'Rechnung',
-    currency: 'EUR',
+    id: null,
+    paymentOption: '', // leer => optional
     iban: '',
+    creditCardNumber: '',
+    expiryDate: '',
+    cvc: '',
+    paypalEmail: '',
   },
 })
 
-// Daten laden
 onMounted(async () => {
   await fetchUser(route.params.id)
 })
 
+/**
+ * User-Daten laden
+ */
 const fetchUser = async (id) => {
   loading.value = true
   try {
-    const response = await axios.get(`/user/${id}`)
-    user.value = response.data
+    const { data } = await axios.get(`/user/${id}`)
+    user.value = data
+
+    // Falls kein Payment existiert, init default
+    if (!user.value.payment) {
+      user.value.payment = {
+        id: null,
+        paymentOption: '', // leer
+        iban: '',
+        creditCardNumber: '',
+        expiryDate: '',
+        cvc: '',
+        paypalEmail: '',
+      }
+    }
   } catch (error) {
     console.error('Fehler beim Laden des Benutzers:', error)
+    alert('Benutzer konnte nicht geladen werden.')
   } finally {
     loading.value = false
   }
 }
 
-//Benutzer Updaten
+/**
+ * ALLES in einem PATCH-Call
+ */
 const handleSave = async () => {
   try {
-    const updatedData = {
+    const updatedUserData = {
       emailAddress: user.value.emailAddress,
       firstName: user.value.firstName,
       lastName: user.value.lastName,
@@ -214,18 +230,23 @@ const handleSave = async () => {
       address: user.value.address,
     }
 
-    // PATCH /user/:id
-    await axios.patch(`/user/${user.value.id}`, updatedData)
+    // Nur wenn der User eine paymentOption ausgewählt hat => Payment anfügen
+    if (user.value.payment.paymentOption) {
+      updatedUserData.payment = { ...user.value.payment }
+    }
 
-    // Erfolgreich gespeichert => z.B. zurück zur Admin-Übersicht
-    await router.push(basePath.value)
+    // 1 Patch Call
+    await axios.patch(`/user/${user.value.id}`, updatedUserData)
+
+    alert('Benutzerdaten erfolgreich aktualisiert!')
+    router.go()
   } catch (error) {
     console.error('Fehler beim Speichern des Benutzers:', error)
-    alert('Fehler beim Speichern des Benutzers')
+    alert('Fehler beim Speichern der Benutzerdaten')
   }
 }
 
-// Benutzer löschen
+// Nur Admin
 const deleteUser = async (id) => {
   const confirmed = window.confirm('Möchten Sie diesen Benutzer wirklich löschen?')
   if (!confirmed) return
@@ -235,17 +256,42 @@ const deleteUser = async (id) => {
     await router.push(basePath.value)
   } catch (error) {
     console.error('Fehler beim Löschen des Benutzers:', error)
+    alert('Fehler beim Löschen des Benutzers')
   }
 }
 
-// Dropdowns ein-/ausklappen
-const toggleDropdown = (dropdown) => {
-  activeDropdown.value = activeDropdown.value === dropdown ? null : dropdown
+// Payment-Modal öffnen/schließen
+const openPaymentModal = () => {
+  showPaymentModal.value = true
 }
+const closePaymentModal = () => {
+  showPaymentModal.value = false
+}
+
+// Obfuskations-Helpers
+const obfuscatedCardNumber = computed(() => {
+  if (!user.value.payment.creditCardNumber) return 'n/a'
+  const last4 = user.value.payment.creditCardNumber.slice(-4)
+  return '**** **** **** ' + last4
+})
+
+const obfuscatedIban = computed(() => {
+  if (!user.value.payment.iban) return 'n/a'
+  const iban = user.value.payment.iban.replace(/\s/g, '')
+  if (iban.length <= 6) return iban
+  return iban.slice(0, 4) + ' **** **** ' + iban.slice(-2)
+})
+
+const obfuscatedPaypalEmail = computed(() => {
+  if (!user.value.payment.paypalEmail) return 'n/a'
+  const [localPart, domain] = user.value.payment.paypalEmail.split('@')
+  if (!domain) return user.value.payment.paypalEmail
+  const obfuscatedLocal = localPart[0] + '****'
+  return obfuscatedLocal + '@' + domain
+})
 </script>
 
 <style scoped>
-/* Stil für den Hauptcontainer */
 .edit-user {
   padding: 30px;
   max-width: 800px;
@@ -253,6 +299,13 @@ const toggleDropdown = (dropdown) => {
   background-color: #fff;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   border-radius: 8px;
+}
+
+.page-title {
+  text-align: center;
+  margin-bottom: 30px;
+  font-size: 1.8rem;
+  color: #333;
 }
 
 .static-field {
@@ -264,22 +317,11 @@ const toggleDropdown = (dropdown) => {
   color: #6c757d;
 }
 
-/* Titel */
-.page-title {
-  text-align: center;
-  margin-bottom: 30px;
-  font-size: 1.8rem;
-  color: #333;
-}
-
-/* Form-Container */
 .form-container {
   display: grid;
-  grid-template-columns: 1fr;
   gap: 20px;
 }
 
-/* Formulareingabefelder */
 .form-group {
   display: flex;
   flex-direction: column;
@@ -288,6 +330,7 @@ const toggleDropdown = (dropdown) => {
 .form-label {
   font-weight: bold;
   color: #333;
+  margin-bottom: 5px;
 }
 
 .form-control {
@@ -295,33 +338,60 @@ const toggleDropdown = (dropdown) => {
   border: 1px solid #ddd;
   border-radius: 8px;
   font-size: 1rem;
+  outline: none;
 }
 
 .form-control:focus {
   border-color: #007bff;
-  outline: none;
 }
 
-/* Button-Stile */
-button {
+.address-fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+}
+
+/* Payment-Anzeige */
+.payment-summary {
+  background-color: #f8f9f9;
+  border: 1px solid #eaeaea;
+  border-radius: 6px;
+  padding: 10px;
+  margin-bottom: 10px;
+}
+
+.payment-summary p {
+  margin: 0 0 5px;
+}
+
+.btn {
   padding: 10px 20px;
   font-size: 1rem;
   border-radius: 5px;
   transition: all 0.3s ease;
   border: none;
-  display: flex; /* Buttons nebeneinander anordnen */
-  flex: 1;
-  justify-content: center;
-  text-align: center;
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
 }
 
 .btn-primary {
   background-color: #4a5043;
   color: white;
+  margin-right: 10px;
 }
 
 .btn-primary:hover {
   background-color: #9fa86d;
+}
+
+.btn-secondary {
+  background-color: #6c757d;
+  color: white;
+}
+
+.btn-secondary:hover {
+  background-color: #5a6268;
 }
 
 .btn-danger {
@@ -333,45 +403,23 @@ button {
   background-color: #c0392b;
 }
 
-/* Dropdown-Menü */
-.dropdown-button {
-  padding: 8px 15px;
-  background-color: #f8f9fa;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  cursor: pointer;
-  display: inline-flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.dropdown-menu {
-  background: #f9f9f9;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  padding: 10px;
-  position: absolute;
-  z-index: 10000;
+.button-group {
   display: flex;
-  flex-direction: column;
-  gap: 8px;
-  max-width: 300px;
-  margin-top: 5px;
-}
-
-.address-fields,
-.payment-fields {
-  display: grid;
-  grid-template-columns: 1fr;
   gap: 10px;
 }
 
-/* Stil für den Toggle-Switch */
+.toggle-switch {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
 .switch {
   position: relative;
   display: inline-block;
   width: 60px;
   height: 34px;
+  margin-left: 10px;
 }
 
 .switch input {
@@ -414,30 +462,5 @@ input:focus + .slider {
 
 input:checked + .slider:before {
   transform: translateX(26px);
-}
-
-/* Runde Slider-Kanten */
-.slider.round {
-  border-radius: 34px;
-}
-
-.slider.round:before {
-  border-radius: 50%;
-}
-
-/* Optional: Farben anpassen */
-.switch input:checked + .slider {
-  background-color: #4a5043; /* Farbe wenn aktiviert */
-}
-
-.switch input:checked + .slider:before {
-  background-color: white;
-}
-
-/* Button-Group */
-.button-group {
-  display: flex;
-  justify-content: space-between;
-  gap: 10px;
 }
 </style>

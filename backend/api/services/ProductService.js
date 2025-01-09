@@ -84,6 +84,7 @@ module.exports = {
              p.name,
              p.description,
              p.price,
+             p.quantity,
              p.image,
              COUNT(pr.rating) AS "reviews",
              COALESCE(AVG(r.stars), 0) AS "averageRating",

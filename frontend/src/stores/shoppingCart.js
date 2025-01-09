@@ -1,101 +1,50 @@
 import { defineStore } from 'pinia'
-import axios from 'axios'
 
 export const useCartStore = defineStore('cart', {
   state: () => ({
-    cart: [], // Warenkorb: Liste der Artikel
-    shippingAddress: null, // Versandadresse
-    paymentMethod: null, // Zahlungsmethode
-    orderDetails: null, // Details der letzten Bestellung
-    error: null, // Fehler für die Anzeige
+    items: JSON.parse(localStorage.getItem('cartItems')) || [],
   }),
-
   getters: {
-    // Anzahl der Artikel im Warenkorb
-    cartItemCount(state) {
-      return state.cart.reduce((count, item) => count + item.quantity, 0)
+    totalAmount: (state) => {
+      return state.items.reduce((total, item) => total + item.price * item.quantity, 0).toFixed(2)
     },
-    // Gesamtkosten der Artikel im Warenkorb
-    cartTotal(state) {
-      return state.cart.reduce((total, item) => total + item.price * item.quantity, 0)
-    },
-    // Prüft, ob die Bestellung abgeschlossen werden kann
-    canPlaceOrder(state) {
-      return state.cart.length > 0 && state.shippingAddress && state.paymentMethod
+    totalItems: (state) => {
+      return state.items.reduce((total, item) => total + item.quantity, 0)
     },
   },
-
   actions: {
-    /**
-     * Artikel in den Warenkorb hinzufügen
-     * @param {Object} product { id, name, price, quantity }
-     */
-    addToCart(product) {
-      const existingProduct = this.cart.find((item) => item.id === product.id)
-      if (existingProduct) {
-        existingProduct.quantity += product.quantity
+    addToCart(product, quantity) {
+      const existingItem = this.items.find((item) => item.productId === product.id)
+      if (existingItem) {
+        existingItem.quantity += quantity
       } else {
-        this.cart.push({ ...product })
+        this.items.push({
+          productId: product.id,
+          name: product.name,
+          price: product.price,
+          quantity,
+          image: product.image,
+        })
       }
+      this.saveCart()
     },
-
-    /**
-     * Artikel aus dem Warenkorb entfernen
-     * @param {number} productId
-     */
     removeFromCart(productId) {
-      this.cart = this.cart.filter((item) => item.id !== productId)
+      this.items = this.items.filter((item) => item.productId !== productId)
+      this.saveCart()
     },
-
-    /**
-     * Warenkorb leeren
-     */
+    updateQuantity(productId, quantity) {
+      const item = this.items.find((item) => item.productId === productId)
+      if (item) {
+        item.quantity = quantity
+        this.saveCart()
+      }
+    },
     clearCart() {
-      this.cart = []
+      this.items = []
+      this.saveCart()
     },
-
-    /**
-     * Versandadresse festlegen
-     * @param {Object} address { street, city, postalCode, country }
-     */
-    setShippingAddress(address) {
-      this.shippingAddress = address
-    },
-
-    /**
-     * Zahlungsmethode festlegen
-     * @param {Object} paymentMethod { type, details }
-     */
-    setPaymentMethod(paymentMethod) {
-      this.paymentMethod = paymentMethod
-    },
-
-    /**
-     * Bestellung aufgeben
-     */
-    async placeOrder() {
-      if (!this.canPlaceOrder) {
-        this.error = 'Bitte füllen Sie alle Felder aus, bevor Sie die Bestellung aufgeben.'
-        return
-      }
-
-      try {
-        const payload = {
-          items: this.cart,
-          shippingAddress: this.shippingAddress,
-          paymentMethod: this.paymentMethod,
-          totalAmount: this.cartTotal,
-        }
-
-        const response = await axios.post('/api/orders', payload)
-        this.orderDetails = response.data
-
-        // Warenkorb nach erfolgreicher Bestellung leeren
-        this.clearCart()
-      } catch (err) {
-        console.error(err)
-        this.error = 'Fehler beim Platzieren der Bestellung. Bitte versuchen Sie es später erneut.'
-      }
+    saveCart() {
+      localStorage.setItem('cartItems', JSON.stringify(this.items))
     },
   },
 })

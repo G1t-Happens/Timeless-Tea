@@ -160,7 +160,7 @@ module.exports.bootstrap = async function() {
     ];
 
     for (let teaInfo of teaNamesDescriptions) {
-      let price = (Math.random() * 20 + 5).toFixed(2);
+      let price = (Math.random() * (15 - 3) + 3).toFixed(2);
       let reviews = Math.floor(Math.random() * 500);
       let imageIndex = Math.floor(Math.random() * images.length);
 
@@ -168,6 +168,7 @@ module.exports.bootstrap = async function() {
         name: teaInfo.name,
         image: `../../src/assets/images/${images[imageIndex]}`,
         price: price,
+        quantity: 100,
         description: teaInfo.description,
         reviews: reviews,
       }).fetch();

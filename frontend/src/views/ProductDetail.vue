@@ -26,26 +26,31 @@
           <span v-for="n in emptyStars" :key="'empty-' + n">☆</span>
           <small>({{ product.reviews }} Bewertungen)</small>
         </div>
-        <p v-if="product.price" class="price">Preis: {{ product.price }}€</p>
+        <p v-if="product.price" class="price">
+          Preis: {{ formattedPrice }}€ - {{ product.quantity }}g
+        </p>
+        <!-- Zusätzliche Preisangaben -->
+        <p class="point-out-info">Preis inkl. 7% MwSt. zzgl. Versand</p>
+        <p class="content-info">Inhalt: {{ product.quantity }}g ({{ pricePerKg }}€ / kg)</p>
         <p v-if="product.description">{{ product.description }}</p>
         <div class="actions">
-          <label for="quantity-input" class="quantity-label">Menge in Gramm (g):</label>
-          <input
-            id="quantity-input"
-            type="number"
-            v-model="quantity"
-            min="50"
-            step="50"
-            class="quantity-input"
-            placeholder="Menge (g)"
-          />
+          <label for="quantity" class="point-out-info">Menge:</label>
+          <div class="quantity-selector">
+            <button @click="decreaseQuantity" :disabled="quantity <= 1" class="quantity-button">
+              -
+            </button>
+            <span class="quantity-display">{{ quantity }}</span>
+            <button @click="increaseQuantity" class="quantity-button">+</button>
+          </div>
           <!-- Warenkorb Button mit Icon -->
           <button @click="addToCart" class="btn">
             <i class="bi bi-cart-fill"></i> In den Warenkorb
           </button>
         </div>
         <!-- Wunschzettel Button mit Herz-Icon -->
-        <button class="btn secondary"><i class="bi bi-heart-fill"></i> Auf den Wunschzettel</button>
+        <button class="btn secondary" @click="toggleWishlist">
+          <i :class="isWished ? 'bi bi-heart-fill' : 'bi bi-heart'"></i> Auf den Wunschzettel
+        </button>
       </div>
     </div>
 
@@ -65,24 +70,60 @@ import { useRoute, useRouter } from 'vue-router'
 import axios from 'axios'
 import ArticleInfoPanel from '@/components/ArticleInfoPanel.vue'
 import BackButton from '@/components/navigation/BackButton.vue'
+import { useCartStore } from '@/stores/shoppingCart.js'
+import { useWishlistStore } from '@/stores/wishlist.js'
 
+// Initialisieren der Stores und Router
+const cartStore = useCartStore()
+const wishlistStore = useWishlistStore()
 const router = useRouter()
 const route = useRoute()
+
+// Reaktive Zustände
 const product = ref(null)
 const loading = ref(true)
-const quantity = ref(50)
+const quantity = ref(1)
 const showImageModal = ref(false) // Zustand für das Modal
 
 const productId = route.params.id
 
+// Berechnete Eigenschaften
 const fullStars = computed(() => Math.floor(product.value?.averageRating || 0))
 const emptyStars = computed(() => 5 - fullStars.value)
 
+// Formatierer für Preise
+const formatter = new Intl.NumberFormat('de-DE', {
+  style: 'decimal',
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2,
+})
+
+// Berechnete Eigenschaft: Formatierter Preis
+const formattedPrice = computed(() => {
+  return product.value && product.value.price ? formatter.format(product.value.price) : '0,00'
+})
+
+// Berechnete Eigenschaft: Preis pro Einheit
+// Preis pro Kilogramm berechnen (als Zahl)
+const pricePerKg = computed(() => {
+  if (product.value.price && product.value.quantity) {
+    const pricePerGram = product.value.price / product.value.quantity
+    const pricePerKilogram = pricePerGram * 1000
+    return parseFloat(pricePerKilogram.toFixed(2)) // Rückgabe als Zahl
+  }
+  return 0.0
+})
+
+// Zustände für den Wunschzettel
+const isWished = computed(() => wishlistStore.isWished(productId))
+
+// Funktion zum Abrufen der Produktdetails
 const fetchProduct = async () => {
   try {
     const { data } = await axios.get(`/product/${productId}`)
     product.value = data
-  } catch {
+  } catch (error) {
+    console.error('Fehler beim Laden der Produktdetails:', error)
     alert('Produktdetails konnten nicht geladen werden.')
     await router.push('/')
   } finally {
@@ -90,21 +131,44 @@ const fetchProduct = async () => {
   }
 }
 
-const addToCart = () => {
-  if (quantity.value < 50 || quantity.value % 50 !== 0) {
-    alert('Bitte gültige Menge (50g Schritte) eingeben.')
-    return
-  }
-  alert(`${quantity.value}g ${product.value.name} in den Warenkorb gelegt.`)
+// Funktionen zur Mengensteuerung
+const increaseQuantity = () => {
+  quantity.value += 1
 }
 
-// Öffnen und Schließen des Modals
+const decreaseQuantity = () => {
+  if (quantity.value > 1) {
+    quantity.value -= 1
+  }
+}
+
+// Funktion zum Hinzufügen zum Warenkorb
+const addToCart = () => {
+  if (quantity.value < 1 || !Number.isInteger(quantity.value)) {
+    alert('Bitte eine gültige Menge (mindestens 1 Einheit) eingeben.')
+    return
+  }
+  cartStore.addToCart(product.value, quantity.value)
+  alert(`${quantity.value} Einheit(en) von ${product.value.name} in den Warenkorb gelegt.`)
+}
+
+// Funktionen zum Öffnen und Schließen des Modals
 const openImageModal = () => {
   showImageModal.value = true
 }
 
 const closeImageModal = () => {
   showImageModal.value = false
+}
+
+// Funktionen zum Wunschzettel
+const toggleWishlist = () => {
+  wishlistStore.toggleWishlist(productId)
+  if (wishlistStore.isWished(productId)) {
+    alert(`${product.value.name} wurde zum Wunschzettel hinzugefügt.`)
+  } else {
+    alert(`${product.value.name} wurde vom Wunschzettel entfernt.`)
+  }
 }
 
 onMounted(fetchProduct)
@@ -181,6 +245,75 @@ onMounted(fetchProduct)
     padding 0.3s ease-in-out;
 }
 
+/* Zusätzliche Preisangaben */
+.point-out-info {
+  font-weight: bold;
+  font-size: 14px;
+  color: #555; /* Dezente Farbe */
+  margin-bottom: 4px;
+}
+
+.content-info {
+  font-size: 14px;
+  color: #555; /* Dezente Farbe */
+  margin-bottom: 8px;
+}
+
+/* Sternebewertung */
+.rating {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+/* Stil für die Preisangabe */
+.price {
+  font-weight: bold;
+  font-size: 18px;
+  color: #c06e52;
+}
+
+/* Aktionen */
+.actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Stil für die Mengensteuerung */
+.quantity-selector {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.quantity-button {
+  width: 70px;
+  height: 50px;
+  background-color: #9fa86d;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  font-size: 20px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.quantity-button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.quantity-button:hover:not(:disabled) {
+  background-color: #7a844b;
+}
+
+.quantity-display {
+  font-size: 16px;
+  min-width: 20px;
+  text-align: center;
+}
+
 /* Modal für das Bild */
 .image-modal {
   position: fixed;
@@ -217,40 +350,7 @@ onMounted(fetchProduct)
   font-size: 14px;
 }
 
-/* Sternebewertung */
-.rating {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-}
-
-.price {
-  font-weight: bold;
-  font-size: 18px;
-  color: #c06e52;
-}
-
-/* Aktionen */
-.actions {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.quantity-label {
-  font-weight: bold;
-  margin-bottom: 5px;
-}
-
-.quantity-input {
-  width: 100%;
-  padding: 8px;
-  font-size: 16px;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  text-align: center;
-}
-
+/* Stil für die Wunschzettel-Buttons */
 .btn {
   padding: 10px 15px;
   font-size: 16px;
@@ -259,10 +359,22 @@ onMounted(fetchProduct)
   cursor: pointer;
   background: #c06e52;
   color: #fff;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  transition: background-color 0.3s ease;
+}
+
+.btn:hover {
+  background: #a35b42;
 }
 
 .btn.secondary {
   background: #9fa86d;
+}
+
+.btn.secondary:hover {
+  background: #7a844b;
 }
 
 /* Responsive Anpassungen */
