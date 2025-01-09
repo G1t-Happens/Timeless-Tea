@@ -21,18 +21,32 @@ import { useRoute } from 'vue-router'
 
 const route = useRoute()
 
-// Breadcrumbs dynamisch erstellen
+// Dynamisch Breadcrumbs erstellen
 const breadcrumbs = computed(() => {
   const pathArray = route.path.split('/').filter(Boolean) // Filtere leere Segmente
-  const breadcrumbArray = pathArray.map((segment, index) => {
-    const path = '/' + pathArray.slice(0, index + 1).join('/')
-    const routeMatch = route.matched.find((r) => r.path === path)
+  let breadcrumbArray = []
+  let i = 0
 
-    return {
-      label: routeMatch?.meta?.breadcrumb || segment,
-      path,
+  while (i < pathArray.length) {
+    const segment = pathArray[i]
+    let path = '/' + pathArray.slice(0, i + 1).join('/')
+    let label = segment // Standardmäßig das Segment als Label
+
+    // Überprüfe, ob es ein Route-Match gibt und ob das nächste Segment eine numerische ID ist
+    const routeMatch = route.matched.find((r) => r.path === path)
+    if (routeMatch && routeMatch.meta.breadcrumb) {
+      label = routeMatch.meta.breadcrumb
     }
-  })
+
+    if (i + 1 < pathArray.length && !isNaN(pathArray[i + 1])) {
+      label += `#${pathArray[i + 1]}` // Füge die ID zum Label hinzu
+      path += `/${pathArray[i + 1]}` // Füge die ID zum Pfad hinzu
+      i++ // Skip the next segment because it is a numeric ID that has been processed
+    }
+
+    breadcrumbArray.push({ label, path })
+    i++
+  }
 
   // Füge die Root-Breadcrumb hinzu
   return [{ label: 'TeeShop', path: '/' }, ...breadcrumbArray]
@@ -80,10 +94,6 @@ const isLast = (index) => index === breadcrumbs.value.length - 1
   transition: background-color 0.3s ease;
 }
 
-.breadcrumb__item--active::after {
-  background-color: #f03e3e; /* Auffälligerer Rotton für den aktiven Pfeil */
-}
-
 /* Link Styling */
 .breadcrumb__link {
   text-decoration: none;
@@ -96,7 +106,7 @@ const isLast = (index) => index === breadcrumbs.value.length - 1
 
 .breadcrumb__link:hover {
   color: #f03e3e; /* Kräftiges Rot für Hover-Effekte */
-  text-shadow: 0px 2px 6px rgba(240, 62, 62, 0.5); /* Moderner Schimmer-Effekt */
+  text-shadow: 0 2px 6px rgba(240, 62, 62, 0.5); /* Moderner Schimmer-Effekt */
 }
 
 /* Text Styling */
@@ -104,28 +114,5 @@ const isLast = (index) => index === breadcrumbs.value.length - 1
   color: #868e96; /* Dezenter Grau-Ton */
   font-weight: bold;
   cursor: default;
-}
-
-/* Responsive Styling */
-@media (max-width: 768px) {
-  .breadcrumb {
-    font-size: 16px;
-  }
-
-  .breadcrumb__item:not(:last-child)::after {
-    width: 8px;
-    height: 8px;
-    margin-left: 8px;
-    margin-right: 8px;
-  }
-
-  .breadcrumb__link {
-    font-weight: 500;
-  }
-}
-
-/* Additional Enhancements */
-.breadcrumb__item:not(:last-child)::after:hover {
-  background-color: #f03e3e; /* Hover-Highlight für Pfeile */
 }
 </style>
