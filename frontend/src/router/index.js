@@ -92,7 +92,7 @@ router.beforeEach(async (to, from, next) => {
   const userStore = useUserStore()
 
   // Routen, die keine Authentifizierung erfordern
-  const publicRoutes = ['LandingPage', 'Login', 'ProductDetail', 'MemberShip']
+  const publicRoutes = ['LandingPage', 'Login', 'ProductDetail', 'MemberShip', 'ShoppingCart']
 
   // Wenn die Route in `publicRoutes` ist, überspringe die Authentifizierung
   if (publicRoutes.includes(to.name)) {
