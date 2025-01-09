@@ -91,25 +91,25 @@ router.beforeEach(async (to, from, next) => {
   console.log('Check route....')
   const userStore = useUserStore()
 
-  // Routen, die keine Authentifizierung erfordern
-  const publicRoutes = ['LandingPage', 'Login', 'ProductDetail', 'MemberShip', 'ShoppingCart']
-
-  // Wenn die Route in `publicRoutes` ist, überspringe die Authentifizierung
-  if (publicRoutes.includes(to.name)) {
-    return next()
-  }
-
-  // Nutzer laden
-  const response = await userStore.fetchUser()
-
-  // Überprüfen, ob die Antwort `false` oder `null` ist -> dann kein User in der Session und ab zum Login
-  if (response === false || response === null) {
-    return next({ name: 'Login' })
-  }
+  // // Routen, die keine Authentifizierung erfordern
+  // const publicRoutes = ['LandingPage', 'Login', 'ProductDetail', 'MemberShip', 'ShoppingCart']
+  //
+  // // Wenn die Route in `publicRoutes` ist, überspringe die Authentifizierung
+  // if (publicRoutes.includes(to.name)) {
+  //   return next()
+  // }
+  //
+  // // Nutzer laden
+  await userStore.fetchUser()
+  //
+  // // // Überprüfen, ob die Antwort `false` oder `null` ist -> dann kein User in der Session und ab zum Login
+  // // if (response === false || response === null) {
+  // //   return next({ name: 'Login' })
+  // // }
 
   if (to.matched.some((record) => record.meta.requiresAuth)) {
     console.log('Must be logged...')
-    if (userStore.user == null) {
+    if (userStore.user == null || userStore.user === false) {
       console.log('Unauthorized -> redirect to login')
       return next({ name: 'Login' })
     } else {
@@ -119,7 +119,7 @@ router.beforeEach(async (to, from, next) => {
 
   if (to.matched.some((record) => record.meta.requiresAdmin)) {
     console.log('Must be admin ...')
-    if (userStore.user == null || !userStore.user.isAdmin) {
+    if (userStore.user == null || userStore.user === false || !userStore.user.isAdmin) {
       console.log('Unauthorized -> redirect to login')
       return next({ name: 'Login' })
     } else {

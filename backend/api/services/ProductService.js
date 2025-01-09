@@ -21,9 +21,9 @@ module.exports = {
    * @throws {BadRequestError} Wenn kein Name oder Preis übergeben wurde.
    */
   createProduct: async function (req) {
-    const { name, description, categories, price } = req.body;
+    const { name, description, categories, price, quantity } = req.body;
 
-    if (!name || !price) {
+    if (!name || !price || !quantity) {
       throw new errors.BadRequestError('Product name and price are required.');
     }
 
@@ -42,7 +42,7 @@ module.exports = {
 
     // Datenbankoperationen innerhalb einer Transaktion
     return await sails.getDatastore().transaction(async (db) => {
-      const newProduct = await Product.create({ name, description, price, image: optimizedUrl })
+      const newProduct = await Product.create({ name, description, price, quantity, image: optimizedUrl })
         .fetch()
         .usingConnection(db);
 
@@ -200,7 +200,7 @@ module.exports = {
     }
 
     // Erwartete Daten aus dem Body
-    const { name, description, categories, price } = req.body;
+    const { name, description, categories, price, quantity } = req.body;
 
     // Produkt anhand der ID laden
     const product = await Product.findOne({ id: productId });
@@ -228,7 +228,7 @@ module.exports = {
     return await sails.getDatastore().transaction(async (db) => {
       // Produkt aktualisieren
       await Product.updateOne({ id: productId })
-        .set({ name, description, price, image: optimizedUrl })
+        .set({ name, description, price, quantity, image: optimizedUrl })
         .usingConnection(db);
 
       // Kategorien neu setzen, falls übergeben
@@ -503,7 +503,7 @@ async function executeProductQuery(baseQuery, queryParams, page, size, totalCoun
  * @returns {Promise<string>} - Die URL der hochgeladenen und optimierten Datei
  * @throws {errors.BadRequestError} - Wenn keine Datei hochgeladen wurde oder ein Fehler auftritt
  */
-async function uploadFileToCloudinary(req, fieldName, productImage = null) {
+async function uploadFileToCloudinary(req, fieldName, productImage = '') {
   const upstream = req.file(fieldName);
   const newFile = upstream._files[0];
 

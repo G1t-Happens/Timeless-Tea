@@ -37,6 +37,19 @@
         <input type="number" step="0.01" v-model="price" id="price" class="form-control" required />
       </div>
 
+      <!-- Menge pro Produkt -->
+      <div class="form-group">
+        <label for="price" class="form-label">Menge in g (Gram)</label>
+        <input
+          type="number"
+          step="0.01"
+          v-model="quantity"
+          id="quantity"
+          class="form-control"
+          required
+        />
+      </div>
+
       <!-- Dropdown für Kategorienauswahl -->
       <div class="form-group">
         <label for="categories" class="form-label">Kategorien</label>
@@ -92,9 +105,10 @@ import BackButton from '@/components/navigation/BackButton.vue'
 const name = ref('')
 const description = ref('')
 const price = ref('')
-const selectedCategories = ref([]) // Array für ausgewählte Kategorien-IDs
-const organizedCategories = ref([]) // Liste der Kategorien, nach Typ gruppiert
-const activeDropdown = ref(null) // Aktuell geöffnetes Dropdown-Menü
+const quantity = ref('')
+const selectedCategories = ref([])
+const organizedCategories = ref([])
+const activeDropdown = ref(null)
 const imageFile = ref(null)
 const imagePreview = ref(null)
 
@@ -152,16 +166,17 @@ const createArticle = async () => {
   formData.append('name', name.value)
   formData.append('description', description.value)
   formData.append('price', price.value)
+  formData.append('quantity', quantity.value)
   formData.append('categories', JSON.stringify(selectedCategories.value))
-  formData.append('image', imageFile.value)
+
+  // Optional: Bild nur anhängen, wenn ein neues Bild hochgeladen wurde
+  if (imageFile.value instanceof File) {
+    formData.append('image', imageFile.value)
+  }
 
   try {
     // Anfrage zum Erstellen des Artikels auf dem Server
-    await axios.post('/product', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    })
+    await axios.post('/product', formData)
 
     // Nach erfolgreicher Erstellung zur Admin-Seite navigieren
     await router.push('/admin')

@@ -55,6 +55,19 @@
           />
         </div>
 
+        <!-- Menge pro Produkt -->
+        <div class="form-group">
+          <label for="price" class="form-label">Menge in g (Gram)</label>
+          <input
+            type="number"
+            step="0.01"
+            v-model="product.quantity"
+            id="quantity"
+            class="form-control"
+            required
+          />
+        </div>
+
         <!-- Dropdown für die Kategorienauswahl -->
         <div class="form-group">
           <label for="categories" class="form-label">Kategorien</label>
@@ -124,6 +137,7 @@ const product = ref({
   name: '',
   description: '',
   price: 0,
+  quantity: 0,
   categories: [],
   image: null,
 })
@@ -190,6 +204,7 @@ const handleSave = async () => {
   formData.append('name', product.value.name)
   formData.append('description', product.value.description)
   formData.append('price', product.value.price)
+  formData.append('quantity', product.value.quantity)
   formData.append('categories', JSON.stringify(selectedCategories.value))
 
   // Optional: Bild nur anhängen, wenn ein neues Bild hochgeladen wurde
