@@ -12,7 +12,7 @@
       <router-link :to="{ name: 'FAQ' }" class="footer-link">FAQ</router-link>
     </div>
     <div class="footer-divider"></div>
-    <p>&copy; 2024 Timeless Tea. Alle Rechte vorbehalten.</p>
+    <p>&copy; 2025 Timeless Tea. Alle Rechte vorbehalten.</p>
   </footer>
 </template>
 
