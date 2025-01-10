@@ -37,7 +37,10 @@
           </div>
 
           <!-- Verweis auf die Registrierungsseite, falls der Nutzer noch kein Konto hat -->
-          <p class="text-center mt-3">Noch kein Konto? <a href="/member">Registrieren</a></p>
+          <p class="text-center mt-3">
+            Noch kein Konto?
+            <router-link :to="{ name: 'MemberShip' }">Registrieren</router-link>
+          </p>
         </div>
       </div>
     </div>

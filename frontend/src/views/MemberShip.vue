@@ -140,7 +140,10 @@
           </div>
 
           <!-- Link zur Login-Seite für bereits registrierte Benutzer -->
-          <p class="text-center mt-3">Schon ein Konto? <a href="/login">Einloggen</a></p>
+          <p class="text-center mt-3">
+            Schon ein Konto?
+            <router-link :to="{ name: 'Login' }">Einloggen</router-link>
+          </p>
         </div>
       </div>
     </div>
