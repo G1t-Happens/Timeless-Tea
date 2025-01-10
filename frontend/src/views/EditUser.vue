@@ -183,7 +183,7 @@ const user = ref({
 
 //Admins koennen auf beliebigen user per param.id zugreifen, nicht admins nur auf die eigenen user daten
 onMounted(async () => {
-  const userId = currentUser.value.isAdmin ? route.params.id : currentUser.value.id
+  const userId = route.params.id || currentUser.value.id;
   await fetchUser(userId)
 })
 

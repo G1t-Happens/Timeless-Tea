@@ -210,12 +210,13 @@ const user = ref({
     country: '',
   },
   payment: {
-    paymentOption: null,
-    iban: null,
-    creditCardNumber: null,
-    expiryDate: null,
-    cvc: null,
-    paypalEmail: null,
+    id: null,
+    paymentOption: '',
+    iban: '',
+    creditCardNumber: '',
+    expiryDate: '',
+    cvc: '',
+    paypalEmail: '',
   },
 })
 
