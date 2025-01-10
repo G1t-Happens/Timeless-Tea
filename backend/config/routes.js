@@ -49,6 +49,13 @@ module.exports.routes = {
   'POST /order': { controller: 'OrderController', action: 'create' },
   'GET /order': 'OrderController.find',
 
+  //ContactMessageController.js
+  'POST /message': { controller: 'ContactMessageController', action: 'create' },
+  'GET /message': 'ContactMessageController.find',
+  'GET /message/:id': 'ContactMessageController.findOne',
+  'DELETE /message/:id': 'ContactMessageController.destroy',
+
+
 
 
   /***************************************************************************

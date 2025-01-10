@@ -89,6 +89,13 @@ const routes = [
     beforeEnter: adminGuard,
   },
   {
+    path: '/admin/message',
+    name: 'Message',
+    component: () => import('@/views/MessageView.vue'),
+    meta: { breadcrumb: 'message', requiresAdmin: true },
+    beforeEnter: adminGuard,
+  },
+  {
     path: '/user',
     name: 'UserDashboard',
     component: () => import('@/views/UserDashboard.vue'),

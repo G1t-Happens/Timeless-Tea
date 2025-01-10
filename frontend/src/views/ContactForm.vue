@@ -84,7 +84,7 @@
 
 <script setup>
 import { ref } from 'vue'
-import BackButton from '@/components/navigation/BackButton.vue'
+import axios from 'axios'
 
 // Formulardaten
 const form = ref({
@@ -130,22 +130,29 @@ const validateForm = () => {
 }
 
 // Formular absenden
-const submitForm = () => {
+const submitForm = async () => {
   if (validateForm()) {
-    successMessage.value = 'Vielen Dank! Ihre Nachricht wurde erfolgreich gesendet.'
-    console.log('Gesendete Formulardaten:', form.value)
+    try {
+      const response = await axios.post('/message', form.value);
+      successMessage.value = 'Vielen Dank! Ihre Nachricht wurde erfolgreich gesendet.';
 
-    // Formular zurücksetzen
-    form.value = {
-      name: '',
-      email: '',
-      subject: '',
-      message: '',
-      privacy: false,
+      console.log('Server-Antwort:', response.data);
+
+      // Formular zurücksetzen
+      form.value = {
+        name: '',
+        email: '',
+        subject: '',
+        message: '',
+        privacy: false,
+      };
+      errors.value = {};
+    } catch (error) {
+      console.error('Fehler beim Senden der Nachricht:', error.response?.data || error.message);
+      errors.value.server = 'Es gab ein Problem beim Senden Ihrer Nachricht. Bitte versuchen Sie es später erneut.';
     }
-    errors.value = {}
   }
-}
+};
 </script>
 
 <style scoped>

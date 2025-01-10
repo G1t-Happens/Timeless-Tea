@@ -183,7 +183,6 @@
         </div>
       </div>
     </div>
-
     <!-- Hauptbereich anzeigen, falls kein spezifisches Panel ausgewählt ist -->
     <div v-else class="text-center">
       <p>Bitte wählen Sie einen Verwaltungsbereich aus.</p>
@@ -205,6 +204,7 @@ const panels = ref([
   { key: 'articles', name: 'Artikel verwalten' },
   { key: 'users', name: 'User verwalten' },
   { key: 'orders', name: 'Bestellungen verwalten' },
+  { key: 'messages', name: 'Nachrichten verwalten' },
 ])
 
 const currentPanel = ref('articles') // Standardmäßig Artikel verwalten
@@ -547,6 +547,9 @@ const selectPanel = (panelKey) => {
       break
     case 'orders':
       fetchOrders()
+      break
+    case 'messages':
+      router.push('/admin/message')
       break
     default:
       break
