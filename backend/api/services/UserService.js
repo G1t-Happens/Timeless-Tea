@@ -218,6 +218,11 @@ module.exports = {
   async deleteUser(req) {
     const userId = req.params.id;
 
+    // Checken ob die id mitgegeben wurde
+    if (!userId) {
+      throw new errors.BadRequestError('Benutzer-ID ist erforderlich.');
+    }
+
     // Checken ob der User existiert
     const user = await User.findOne({ id: userId });
     if (!user) {
