@@ -112,20 +112,30 @@ const closeModal = () => {
 
 const handleConfirm = async () => {
   try {
-    // `payment` ist direkt in den `props` eingebunden
+    let result
     if (props.payment.id) {
-      // Wenn eine `id` existiert, dann ist dies ein Update
-      const updatedPayment = await updatePayment(props.payment.id, props.payment)
-      emit('save', updatedPayment.data)
+      // Zahlungsmethode aktualisieren
+      result = await updatePayment(props.payment.id, props.payment)
     } else {
-      // Andernfalls ein neuer Payment-Eintrag
-      const newPayment = await createPayment(props.payment)
-      emit('save', newPayment.data)
+      // Neue Zahlungsmethode erstellen
+      result = await createPayment(props.payment)
     }
+    emit('save', result.data) // Emit der neuen/aktualisierten Zahlungsmethode
+    resetPayment() // Eingabefelder zurücksetzen
     emit('close')
   } catch (error) {
-    console.error('Zahlung konnte nicht verarbeitet werden:', error)
+    console.error('Fehler beim Speichern der Zahlungsmethode:', error)
   }
+}
+
+const resetPayment = () => {
+  Object.assign(props.payment, {
+    paymentOption: '',
+    creditCardNumber: '',
+    iban: '',
+    paypalEmail: '',
+    expiryDate: '',
+  })
 }
 
 // Methode zum Erstellen einer neuen Zahlung

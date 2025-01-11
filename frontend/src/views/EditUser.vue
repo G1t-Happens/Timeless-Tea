@@ -255,8 +255,8 @@ const handleSave = async () => {
 
 // Zahlungsmethoden bearbeiten
 const editPayment = (payment) => {
-  editingPayment.value = { ...payment } // Kopiere die Zahlungsmethode zur Bearbeitung
-  openPaymentModal()
+  editingPayment.value = { ...payment } // Kopiere das ausgewählte Payment-Objekt vollständig
+  showPaymentModal.value = true // Öffne das Modal
 }
 
 // Zahlungsmethode löschen
@@ -269,15 +269,15 @@ const deletePayment = async (paymentId) => {
 
 // Payment-Modal öffnen/schließen
 const openPaymentModal = () => {
-  // Wenn keine Zahlungsmethode zum Bearbeiten vorliegt, setze eine leere Zahlungsmethode
-  editingPayment.value = editingPayment.value || {
+  // Zurücksetzen der `editingPayment`, um sicherzustellen, dass alte Daten nicht vorhanden sind
+  editingPayment.value = {
     paymentOption: '',
     creditCardNumber: '',
     iban: '',
     paypalEmail: '',
     expiryDate: '',
   }
-  showPaymentModal.value = true
+  showPaymentModal.value = true // Öffne das Modal
 }
 
 const closePaymentModal = () => {
@@ -285,18 +285,25 @@ const closePaymentModal = () => {
 }
 
 // Zahlungsmethode speichern
-const savePayment = (newPayment) => {
-  if (editingPayment.value) {
-    // Bestehende Zahlungsmethode aktualisieren
-    const index = user.value.payments.findIndex((payment) => payment.id === editingPayment.value.id)
-    if (index !== -1) {
-      user.value.payments[index] = newPayment
+const savePayment = async (newPayment) => {
+  try {
+    if (editingPayment.value.id) {
+      // Existierende Zahlungsmethode aktualisieren
+      const index = user.value.payments.findIndex(
+        (payment) => payment.id === editingPayment.value.id,
+      )
+      if (index !== -1) {
+        user.value.payments[index] = newPayment // Aktualisiere das Payment in der Liste
+      }
+    } else {
+      // Neue Zahlungsmethode hinzufügen
+      user.value.payments.push(newPayment)
     }
-  } else {
-    // Neue Zahlungsmethode hinzufügen
-    user.value.payments.push(newPayment)
+    await fetchUser(user.value.id)
+    closePaymentModal()
+  } catch (error) {
+    console.error('Fehler beim Speichern der Zahlungsmethode:', error)
   }
-  closePaymentModal()
 }
 
 // Obfuskations-Helpers
