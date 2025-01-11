@@ -59,9 +59,10 @@ module.exports = {
       description: 'The address associated with this user.'
     },
 
-    payment: {
-      model: 'payment',
-      description: 'The payment information associated with this user.'
+    payments: {
+      collection: 'payment',
+      via: 'user',
+      description: 'The payment informations associated with this user.'
     }
 
   },

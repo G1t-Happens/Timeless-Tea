@@ -19,7 +19,7 @@ module.exports = {
    * @throws {BadRequestError} Wenn keine Benutzer-ID übergeben wurde.
    * @throws {NotFoundError} Wenn kein Benutzer mit der übergebenen ID existiert.
    */
-  findUserById: async function(req) {
+  findUserById: async function (req) {
     const userId = req.params.id;
 
     // Benutzer-ID muss vorhanden sein, ansonsten BadRequestError
@@ -30,16 +30,18 @@ module.exports = {
     const user = await User.findOne({ id: userId })
       .populate('orders')
       .populate('address')
-      .populate('payment');
+      .populate('payments');
 
     // Wenn kein Benutzer gefunden wurde, NotFoundError werfen
     if (!user) {
       throw new errors.NotFoundError('Benutzer nicht gefunden.');
     }
 
+    // Zahlungen filtern, um nur die relevanten mit `isForOrder: false` einzuschließen
+    user.payments = user.payments.filter(payment => payment.isForOrder === false);
+
     // Entferne das Passwort aus dem Rückgabewert
     delete user.password;
-
     return user;
   },
 
@@ -133,7 +135,6 @@ module.exports = {
       lastName,
       isAdmin,
       address,
-      payment, // <== neu: Payment-Daten
     } = req.body;
 
     // 3) Aktuellen Benutzer aus der Session holen
@@ -146,7 +147,7 @@ module.exports = {
     // 4) User suchen, der aktualisiert werden soll
     const existingUser = await User.findOne({ id: userId })
       .populate('address') // falls Address-Daten direkt gebraucht
-      .populate('payment'); // <== neu: Payment-Daten gleich mitladen
+      .populate('payments'); // <== neu: Payment-Daten gleich mitladen
 
     if (!existingUser) {
       throw new errors.NotFoundError(`Benutzer mit ID ${userId} nicht gefunden.`);
@@ -182,60 +183,8 @@ module.exports = {
           })
           .usingConnection(db);
       }
-
       //--------------------------------
-      // (b) Payment aktualisieren / anlegen
-      //--------------------------------
-      let newPaymentId = existingUser.payment ? existingUser.payment.id : null;
-
-      if (payment) {
-        // Gibt es bereits Payment beim User?
-        if (existingUser.payment) {
-          // Update existierendes Payment
-          await Payment.updateOne({ id: existingUser.payment.id })
-            .set({
-              paymentOption: payment.paymentOption || existingUser.payment.paymentOption,
-              iban: payment.paymentOption === 'bank transfer'
-                ? payment.iban || existingUser.payment.iban
-                : null,
-              creditCardNumber: payment.paymentOption === 'credit card'
-                ? payment.creditCardNumber || existingUser.payment.creditCardNumber
-                : null,
-              expiryDate: payment.paymentOption === 'credit card'
-                ? payment.expiryDate || existingUser.payment.expiryDate
-                : null,
-              cvc: payment.paymentOption === 'credit card'
-                ? payment.cvc || existingUser.payment.cvc
-                : null,
-              paypalEmail: payment.paymentOption === 'paypal'
-                ? payment.paypalEmail || existingUser.payment.paypalEmail
-                : null,
-            })
-            .usingConnection(db);
-
-          // ID ändert sich nicht, also beibehalten
-          newPaymentId = existingUser.payment.id;
-
-        } else {
-          // Noch kein Payment vorhanden => Neues anlegen
-          const createdPayment = await Payment.create({
-            user: existingUser.id, // Zuordnung zum aktuellen User
-            paymentOption: payment.paymentOption,
-            iban: payment.paymentOption === 'bank transfer' ? payment.iban : null,
-            creditCardNumber: payment.paymentOption === 'credit card' ? payment.creditCardNumber : null,
-            expiryDate: payment.paymentOption === 'credit card' ? payment.expiryDate : null,
-            cvc: payment.paymentOption === 'credit card' ? payment.cvc : null,
-            paypalEmail: payment.paymentOption === 'paypal' ? payment.paypalEmail : null,
-          })
-            .usingConnection(db)
-            .fetch();
-
-          newPaymentId = createdPayment.id;
-        }
-      }
-
-      //--------------------------------
-      // (c) User aktualisieren
+      // (b) User aktualisieren
       //--------------------------------
       const updatedUser = await User.updateOne({ id: userId })
         .set({
@@ -247,9 +196,6 @@ module.exports = {
 
           // Adresse
           address: address.id || existingUser.address.id,
-
-          // Payment-Verknüpfung aktualisieren, falls wir ein Payment angelegt/aktualisiert haben
-          payment: newPaymentId || existingUser.payment.id || null,
         })
         .usingConnection(db);
 

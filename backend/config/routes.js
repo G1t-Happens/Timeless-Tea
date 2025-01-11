@@ -45,15 +45,23 @@ module.exports.routes = {
   'POST /category': { controller: 'CategoryController', action: 'create' },
   'GET /category': 'CategoryController.find',
 
-  //CategoryController.js
+  //OrderController.js
   'POST /order': { controller: 'OrderController', action: 'create' },
   'GET /order': 'OrderController.find',
+  'GET /order/detail': 'OrderController.findOrdersByUser',
+  'PATCH /order/:id/cancel': 'OrderController.cancelOrder',
 
   //ContactMessageController.js
   'POST /message': { controller: 'ContactMessageController', action: 'create' },
   'GET /message': 'ContactMessageController.find',
   'GET /message/:id': 'ContactMessageController.findOne',
   'DELETE /message/:id': 'ContactMessageController.destroy',
+
+  //PaymentController.js
+  'POST /payment/create': 'PaymentController.create',
+  'GET /payment/:userId': 'PaymentController.findPaymentsByUser',
+  'DELETE /payment/:id': 'PaymentController.destroy',
+  'PATCH /payment/:id': 'PaymentController.updatePayment',
 
 
 

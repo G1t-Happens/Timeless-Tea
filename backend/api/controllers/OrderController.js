@@ -47,14 +47,37 @@ module.exports = {
 
       // Transaktion
       const newOrder = await sails.getDatastore().transaction(async (db) => {
+        // Neues Payment-Objekt für die Order erstellen
+        const originalPayment = await Payment.findOne({ id: payment, user });
+        if (!originalPayment) {
+          throw new Error('The specified payment method does not exist or does not belong to the user.');
+        }
+
+        const orderPayment = await Payment.create({
+          paymentOption: originalPayment.paymentOption,
+          iban: originalPayment.iban,
+          creditCardNumber: originalPayment.creditCardNumber,
+          expiryDate: originalPayment.expiryDate,
+          cvc: originalPayment.cvc,
+          paypalEmail: originalPayment.paypalEmail,
+          isForOrder: true, // Markiere es als Order-spezifisches Payment
+          user,
+        }).fetch().usingConnection(db);
+
         // Bestellung erstellen
         const order = await Order.create({
           totalAmount: calculatedTotal, // Verwende den berechneten Gesamtbetrag
           orderStatus,
           user,
-          payment,
+          payment: orderPayment.id, // Verknüpfe mit dem neuen Payment
           shipping: shipping || null,
         }).fetch().usingConnection(db);
+
+
+        //Order Id auch dem Paymenteintrag mitgeben
+        await Payment.updateOne({ id: orderPayment.id }).set({
+          order: order.id
+        }).usingConnection(db);
 
         // Produkte zur Bestellung hinzufügen
         const orderProductRecords = orderProducts.map(op => ({
@@ -82,7 +105,80 @@ module.exports = {
     }
   },
 
-  find: async function () {
-    return await Category.find();
-  }
+  findOrdersByUser: async function (req, res) {
+
+    const userId = req.session.userId;
+
+    try {
+      const orders = await Order.find({ user: userId})
+        .populate('payment')
+        .populate('shipping')
+        .populate('orderProducts');
+
+      // Fetch product details for each orderProduct
+      const detailedOrders = await Promise.all(
+        orders.map(async (order) => {
+          const populatedOrderProducts = await Promise.all(
+            order.orderProducts.map(async (orderProduct) => {
+              const product = await Product.findOne({ id: orderProduct.product });
+              return {
+                ...orderProduct,
+                product,
+              };
+            })
+          );
+
+          return {
+            ...order,
+            orderProducts: populatedOrderProducts,
+          };
+        })
+      );
+      return res.ok(detailedOrders);
+    } catch (error) {
+      sails.log.error('Error fetching orders with details:', error);
+      return res.serverError({ error: 'An error occurred while fetching orders.' });
+    }
+  },
+
+  cancelOrder: async function (req, res) {
+    try {
+      const orderId = req.params.id;
+      const userId = req.session.userId;
+
+      // Check if the order ID is provided
+      if (!orderId) {
+        return res.badRequest({ error: 'Order ID is required.' });
+      }
+
+      // Fetch the order
+      const order = await Order.findOne({ id: orderId });
+
+      // Check if the order exists
+      if (!order) {
+        return res.notFound({ error: 'Order not found.' });
+      }
+
+      // Check if my order
+      if(order.user !== userId) {
+        return res.badRequest({ error: 'NOT MY ORDER' });
+      }
+
+      // Check if the order can be canceled (only "open" and "processing" allowed)
+      if (!['open', 'processing'].includes(order.orderStatus)) {
+        return res.badRequest({
+          error: 'Order cannot be canceled. Only orders with status "open" or "processing" can be canceled.',
+        });
+      }
+
+      // Update the order status to "cancel"
+      const updatedOrder = await Order.updateOne({ id: orderId }).set({ orderStatus: 'canceled' });
+
+      // Return the updated order
+      return res.ok(updatedOrder);
+    } catch (error) {
+      sails.log.error('Error canceling order:', error);
+      return res.serverError({ error: 'An error occurred while canceling the order.' });
+    }
+  },
 };

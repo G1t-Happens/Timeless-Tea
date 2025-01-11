@@ -5,73 +5,166 @@
     <div v-if="loading" class="loading">
       <p>Loading orders...</p>
     </div>
-    <div v-if="!loading && sortedOrders.length === 0" class="empty">
-      <p>No orders found.</p>
-    </div>
-    <div v-else>
-      <div class="order-list">
-        <div v-for="order in sortedOrders" :key="order.id" class="order-item">
-          <div class="order-details">
-            <p><strong>Order ID:</strong> {{ order.id }}</p>
-            <p><strong>Status:</strong> {{ order.orderStatus }}</p>
-            <p><strong>Gesamt:</strong> €{{ order.totalAmount.toFixed(2) }}</p>
-            <p><strong>Bestellt am:</strong> {{ formatDate(order.createdAt) }}</p>
-            <p><strong>Bezahlmethode:</strong> {{ order.payment.paymentOption }}</p>
-            <p><strong>Lieferadresse:</strong> {{ formatAddress(order.user.address) }}</p>
-          </div>
-          <div class="order-actions">
-            <button
-              v-if="order.orderStatus !== 'cancel'"
-              class="cancel-button"
-              @click="cancelOrder(order.id)"
-            >
-              Bestellung stornieren
-            </button>
+    <div v-if="!loading">
+      <section class="active-orders">
+        <h3 class="section-title">Aktive Bestellungen</h3>
+        <div v-if="activeOrders.length === 0" class="empty">
+          <p>Keine aktiven Bestellungen vorhanden.</p>
+        </div>
+        <div v-else class="order-list">
+          <div v-for="order in activeOrders" :key="order.id" class="order-item">
+            <div class="order-header">
+              <p class="order-id"><strong>Order ID:</strong> {{ order.id }}</p>
+              <p class="order-status"><strong>Status:</strong> {{ order.orderStatus }}</p>
+              <p class="order-total">
+                <strong>Gesamt:</strong> €{{ order.totalAmount.toFixed(2) }}
+              </p>
+              <p class="order-date">
+                <strong>Bestellt am:</strong> {{ formatDate(order.createdAt) }}
+              </p>
+            </div>
+            <div class="order-payment-details">
+              <p>
+                <strong>Bezahlmethode:</strong>
+                {{ order.payment?.paymentOption || 'Keine Angaben' }}
+              </p>
+              <template v-if="order.payment?.paymentOption === 'bank transfer'">
+                <p><strong>IBAN:</strong> {{ order.payment.iban }}</p>
+              </template>
+              <template v-else-if="order.payment?.paymentOption === 'credit card'">
+                <p><strong>Kreditkartennummer:</strong> {{ order.payment.creditCardNumber }}</p>
+                <p><strong>Ablaufdatum:</strong> {{ order.payment.expiryDate }}</p>
+              </template>
+              <template v-else-if="order.payment?.paymentOption === 'paypal'">
+                <p><strong>PayPal Email:</strong> {{ order.payment.paypalEmail }}</p>
+              </template>
+            </div>
+            <div v-if="order.orderProducts.length > 0" class="order-products">
+              <p class="products-header"><strong>Produkte:</strong></p>
+              <div class="product-list-container">
+                <ul class="product-list">
+                  <li v-for="product in order.orderProducts" :key="product.id" class="product-item">
+                    <a :href="`/product/${product.product.id}`" class="product-link">
+                      <img
+                        :src="product.product.image"
+                        :alt="product.product.name"
+                        class="product-image"
+                      />
+                      <div class="product-info">
+                        <p class="product-name">{{ product.product.name }}</p>
+                        <p class="product-quantity">
+                          {{ product.quantity }}x (€{{ product.product.price.toFixed(2) }})
+                        </p>
+                      </div>
+                    </a>
+                  </li>
+                </ul>
+              </div>
+            </div>
+            <div class="order-actions">
+              <button
+                v-if="order.orderStatus !== 'cancel'"
+                class="cancel-button"
+                @click="cancelOrder(order.id)"
+              >
+                Bestellung stornieren
+              </button>
+            </div>
           </div>
         </div>
-      </div>
+      </section>
+
+      <section class="order-history">
+        <h3 class="section-title">Bestellhistorie</h3>
+        <div v-if="historicalOrders.length === 0" class="empty">
+          <p>Keine abgeschlossenen Bestellungen vorhanden.</p>
+        </div>
+        <div v-else class="order-list">
+          <div v-for="order in historicalOrders" :key="order.id" class="order-item">
+            <div class="order-header">
+              <p class="order-id"><strong>Order ID:</strong> {{ order.id }}</p>
+              <p class="order-status"><strong>Status:</strong> {{ order.orderStatus }}</p>
+              <p class="order-total">
+                <strong>Gesamt:</strong> €{{ order.totalAmount.toFixed(2) }}
+              </p>
+              <p class="order-date">
+                <strong>Bestellt am:</strong> {{ formatDate(order.createdAt) }}
+              </p>
+            </div>
+            <div class="order-payment-details">
+              <p>
+                <strong>Bezahlmethode:</strong>
+                {{ order.payment?.paymentOption || 'Keine Angaben' }}
+              </p>
+              <template v-if="order.payment?.paymentOption === 'bank transfer'">
+                <p><strong>IBAN:</strong> {{ order.payment.iban }}</p>
+              </template>
+              <template v-else-if="order.payment?.paymentOption === 'credit card'">
+                <p><strong>Kreditkartennummer:</strong> {{ order.payment.creditCardNumber }}</p>
+                <p><strong>Ablaufdatum:</strong> {{ order.payment.expiryDate }}</p>
+              </template>
+              <template v-else-if="order.payment?.paymentOption === 'paypal'">
+                <p><strong>PayPal Email:</strong> {{ order.payment.paypalEmail }}</p>
+              </template>
+            </div>
+            <div v-if="order.orderProducts.length > 0" class="order-products">
+              <p class="products-header"><strong>Produkte:</strong></p>
+              <div class="product-list-container">
+                <ul class="product-list">
+                  <li v-for="product in order.orderProducts" :key="product.id" class="product-item">
+                    <a :href="`/product/${product.product.id}`" class="product-link">
+                      <img
+                        :src="product.product.image"
+                        :alt="product.product.name"
+                        class="product-image"
+                      />
+                      <div class="product-info">
+                        <p class="product-name">{{ product.product.name }}</p>
+                        <p class="product-quantity">
+                          {{ product.quantity }}x (€{{ product.product.price.toFixed(2) }})
+                        </p>
+                      </div>
+                    </a>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
     </div>
   </div>
 </template>
 
 <script setup>
 import { ref, computed } from 'vue'
-import { useUserStore } from '@/stores/user'
 import axios from 'axios'
 import BackButton from '@/components/navigation/BackButton.vue'
 
-const userStore = useUserStore()
 const orders = ref([])
-const user = ref(null)
 const loading = ref(false)
 
-const fetchUserAndOrders = async (userId) => {
+const fetchOrders = async () => {
   loading.value = true
   try {
-    const { data } = await axios.get(`/user/${userId}`)
-    user.value = data
-
-    // Associate user and payment details with orders
-    orders.value = data.orders.map((order) => ({
-      ...order,
-      user: data, // Include user info in the order
-      payment: data.payment, // Include payment info in the order
-    }))
+    const { data } = await axios.get('/order/detail')
+    orders.value = data
   } catch (error) {
-    console.error('Error loading user and orders:', error)
-    alert('Failed to load user data and orders.')
+    console.error('Error loading orders:', error)
+    alert('Failed to load orders.')
   } finally {
     loading.value = false
   }
 }
 
-const sortedOrders = computed(() => {
-  return orders.value.slice().sort((a, b) => {
-    if (a.orderStatus === b.orderStatus) {
-      return b.createdAt - a.createdAt // Newest first
-    }
-    return a.orderStatus.localeCompare(b.orderStatus) // Alphabetical
-  })
+const activeOrders = computed(() => {
+  return orders.value.filter((order) => ['open', 'processing'].includes(order.orderStatus))
+})
+
+const historicalOrders = computed(() => {
+  return orders.value.filter((order) =>
+    ['failed', 'successful', 'refunded', 'canceled'].includes(order.orderStatus),
+  )
 })
 
 const formatDate = (timestamp) => {
@@ -79,19 +172,31 @@ const formatDate = (timestamp) => {
   return date.toLocaleString()
 }
 
-const formatAddress = (address) => {
-  return `${address.street} ${address.houseNumber}, ${address.city}, ${address.state}, ${address.country}, ${address.postalCode} (${address.addressAddition})`
-}
+const cancelOrder = async (orderId) => {
+  try {
+    const order = orders.value.find((o) => o.id === orderId)
+    if (!order) {
+      alert('Bestellung nicht gefunden.')
+      return
+    }
 
-const cancelOrder = (orderId) => {
-  const order = orders.value.find((o) => o.id === orderId)
-  if (order) {
-    order.orderStatus = 'cancel'
+    if (!['open', 'processing'].includes(order.orderStatus)) {
+      alert('Nur offene oder in Bearbeitung befindliche Bestellungen können storniert werden.')
+      return
+    }
+
+    // Sende die API-Anfrage
+    await axios.patch(`/order/${orderId}/cancel`)
+
+    order.orderStatus = 'canceled'
+    alert('Die Bestellung wurde erfolgreich storniert.')
+  } catch (error) {
+    console.error('Fehler beim Stornieren der Bestellung:', error)
+    alert('Die Bestellung konnte nicht storniert werden.')
   }
 }
 
-// Initial load for user ID 2
-fetchUserAndOrders(userStore.user.id)
+fetchOrders()
 </script>
 
 <style scoped>
@@ -115,11 +220,6 @@ fetchUserAndOrders(userStore.user.id)
   font-family: Arial, sans-serif;
 }
 
-h1 {
-  font-size: 24px;
-  margin-bottom: 20px;
-}
-
 .loading {
   text-align: center;
   color: #666;
@@ -130,6 +230,14 @@ h1 {
   color: #999;
 }
 
+.section-title {
+  text-align: center;
+  font-size: 1.5rem;
+  margin-top: 20px;
+  margin-bottom: 20px;
+  color: #555;
+}
+
 .order-list {
   display: flex;
   flex-direction: column;
@@ -138,17 +246,106 @@ h1 {
 
 .order-item {
   border: 1px solid #ddd;
-  border-radius: 5px;
-  padding: 15px;
-  background-color: #f9f9f9;
+  border-radius: 8px;
+  padding: 20px;
+  background-color: #fff;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s;
 }
 
-.order-details p {
-  margin: 5px 0;
+.order-item:hover {
+  transform: translateY(-5px);
+}
+
+.order-header {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 15px;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 10px;
+}
+
+.order-payment-details {
+  margin-top: 10px;
+  font-size: 14px;
+  color: #555;
+  border-top: 1px solid #eee;
+  padding-top: 10px;
+}
+
+.order-products {
+  margin-top: 15px;
+}
+
+.products-header {
+  margin-bottom: 10px;
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.product-list-container {
+  max-height: 200px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 10px;
+  background-color: #fafafa;
+}
+
+.product-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.product-item {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.product-link {
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: inherit;
+}
+
+.product-link:hover .product-name {
+  text-decoration: underline;
+}
+
+.product-image {
+  width: 60px;
+  height: 60px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.product-info {
+  flex: 1;
+}
+
+.product-name {
+  font-weight: bold;
+  margin: 0;
+}
+
+.product-quantity {
+  margin: 0;
+  font-size: 14px;
+  color: #666;
 }
 
 .order-actions {
-  margin-top: 10px;
+  margin-top: 20px;
+  text-align: right;
 }
 
 .cancel-button {
@@ -156,8 +353,10 @@ h1 {
   color: white;
   border: none;
   border-radius: 5px;
-  padding: 8px 12px;
+  padding: 10px 15px;
   cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.2s;
 }
 
 .cancel-button:hover {

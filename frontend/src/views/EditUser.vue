@@ -87,40 +87,47 @@
           <input v-model="user.address.country" type="text" id="country" class="form-control" />
         </div>
 
-        <!-- Zahlungsdaten: Aktuelle Methode + Bearbeiten-Button -->
+        <!-- Zahlungsmethoden: Alle Methoden anzeigen und bearbeiten -->
         <div class="form-group">
-          <h3 class="form-label">Zahlungsmethode</h3>
+          <h3 class="form-label">Zahlungsmethoden</h3>
 
-          <!-- Aktuelle Zahlungsmethode anzeigen -->
-          <div class="payment-summary">
-            <strong>Aktuell:</strong>
-            <div v-if="user.payment.paymentOption === 'credit card'">
-              <p><strong>Kreditkarte</strong></p>
-              <p>Nummer: {{ obfuscatedCardNumber }}</p>
-              <p>Ablaufdatum: {{ user.payment.expiryDate || 'n/a' }}</p>
+          <!-- Liste der Zahlungsmethoden anzeigen -->
+          <div v-if="user.payments.length > 0">
+            <div v-for="payment in user.payments" :key="payment.id" class="payment-summary">
+              <strong>{{ payment.paymentOption }}</strong>
+              <div v-if="payment.paymentOption === 'bank transfer'">
+                <p>IBAN: {{ obfuscateIban(payment.iban) }}</p>
+              </div>
+              <div v-else-if="payment.paymentOption === 'credit card'">
+                <p>Nummer: {{ obfuscateCreditCard(payment.creditCardNumber) }}</p>
+                <p>Ablaufdatum: {{ payment.expiryDate || 'n/a' }}</p>
+              </div>
+              <div v-else-if="payment.paymentOption === 'paypal'">
+                <p>E-Mail: {{ obfuscatePaypalEmail(payment.paypalEmail) }}</p>
+              </div>
+              <button type="button" @click="editPayment(payment)" class="btn btn-secondary">
+                Bearbeiten
+              </button>
+              <button type="button" @click="deletePayment(payment.id)" class="btn btn-danger">
+                Löschen
+              </button>
             </div>
-            <div v-else-if="user.payment.paymentOption === 'bank transfer'">
-              <p><strong>Banküberweisung</strong></p>
-              <p>IBAN: {{ obfuscatedIban }}</p>
-            </div>
-            <div v-else-if="user.payment.paymentOption === 'paypal'">
-              <p><strong>PayPal</strong></p>
-              <p>E-Mail: {{ obfuscatedPaypalEmail }}</p>
-            </div>
-            <div v-else>
-              <p>Keine Zahlungsmethode hinterlegt.</p>
-            </div>
+          </div>
+          <div v-else>
+            <p>Keine Zahlungsmethoden hinterlegt.</p>
           </div>
 
           <!-- Button zum Öffnen des Payment-Modals -->
           <button type="button" class="btn btn-secondary" @click="openPaymentModal">
-            Zahlungsmethode bearbeiten
+            Zahlungsmethode hinzufügen
           </button>
         </div>
 
         <!-- Speichern/Löschen -->
         <div class="button-group">
-          <button type="submit" class="btn btn-primary">Speichern</button>
+          <button type="submit" class="btn btn-primary" :disabled="!isFormChanged">
+            Speichern
+          </button>
           <button
             v-if="currentUser.isAdmin"
             type="button"
@@ -133,8 +140,13 @@
       </form>
     </div>
 
-    <!-- PaymentModal -->
-    <PaymentModal :show="showPaymentModal" :payment="user.payment" @close="closePaymentModal" />
+    <!-- PaymentModal für Bearbeitung/Erstellung -->
+    <PaymentModal
+      :show="showPaymentModal"
+      :payment="editingPayment"
+      @close="closePaymentModal"
+      @save="savePayment"
+    />
   </div>
 </template>
 
@@ -152,9 +164,9 @@ const route = useRoute()
 const router = useRouter()
 const loading = ref(true)
 const showPaymentModal = ref(false)
-const basePath = computed(() => (currentUser.value?.isAdmin ? '/admin' : '/user'))
-
-// Lokales User-Objekt
+const editingPayment = ref(null)
+const originalUser = ref(null)
+// Lokales User-Objekt und Kopie für Vergleich
 const user = ref({
   id: null,
   emailAddress: '',
@@ -170,20 +182,19 @@ const user = ref({
     postalCode: '',
     country: '',
   },
-  payment: {
-    id: null,
-    paymentOption: '',
-    iban: '',
-    creditCardNumber: '',
-    expiryDate: '',
-    cvc: '',
-    paypalEmail: '',
-  },
+  payments: [], // Neue Eigenschaft für mehrere Zahlungsmethoden
 })
 
-//Admins koennen auf beliebigen user per param.id zugreifen, nicht admins nur auf die eigenen user daten
+const isFormChanged = computed(() => {
+  const addressChanged =
+    JSON.stringify(user.value.address) !== JSON.stringify(originalUser.value.address)
+  const generalChanged = JSON.stringify(user.value) !== JSON.stringify(originalUser.value)
+  return generalChanged || addressChanged
+})
+
+// Admins können auf beliebigen User zugreifen, nicht Admins nur auf die eigenen Daten
 onMounted(async () => {
-  const userId = route.params.id || currentUser.value.id;
+  const userId = route.params.id || currentUser.value.id
   await fetchUser(userId)
 })
 
@@ -195,24 +206,26 @@ const fetchUser = async (id) => {
   try {
     const { data } = await axios.get(`/user/${id}`)
     user.value = data
-
-    // Falls kein Payment existiert, init default
-    if (!user.value.payment) {
-      user.value.payment = {
-        id: null,
-        paymentOption: '', // leer
-        iban: '',
-        creditCardNumber: '',
-        expiryDate: '',
-        cvc: '',
-        paypalEmail: '',
-      }
-    }
+    originalUser.value = JSON.parse(JSON.stringify(data))
   } catch (error) {
     console.error('Fehler beim Laden des Benutzers:', error)
     alert('Benutzer konnte nicht geladen werden.')
   } finally {
     loading.value = false
+  }
+}
+
+//TODO nochmal pruefen wohin redirecten
+const deleteUser = async (id) => {
+  const confirmed = window.confirm('Möchten Sie diesen User wirklich löschen?')
+  if (!confirmed) {
+    return
+  }
+  try {
+    await axios.delete(`/user/${id}`)
+  } catch (error) {
+    console.error('Fehler beim Löschen des Users:', error)
+    alert('Fehler beim Löschen des Users.') // Optional: Ersetze durch eine bessere Fehleranzeige
   }
 }
 
@@ -229,11 +242,6 @@ const handleSave = async () => {
       address: user.value.address,
     }
 
-    // Nur wenn der User eine paymentOption ausgewählt hat => Payment anfügen
-    if (user.value.payment.paymentOption) {
-      updatedUserData.payment = { ...user.value.payment }
-    }
-
     // 1 Patch Call
     await axios.patch(`/user/${user.value.id}`, updatedUserData)
 
@@ -245,49 +253,72 @@ const handleSave = async () => {
   }
 }
 
-// Nur Admin
-const deleteUser = async (id) => {
-  const confirmed = window.confirm('Möchten Sie diesen Benutzer wirklich löschen?')
-  if (!confirmed) return
+// Zahlungsmethoden bearbeiten
+const editPayment = (payment) => {
+  editingPayment.value = { ...payment } // Kopiere die Zahlungsmethode zur Bearbeitung
+  openPaymentModal()
+}
 
-  try {
-    await axios.delete(`/user/${id}`)
-    await router.push(basePath.value)
-  } catch (error) {
-    console.error('Fehler beim Löschen des Benutzers:', error)
-    alert('Fehler beim Löschen des Benutzers')
-  }
+// Zahlungsmethode löschen
+const deletePayment = async (paymentId) => {
+  const confirmed = window.confirm('Möchten Sie diese Zahlungsmethode wirklich löschen?')
+  if (!confirmed) return
+  await axios.delete(`/payment/${paymentId}`)
+  user.value.payments = user.value.payments.filter((payment) => payment.id !== paymentId)
 }
 
 // Payment-Modal öffnen/schließen
 const openPaymentModal = () => {
+  // Wenn keine Zahlungsmethode zum Bearbeiten vorliegt, setze eine leere Zahlungsmethode
+  editingPayment.value = editingPayment.value || {
+    paymentOption: '',
+    creditCardNumber: '',
+    iban: '',
+    paypalEmail: '',
+    expiryDate: '',
+  }
   showPaymentModal.value = true
 }
+
 const closePaymentModal = () => {
   showPaymentModal.value = false
 }
 
+// Zahlungsmethode speichern
+const savePayment = (newPayment) => {
+  if (editingPayment.value) {
+    // Bestehende Zahlungsmethode aktualisieren
+    const index = user.value.payments.findIndex((payment) => payment.id === editingPayment.value.id)
+    if (index !== -1) {
+      user.value.payments[index] = newPayment
+    }
+  } else {
+    // Neue Zahlungsmethode hinzufügen
+    user.value.payments.push(newPayment)
+  }
+  closePaymentModal()
+}
+
 // Obfuskations-Helpers
-const obfuscatedCardNumber = computed(() => {
-  if (!user.value.payment.creditCardNumber) return 'n/a'
-  const last4 = user.value.payment.creditCardNumber.slice(-4)
+const obfuscateCreditCard = (cardNumber) => {
+  if (!cardNumber) return 'n/a'
+  const last4 = cardNumber.slice(-4)
   return '**** **** **** ' + last4
-})
+}
 
-const obfuscatedIban = computed(() => {
-  if (!user.value.payment.iban) return 'n/a'
-  const iban = user.value.payment.iban.replace(/\s/g, '')
-  if (iban.length <= 6) return iban
-  return iban.slice(0, 4) + ' **** **** ' + iban.slice(-2)
-})
+const obfuscateIban = (iban) => {
+  if (!iban) return 'n/a'
+  const cleanIban = iban.replace(/\s/g, '')
+  if (cleanIban.length <= 6) return cleanIban
+  return cleanIban.slice(0, 4) + ' **** **** ' + cleanIban.slice(-2)
+}
 
-const obfuscatedPaypalEmail = computed(() => {
-  if (!user.value.payment.paypalEmail) return 'n/a'
-  const [localPart, domain] = user.value.payment.paypalEmail.split('@')
-  if (!domain) return user.value.payment.paypalEmail
-  const obfuscatedLocal = localPart[0] + '****'
-  return obfuscatedLocal + '@' + domain
-})
+const obfuscatePaypalEmail = (email) => {
+  if (!email) return 'n/a'
+  const [localPart, domain] = email.split('@')
+  if (!domain) return email
+  return localPart[0] + '****' + '@' + domain
+}
 </script>
 
 <style scoped>

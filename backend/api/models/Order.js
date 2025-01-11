@@ -18,7 +18,7 @@ module.exports = {
     orderStatus: {
       type: 'string',
       required: true,
-      isIn: ['open', 'processing', 'failed', 'successful', 'refunded'],
+      isIn: ['open', 'processing', 'failed', 'successful', 'refunded', 'canceled'],
       example: 'processing'
     },
 

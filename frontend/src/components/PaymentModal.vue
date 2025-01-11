@@ -1,9 +1,8 @@
 <template>
-  <!-- Modal Overlay mit Transition -->
   <transition name="fade-modal">
     <div class="modal-backdrop" v-if="show" @click.self="closeModal">
       <div class="modal-container">
-        <h2>Zahlungsmethode festlegen</h2>
+        <h2>Zahlungsmethode festlegen/bearbeiten</h2>
 
         <!-- Auswahl der Zahlungsoption -->
         <div class="form-group">
@@ -88,7 +87,11 @@
 </template>
 
 <script setup>
-defineProps({
+import axios from 'axios'
+import { useUserStore } from '@/stores/user'
+import { defineProps, defineEmits } from 'vue'
+
+const props = defineProps({
   show: {
     type: Boolean,
     default: false,
@@ -99,24 +102,55 @@ defineProps({
   },
 })
 
-/**
- * Events:
- *  - close: Wird gefeuert, wenn das Modal geschlossen oder bestätigt wird.
- */
-const emit = defineEmits(['close'])
+const emit = defineEmits(['close', 'save'])
 
-/**
- * Modal schließen
- */
+const userStore = useUserStore()
+
 const closeModal = () => {
   emit('close')
 }
 
-/**
- * Bestätigen-Button: Schließen + Daten wurden bereits in `payment` geschrieben
- */
-const handleConfirm = () => {
-  emit('close')
+const handleConfirm = async () => {
+  try {
+    // `payment` ist direkt in den `props` eingebunden
+    if (props.payment.id) {
+      // Wenn eine `id` existiert, dann ist dies ein Update
+      const updatedPayment = await updatePayment(props.payment.id, props.payment)
+      emit('save', updatedPayment.data)
+    } else {
+      // Andernfalls ein neuer Payment-Eintrag
+      const newPayment = await createPayment(props.payment)
+      emit('save', newPayment.data)
+    }
+    emit('close')
+  } catch (error) {
+    console.error('Zahlung konnte nicht verarbeitet werden:', error)
+  }
+}
+
+// Methode zum Erstellen einer neuen Zahlung
+async function createPayment(paymentData) {
+  try {
+    const response = await axios.post(`/payment/create`, {
+      userId: userStore.user.id,
+      ...paymentData,
+    })
+    return response
+  } catch (error) {
+    console.error('Fehler beim Erstellen der Zahlung:', error)
+    throw error
+  }
+}
+
+// Methode zum Aktualisieren einer bestehenden Zahlung
+async function updatePayment(paymentId, paymentData) {
+  try {
+    const response = await axios.put(`/payment/${paymentId}`, paymentData)
+    return response
+  } catch (error) {
+    console.error('Fehler beim Aktualisieren der Zahlung:', error)
+    throw error
+  }
 }
 </script>
 

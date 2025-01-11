@@ -59,13 +59,18 @@ module.exports = {
       description: 'Nur relevant bei PayPal, z.B. user@paypal.com'
     },
 
+    isForOrder: {
+      type: 'boolean',
+      required: true,
+      description: 'Ob dieses Payment für eine Order erstellt wurde oder User(strikte Trennung).'
+    },
+
     /**
      * Besitzer dieser Payment-Daten
      * unique: true => Ein User kann nur genau EIN Payment haben
      */
     user: {
       model: 'user',
-      unique: true,
       required: true,
       description: 'User zu dem dieses Payment gehört.'
     },

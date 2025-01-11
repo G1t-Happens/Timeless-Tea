@@ -43,7 +43,7 @@ module.exports.policies = {
   },
 
   OrderController: {
-    find: 'isAdmin'
+    find: 'isAdmin',
   },
 
   ContactMessageController: {
