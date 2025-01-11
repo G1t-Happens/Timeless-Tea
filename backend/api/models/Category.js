@@ -5,6 +5,7 @@
  *                 Kategorien können verschiedene Typen haben und sind über eine Many-to-Many-Beziehung
  *                 mit Produkten verknüpft (über die ProductCategory-Tabelle).
  */
+
 module.exports = {
   attributes: {
     /**

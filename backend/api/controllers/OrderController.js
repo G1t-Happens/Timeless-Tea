@@ -1,36 +1,46 @@
 module.exports = {
   create: async function (req, res) {
     try {
-      const { totalAmount, orderStatus, user, payment, shipping, orderProducts, newShippingAddress } = req.body;
+      const { totalAmount, payment, orderProducts, newShippingAddress } = req.body;
+      const user = req.session.userId;
+
+      // Pruefen ob User vorhanden
+      if(!user) {
+        return res.badRequest({ error: 'Kein User vorhanden' });
+      }
 
       // Validierung der Pflichtfelder
-      if (!totalAmount || !orderStatus || !user || !payment || !Array.isArray(orderProducts) || orderProducts.length === 0) {
+      if (!totalAmount || !user || !payment || !Array.isArray(orderProducts) || orderProducts.length === 0) {
         return res.badRequest({ error: 'Invalid request data. Please provide all required fields.' });
       }
 
-      // Validierung der Produkte
-      const invalidProducts = orderProducts.some(op => !op.product || !op.quantity || op.quantity <= 0);
+      // Validierung der Produkte und Extraktion der Produkt-IDs
+      const productIds = [];
+      const invalidProducts = orderProducts.some(op => {
+        if (!op.product || !op.quantity || op.quantity <= 0) {
+          return true;
+        }
+        productIds.push(op.product);
+        return false;
+      });
+
       if (invalidProducts) {
         return res.badRequest({ error: 'Invalid product data. Each product must have a valid ID and quantity > 0.' });
       }
 
-      // Extrahiere nur die Produkt-IDs
-      const productIds = orderProducts.map(op => op.product);
-
-      // Prüfe, ob die Produkte existieren und deren Preise
-      const existingProducts = await Product.find({ id: productIds });
+      // Hole Produkte und prüfe Existenz in einer Abfrage
+      const existingProducts = await Product.find({ id: productIds }).select(['id', 'price']);
       if (existingProducts.length !== productIds.length) {
         return res.badRequest({ error: 'One or more products do not exist.' });
       }
 
-      // Berechne den Gesamtbetrag basierend auf den angegebenen Produkten und Mengen
+      // Berechne den Gesamtbetrag basierend auf den Produkten und Mengen
       const calculatedTotal = orderProducts.reduce((sum, op) => {
         const product = existingProducts.find(p => p.id === op.product);
         return sum + (product.price * op.quantity);
       }, 0);
 
-      // Überprüfe, ob der angegebene Gesamtbetrag mit dem berechneten übereinstimmt
-      if (Math.abs(calculatedTotal - totalAmount) > 0.01) { // Toleranz für Rundungsfehler
+      if (Math.abs(calculatedTotal - totalAmount) > 0.01) {
         return res.badRequest({
           error: 'The total amount does not match the sum of the products and quantities.',
           calculatedTotal,
@@ -38,21 +48,66 @@ module.exports = {
         });
       }
 
-      // Optionale neue Versandadresse
-      let shippingAddressId = null;
-      if (newShippingAddress) {
-        const newAddress = await Address.create(newShippingAddress).fetch();
-        shippingAddressId = newAddress.id;
+      // Lade Benutzer- und Zahlungsdaten parallel
+      const [orderUser, originalPayment] = await Promise.all([
+        User.findOne({ id: user }).populate('address'),
+        Payment.findOne({ id: payment, user })
+      ]);
+
+      if (!orderUser) {
+        return res.badRequest({ error: 'No user found.' });
       }
 
+      if (!originalPayment) {
+        return res.badRequest({ error: 'The specified payment method does not exist or does not belong to the user.' });
+      }
+
+      const formatDateForDateColumn = (date) => date.toISOString().split('T')[0];
+
       // Transaktion
-      const newOrder = await sails.getDatastore().transaction(async (db) => {
-        // Neues Payment-Objekt für die Order erstellen
-        const originalPayment = await Payment.findOne({ id: payment, user });
-        if (!originalPayment) {
-          throw new Error('The specified payment method does not exist or does not belong to the user.');
+      await sails.getDatastore().transaction(async (db) => {
+        // Adresse erstellen oder nutzen
+        let shippingAddressId;
+        if (newShippingAddress) {
+          const newAddress = await Address.create(newShippingAddress).fetch().usingConnection(db);
+          shippingAddressId = newAddress.id;
+        } else {
+          const { address } = orderUser;
+          const newAddress = await Address.create({
+            country: address.country,
+            state: address.state || null,
+            city: address.city,
+            postalCode: address.postalCode,
+            street: address.street,
+            houseNumber: address.houseNumber,
+            addressAddition: address.addressAddition || null
+          }).fetch().usingConnection(db);
+          shippingAddressId = newAddress.id;
         }
 
+        // Bestellung erstellen
+        const order = await Order.create({
+          totalAmount: calculatedTotal,
+          orderStatus: 'open',
+          user,
+          payment: null,
+          shipping: null
+        }).fetch().usingConnection(db);
+
+        // Versanddaten erstellen
+        const estimatedDeliveryDate = formatDateForDateColumn(new Date(new Date().setDate(new Date().getDate() + 5)));
+        const shippingDate = formatDateForDateColumn(new Date());
+
+        await Shipping.create({
+          carrier: 'Default Carrier',
+          deliveryStatus: 'not shipped',
+          estimatedDeliveryDate: estimatedDeliveryDate,
+          shippingDate: shippingDate,
+          address: shippingAddressId,
+          order: order.id
+        }).fetch().usingConnection(db);
+
+        // Zahlung erstellen
         const orderPayment = await Payment.create({
           paymentOption: originalPayment.paymentOption,
           iban: originalPayment.iban,
@@ -60,23 +115,15 @@ module.exports = {
           expiryDate: originalPayment.expiryDate,
           cvc: originalPayment.cvc,
           paypalEmail: originalPayment.paypalEmail,
-          isForOrder: true, // Markiere es als Order-spezifisches Payment
+          isForOrder: true,
           user,
-        }).fetch().usingConnection(db);
-
-        // Bestellung erstellen
-        const order = await Order.create({
-          totalAmount: calculatedTotal, // Verwende den berechneten Gesamtbetrag
-          orderStatus,
-          user,
-          payment: orderPayment.id, // Verknüpfe mit dem neuen Payment
-          shipping: shipping || null,
-        }).fetch().usingConnection(db);
-
-
-        //Order Id auch dem Paymenteintrag mitgeben
-        await Payment.updateOne({ id: orderPayment.id }).set({
           order: order.id
+        }).fetch().usingConnection(db);
+
+        // Bestellung aktualisieren nachdem payment und shipping erstellt wurden
+        await Order.updateOne({ id: order.id }).set({
+          payment: orderPayment.id,
+          shipping: order.id
         }).usingConnection(db);
 
         // Produkte zur Bestellung hinzufügen
@@ -86,19 +133,8 @@ module.exports = {
           quantity: op.quantity,
         }));
         await OrderProduct.createEach(orderProductRecords).usingConnection(db);
-
-        // Versandadresse aktualisieren, falls vorhanden
-        if (shippingAddressId) {
-          await Shipping.updateOne({ id: shipping }).set({ address: shippingAddressId }).usingConnection(db);
-        }
-
-        // Benutzer aktualisieren und Bestellung hinzufügen
-        await User.addToCollection(user, 'orders', order.id).usingConnection(db);
-
-        return order;
       });
-
-      return res.ok(newOrder);
+      return res.sendStatus(201);
     } catch (error) {
       sails.log.error('Error creating order:', error);
       return res.serverError({ error: 'An error occurred while creating the order.' });
@@ -106,7 +142,6 @@ module.exports = {
   },
 
   findOrdersByUser: async function (req, res) {
-
     const userId = req.session.userId;
 
     try {

@@ -9,8 +9,9 @@ module.exports = {
   attributes: {
 
     /**
-     * paymentOption
-     * "credit card", "bank transfer" oder "paypal"
+     * @description Legt die Bezahlmethode fest
+     * @type {string}
+     * @example credit card, paypal,...
      */
     paymentOption: {
       type: 'string',
@@ -20,7 +21,9 @@ module.exports = {
     },
 
     /**
-     * Felder für Banküberweisung
+     * @description Legt die Iban fest fuer bank transfer
+     * @type {string}
+     * @example DE89370400440532013000
      */
     iban: {
       type: 'string',
@@ -29,7 +32,9 @@ module.exports = {
     },
 
     /**
-     * Felder für Kreditkarte
+     * @description Legt die credit card number fest fuer Kreditkartenzahlung
+     * @type {string}
+     * @example 1234567890123456
      */
     creditCardNumber: {
       type: 'string',
@@ -37,12 +42,22 @@ module.exports = {
       description: 'Nur relevant bei credit card, z.B. 1234567890123456'
     },
 
+    /**
+     * @description Legt das Ablaufdatum der credit card fest
+     * @type {string}
+     * @example 12/27
+     */
     expiryDate: {
       type: 'string',
       allowNull: true,
       description: 'Nur relevant bei credit card, z.B. "12/24"'
     },
 
+    /**
+     * @description Legt die Kreditkartenpruefnummer fest (CVC)
+     * @type {string}
+     * @example 123
+     */
     cvc: {
       type: 'string',
       allowNull: true,
@@ -50,7 +65,9 @@ module.exports = {
     },
 
     /**
-     * Felder für PayPal
+     * @description Legt die paypal mail fest
+     * @type {string}
+     * @example user@paypal.com
      */
     paypalEmail: {
       type: 'string',
@@ -59,6 +76,12 @@ module.exports = {
       description: 'Nur relevant bei PayPal, z.B. user@paypal.com'
     },
 
+    /**
+     * @description Legt fest ob Payment Eintrag fuer User hinterlegt oder fuer Order hinterlegt,
+     * da wir eine strikte Datentrennung brauchen -> Snapshot Daten fuer Bestellung
+     * @type {boolean}
+     * @example true, false
+     */
     isForOrder: {
       type: 'boolean',
       required: true,
@@ -66,8 +89,9 @@ module.exports = {
     },
 
     /**
-     * Besitzer dieser Payment-Daten
-     * unique: true => Ein User kann nur genau EIN Payment haben
+     * @description Der User der das Payment hinterlegt/erstellt hat
+     * @type {string}
+     * @example id: 3
      */
     user: {
       model: 'user',
@@ -76,13 +100,14 @@ module.exports = {
     },
 
     /**
-     * Optional: Falls du Payment-Daten auch direkt an eine Order knüpfen willst
+     * @description Die Order die zu dieser Bezahlmethode gehoert
+     * @type {string}
+     * @example id: 3
      */
     order: {
       model: 'order',
       unique: true,
-      description: 'Die zugehörige Order, falls direkt verknüpft.'
+      description: 'Die zugehörige Order.'
     }
-
   },
 };

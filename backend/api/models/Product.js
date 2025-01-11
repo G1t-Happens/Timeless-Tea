@@ -4,6 +4,7 @@
  * @description :: Unser Datenmodell für Produkte.
  *                 Produkte können einer oder mehreren Kategorien und Ratings angehören (Many-to-Many).
  */
+
 module.exports = {
   attributes: {
     /**

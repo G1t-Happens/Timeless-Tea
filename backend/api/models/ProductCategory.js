@@ -4,6 +4,7 @@
  * @description :: Eine Zwischentabelle (Join Table), um die Many-to-Many-Beziehung
  *                 zwischen Produkten und Kategorien abzubilden und aufzuloesen.
  */
+
 module.exports = {
   attributes: {
     /**

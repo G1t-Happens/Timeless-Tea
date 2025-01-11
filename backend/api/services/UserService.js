@@ -28,7 +28,6 @@ module.exports = {
     }
 
     const user = await User.findOne({ id: userId })
-      .populate('orders')
       .populate('address')
       .populate('payments');
 

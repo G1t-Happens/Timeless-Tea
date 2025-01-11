@@ -287,14 +287,9 @@ const submitOrder = async () => {
   }
 
   try {
-    const finalShippingAddressId = useBillingAsShipping.value ? user.value.address.id : null
-
     const orderData = {
       totalAmount: parseFloat(cartStore.totalAmount),
-      orderStatus: 'open',
-      user: userStore.user.id,
       payment: selectedPayment.value,
-      shipping: finalShippingAddressId,
       orderProducts: cartStore.items.map((item) => ({
         product: item.productId,
         quantity: item.quantity,
@@ -302,7 +297,6 @@ const submitOrder = async () => {
       newShippingAddress: useBillingAsShipping.value ? null : { ...shippingAddress.value },
     }
 
-    // Backend-Call für die Bestellung mit neuem Payment-Objekt
     const response = await axios.post('/order', orderData)
     cartStore.clearCart()
     await router.push({ name: 'OrderDetail', params: { id: response.data.id } })
