@@ -35,7 +35,49 @@
         </div>
       </div>
 
-      <!-- Zahlungsmethode -->
+      <!-- Benutzerdetails (Rechnungsadresse) -->
+      <div class="user-details">
+        <h2>Rechnungsadresse</h2>
+        <p class="edit-hint">
+          <strong>Hinweis:</strong>
+          Falls Sie Ihre Rechnungsadresse ändern möchten, können Sie das
+          <router-link :to="{ name: 'UserEditUser' }">hier</router-link>
+          erledigen.
+        </p>
+        <div class="detail-item">
+          <label for="firstName">Vorname:</label>
+          <input id="firstName" type="text" v-model="user.firstName" disabled />
+        </div>
+        <div class="detail-item">
+          <label for="lastName">Nachname:</label>
+          <input id="lastName" type="text" v-model="user.lastName" disabled />
+        </div>
+        <div class="detail-item">
+          <label for="email">E-Mail:</label>
+          <input id="email" type="email" v-model="user.emailAddress" disabled />
+        </div>
+        <div class="detail-item">
+          <label for="country">Land:</label>
+          <input id="country" type="text" v-model="user.address.country" disabled />
+        </div>
+        <div class="detail-item">
+          <label for="postalCode">Postleitzahl:</label>
+          <input id="postalCode" type="text" v-model="user.address.postalCode" disabled />
+        </div>
+        <div class="detail-item">
+          <label for="city">Stadt:</label>
+          <input id="city" type="text" v-model="user.address.city" disabled />
+        </div>
+        <div class="detail-item">
+          <label for="street">Straße:</label>
+          <input id="street" type="text" v-model="user.address.street" disabled />
+        </div>
+        <div class="detail-item">
+          <label for="houseNumber">Hausnummer:</label>
+          <input id="houseNumber" type="text" v-model="user.address.houseNumber" disabled />
+        </div>
+      </div>
+
       <!-- Zahlungsmethode -->
       <div class="payment-method">
         <h2>Zahlungsmethode</h2>
@@ -76,6 +118,50 @@
         </div>
       </div>
 
+      <!-- Versandinformationen -->
+      <div class="shipping-info">
+        <h2>Versandinformationen</h2>
+        <div class="checkbox-wrapper">
+          <input type="checkbox" id="use-billing-as-shipping" v-model="useBillingAsShipping" />
+          <label for="use-billing-as-shipping">
+            Versandadresse ist identisch mit der Rechnungsadresse
+          </label>
+        </div>
+        <div v-if="useBillingAsShipping">
+          <p>Die Versandadresse entspricht der oben angegebenen Rechnungsadresse.</p>
+        </div>
+        <div v-else>
+          <div class="detail-item">
+            <label for="ship-country">Land*:</label>
+            <input id="ship-country" type="text" v-model="shippingAddress.country" />
+          </div>
+          <div class="detail-item">
+            <label for="ship-postal-code">Postleitzahl*:</label>
+            <input id="ship-postal-code" type="text" v-model="shippingAddress.postalCode" />
+          </div>
+          <div class="detail-item">
+            <label for="ship-city">Stadt*:</label>
+            <input id="ship-city" type="text" v-model="shippingAddress.city" />
+          </div>
+          <div class="detail-item">
+            <label for="ship-street">Straße*:</label>
+            <input id="ship-street" type="text" v-model="shippingAddress.street" />
+          </div>
+          <div class="detail-item">
+            <label for="ship-house-number">Hausnummer*:</label>
+            <input id="ship-house-number" type="text" v-model="shippingAddress.houseNumber" />
+          </div>
+          <div class="detail-item">
+            <label for="ship-addition">Adresszusatz (optional):</label>
+            <input id="ship-addition" type="text" v-model="shippingAddress.addressAddition" />
+          </div>
+          <div class="detail-item">
+            <label for="ship-state">Bundesland (optional):</label>
+            <input id="ship-state" type="text" v-model="shippingAddress.state" />
+          </div>
+        </div>
+      </div>
+
       <!-- Bestellung abschicken -->
       <div class="checkout-actions">
         <button @click="openConfirmationModal" class="btn btn-success" :disabled="!canCheckout">
@@ -111,13 +197,35 @@ import OrderConfirmationModal from '@/components/OrderConfirmationModal.vue'
 const cartStore = useCartStore()
 const userStore = useUserStore()
 const router = useRouter()
-
-const user = ref({})
 const payments = ref([])
 const selectedPayment = ref(null)
 const showConfirmationModal = ref(false)
 const useBillingAsShipping = ref(true)
 const shippingAddress = ref({})
+
+const user = ref({
+  id: null,
+  emailAddress: '',
+  firstName: '',
+  lastName: '',
+  address: {
+    id: null,
+    street: '',
+    houseNumber: '',
+    addressAddition: '',
+    city: '',
+    postalCode: '',
+    country: '',
+  },
+  payment: {
+    paymentOption: null,
+    iban: null,
+    creditCardNumber: null,
+    expiryDate: null,
+    cvc: null,
+    paypalEmail: null,
+  },
+})
 
 const canCheckout = computed(() => {
   return cartStore.items.length > 0 && userStore.user && user.value.address && selectedPayment.value
@@ -127,7 +235,7 @@ const getSelectedPayment = () => {
   return payments.value.find((payment) => payment.id === selectedPayment.value) || null
 }
 
-const fetchUserAndPayments = async () => {
+const fetchUserDetails = async () => {
   try {
     const response = await axios.get(`/user/${userStore.user.id}`)
     user.value = response.data
@@ -205,7 +313,7 @@ const submitOrder = async () => {
 }
 
 onMounted(async () => {
-  await fetchUserAndPayments()
+  await fetchUserDetails()
 })
 </script>
 
@@ -311,12 +419,6 @@ onMounted(async () => {
   margin-bottom: 5px;
 }
 
-.detail-item label {
-  font-weight: bold;
-  margin-bottom: 5px;
-  color: #555;
-}
-
 .detail-item input,
 .detail-item textarea {
   padding: 10px;
@@ -373,5 +475,25 @@ onMounted(async () => {
 
 .btn-success:hover {
   background-color: #9fa86d;
+}
+
+.detail-item {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 15px;
+}
+
+.detail-item label {
+  font-weight: bold;
+  margin-bottom: 5px;
+  color: #555;
+}
+
+.detail-item textarea {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  resize: vertical;
+  background-color: #fff;
 }
 </style>
