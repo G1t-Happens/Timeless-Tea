@@ -214,8 +214,6 @@ const fetchUser = async (id) => {
     loading.value = false
   }
 }
-
-//TODO nochmal pruefen wohin redirecten
 const deleteUser = async (id) => {
   const confirmed = window.confirm('Möchten Sie diesen User wirklich löschen?')
   if (!confirmed) {
@@ -223,9 +221,10 @@ const deleteUser = async (id) => {
   }
   try {
     await axios.delete(`/user/${id}`)
+    await router.push({ name: 'AdminDasboard' })
   } catch (error) {
     console.error('Fehler beim Löschen des Users:', error)
-    alert('Fehler beim Löschen des Users.') // Optional: Ersetze durch eine bessere Fehleranzeige
+    alert('Fehler beim Löschen des Users.')
   }
 }
 

@@ -215,28 +215,38 @@ module.exports = {
    * @param {Request} req - Der eingehende HTTP-Request, enthält die Benutzer-ID in req.params.id.
    * @throws {BadRequestError} Wenn keine Benutzer-ID übergeben wurde.
    */
-  deleteUser: async function (req) {
+  async deleteUser(req) {
     const userId = req.params.id;
 
-    // Benutzer-ID muss vorhanden sein
-    if (!userId) {
-      throw new errors.BadRequestError('Benutzer-ID ist erforderlich.');
+    // Checken ob der User existiert
+    const user = await User.findOne({ id: userId });
+    if (!user) {
+      return errors.NotFoundError('Der zu loeschende User wurde nicht gefunden!');
     }
 
-    // Datenbankoperationen innerhalb einer Transaktion
-    return await sails.getDatastore().transaction(async (db) => {
-      try {
-        // Zuerst zugehörige Bestellungen löschen
-        await Order.destroy({ user: userId }).usingConnection(db);
+    // Order und zugehoerige daten ziehen und loeschen
+    const orders = await Order.find({ user: userId });
+    for (const order of orders) {
+      // Delete related shipping information
+      await Shipping.destroy({ order: order.id });
 
-        // Dann den Benutzer selbst löschen
-        await User.destroy({ id: userId }).usingConnection(db);
+      // Delete related order-product associations
+      await OrderProduct.destroy({ order: order.id });
 
-      } catch (err) {
-        sails.log.error('Error during deleteUser transaction:', err);
-        throw new errors.CustomError('Fehler beim Löschen des Benutzers.', 500);
-      }
-    });
+      // Delete the order itself
+      await Order.destroy({ id: order.id });
+    }
+
+    // Loeschen der angelegten Bezahlmethoden des Users
+    await Payment.destroy({ user: userId });
+
+    // Loeschen der angelegten Adresse des Users
+    if (user.address) {
+      await Address.destroy({ id: user.address });
+    }
+
+    // Endlich den User loeschen
+    await User.destroy({ id: userId });
   },
 
   /**
