@@ -145,14 +145,15 @@ module.exports = {
     const userId = req.session.userId;
 
     try {
-      const orders = await Order.find({ user: userId})
+      const orders = await Order.find({ user: userId })
         .populate('payment')
         .populate('shipping')
         .populate('orderProducts');
 
-      // Fetch product details for each orderProduct
+      // Fetch product and address details for each order
       const detailedOrders = await Promise.all(
         orders.map(async (order) => {
+          // Populate products in orderProducts
           const populatedOrderProducts = await Promise.all(
             order.orderProducts.map(async (orderProduct) => {
               const product = await Product.findOne({ id: orderProduct.product });
@@ -163,12 +164,23 @@ module.exports = {
             })
           );
 
+          // Populate address details from shipping
+          let shippingAddress = null;
+          if (order.shipping && order.shipping.address) {
+            shippingAddress = await Address.findOne({ id: order.shipping.address });
+          }
+
           return {
             ...order,
             orderProducts: populatedOrderProducts,
+            shipping: {
+              ...order.shipping,
+              address: shippingAddress,
+            },
           };
         })
       );
+
       return res.ok(detailedOrders);
     } catch (error) {
       sails.log.error('Error fetching orders with details:', error);
