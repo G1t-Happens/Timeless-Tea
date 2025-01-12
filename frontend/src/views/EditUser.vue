@@ -123,6 +123,9 @@
           </button>
         </div>
 
+        <!-- Trennlinie für Abschnitt -->
+        <hr class="section-divider" />
+
         <!-- Speichern/Löschen -->
         <div class="button-group">
           <button type="submit" class="btn btn-primary" :disabled="!isFormChanged">
