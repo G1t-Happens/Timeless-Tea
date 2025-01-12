@@ -14,7 +14,6 @@
           class="search-input"
         />
       </div>
-
       <div class="orders-container">
         <section class="active-orders">
           <h3 class="section-title">Aktive Bestellungen</h3>
@@ -47,7 +46,7 @@
                   <strong>Bestellt am:</strong> {{ formatDate(order.createdAt) }}
                 </p>
               </div>
-              <div class="order-payment-details">
+              <div class="order-details-text">
                 <p>
                   <strong>Bezahlmethode:</strong>
                   {{ order.payment?.paymentOption || 'Keine Angaben' }}
@@ -62,6 +61,18 @@
                 <template v-else-if="order.payment?.paymentOption === 'paypal'">
                   <p><strong>PayPal Email:</strong> {{ order.payment.paypalEmail }}</p>
                 </template>
+              </div>
+              <div class="order-details-text">
+                <p><strong>Lieferstatus:</strong> {{ order.shipping.deliveryStatus }}</p>
+                <p>
+                  <strong>Lieferadresse:</strong>
+                  {{ order.shipping.address.street }} {{ order.shipping.address.houseNumber }},
+                  {{ order.shipping.address.city }}, {{ order.shipping.address.postalCode }}
+                </p>
+                <p>
+                  <strong>Voraussichtliche Lieferung:</strong>
+                  {{ formatDate(order.shipping.estimatedDeliveryDate) }}
+                </p>
               </div>
               <div v-if="order.orderProducts.length > 0" class="order-products">
                 <p class="products-header"><strong>Produkte:</strong></p>
@@ -133,7 +144,7 @@
                   <strong>Bestellt am:</strong> {{ formatDate(order.createdAt) }}
                 </p>
               </div>
-              <div class="order-payment-details">
+              <div class="order-details-text">
                 <p>
                   <strong>Bezahlmethode:</strong>
                   {{ order.payment?.paymentOption || 'Keine Angaben' }}
@@ -148,6 +159,18 @@
                 <template v-else-if="order.payment?.paymentOption === 'paypal'">
                   <p><strong>PayPal Email:</strong> {{ order.payment.paypalEmail }}</p>
                 </template>
+              </div>
+              <div class="order-details-text">
+                <p><strong>Lieferstatus:</strong> {{ order.shipping.deliveryStatus }}</p>
+                <p>
+                  <strong>Lieferadresse:</strong>
+                  {{ order.shipping.address.street }} {{ order.shipping.address.houseNumber }},
+                  {{ order.shipping.address.city }}, {{ order.shipping.address.postalCode }}
+                </p>
+                <p>
+                  <strong>Voraussichtliche Lieferung:</strong>
+                  {{ formatDate(order.shipping.estimatedDeliveryDate) }}
+                </p>
               </div>
               <div v-if="order.orderProducts.length > 0" class="order-products">
                 <p class="products-header"><strong>Produkte:</strong></p>
@@ -208,12 +231,16 @@ const fetchOrders = async () => {
   }
 }
 
+const sortedOrders = computed(() => {
+  return [...orders.value].sort((a, b) => b.updatedAt - a.updatedAt)
+})
+
 const activeOrders = computed(() => {
-  return orders.value.filter((order) => ['open', 'processing'].includes(order.orderStatus))
+  return sortedOrders.value.filter((order) => ['open', 'processing'].includes(order.orderStatus))
 })
 
 const historicalOrders = computed(() => {
-  return orders.value.filter((order) =>
+  return sortedOrders.value.filter((order) =>
     ['failed', 'successful', 'refunded', 'canceled'].includes(order.orderStatus),
   )
 })
@@ -260,7 +287,7 @@ const historyTotalPages = computed(() => {
 
 const formatDate = (timestamp) => {
   const date = new Date(timestamp)
-  return date.toLocaleString()
+  return date.toLocaleDateString('de-DE')
 }
 
 const cancelOrder = async (orderId) => {
@@ -364,7 +391,7 @@ fetchOrders()
   padding-bottom: 10px;
 }
 
-.order-payment-details {
+.order-details-text {
   margin-top: 10px;
   font-size: 14px;
   color: #555;
