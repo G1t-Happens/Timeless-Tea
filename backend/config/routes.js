@@ -50,6 +50,7 @@ module.exports.routes = {
   'GET /order': 'OrderController.find',
   'GET /order/detail': 'OrderController.findOrdersByUser',
   'PATCH /order/:id/cancel': 'OrderController.cancelOrder',
+  'GET /order/count': 'OrderController.count',
 
   //ContactMessageController.js
   'POST /message': { controller: 'ContactMessageController', action: 'create' },

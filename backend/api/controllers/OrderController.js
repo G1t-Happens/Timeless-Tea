@@ -228,4 +228,41 @@ module.exports = {
       return res.serverError({ error: 'An error occurred while canceling the order.' });
     }
   },
+
+  count: async function (req, res) {
+    try {
+
+      // Abrufen aller Bestellungen mit ihren Statuswerten
+      const orders = await Order.find({
+        select: ['orderStatus']
+      });
+
+      // Initialisiere Zähler
+      let total = orders.length;
+      let finished = 0;
+      let active = 0;
+
+      // Kategorien zuordnen
+      orders.forEach(order => {
+        if (['successful', 'refunded', 'canceled'].includes(order.orderStatus)) {
+          finished++;
+        } else if (['processing', 'open'].includes(order.orderStatus)) {
+          active++;
+        }
+      });
+
+      return res.json({
+        total,
+        finished,
+        active
+      });
+    } catch (err) {
+      sails.log.error('Error fetching order counts:', err);
+      if (err instanceof errors.CustomError) {
+        return res.status(err.status).json({ error: err.message });
+      }
+
+      return res.serverError('An unexpected error occurred.');
+    }
+  }
 };

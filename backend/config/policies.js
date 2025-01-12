@@ -44,6 +44,7 @@ module.exports.policies = {
 
   OrderController: {
     find: 'isAdmin',
+    count: 'isAdmin'
   },
 
   ContactMessageController: {

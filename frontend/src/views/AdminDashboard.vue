@@ -4,16 +4,29 @@
       <h2 class="text-center admin-title">Admin Dashboard</h2>
       <div class="stats-row">
         <div class="stat-card">
+          <h3>Artikel</h3>
           <h3>{{ articlesCount || 0 }}</h3>
-          <p>Artikel</p>
         </div>
         <div class="stat-card">
+          <h3>User</h3>
           <h3>{{ usersCount || 0 }}</h3>
-          <p>User</p>
         </div>
-        <div class="stat-card">
-          <h3>{{ orders.length }}</h3>
-          <p>Bestellungen</p>
+        <div class="stat-card orders-card">
+          <h3>Bestellungen</h3>
+          <div class="orders-stats">
+            <div class="orders-stat">
+              <span class="stat-label">Gesamt:</span>
+              <span class="stat-value">{{ ordersCount.total || 0 }}</span>
+            </div>
+            <div class="orders-stat">
+              <span class="stat-label">Abgeschlossen:</span>
+              <span class="stat-value">{{ ordersCount.finished || 0 }}</span>
+            </div>
+            <div class="orders-stat">
+              <span class="stat-label">Offen:</span>
+              <span class="stat-value">{{ ordersCount.active || 0 }}</span>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -207,9 +220,7 @@ const panels = ref([
   { key: 'messages', name: 'Nachrichten verwalten' },
 ])
 
-const currentPanel = ref('articles') // Standardmäßig Artikel verwalten
-
-// Router
+const currentPanel = ref('articles')
 const router = useRouter()
 
 // Gemeinsame Loading-Status
@@ -431,6 +442,7 @@ const deleteUser = async (id) => {
 
 // ----------------- Bestellungen verwalten -----------------
 const orders = ref([])
+const ordersCount = ref([])
 const orderSearchQuery = ref('')
 const localOrderFilters = ref({ status: '', page: 1, size: 8 })
 const currentOrderPage = ref(1)
@@ -529,6 +541,13 @@ const fetchMetaData = async () => {
   try {
     const userCountResponse = await axios.get('/user/count')
     usersCount.value = userCountResponse.data
+  } catch (error) {
+    console.error('Fehler beim Abrufen der User Metadaten:', error.message)
+  }
+
+  try {
+    const orderCountResponse = await axios.get('/order/count')
+    ordersCount.value = orderCountResponse.data
   } catch (error) {
     console.error('Fehler beim Abrufen der User Metadaten:', error.message)
   }
@@ -729,5 +748,11 @@ onMounted(() => {
   box-shadow: 0 5px 4px rgba(0, 0, 0, 0.1);
   text-align: center;
   flex: 1;
+}
+
+.orders-stat {
+  display: flex;
+  justify-content: space-between;
+  font-size: 1.2rem;
 }
 </style>
