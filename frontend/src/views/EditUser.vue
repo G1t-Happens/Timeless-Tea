@@ -142,6 +142,7 @@
 
     <!-- PaymentModal für Bearbeitung/Erstellung -->
     <PaymentModal
+      v-if="showPaymentModal"
       :show="showPaymentModal"
       :payment="editingPayment"
       @close="closePaymentModal"

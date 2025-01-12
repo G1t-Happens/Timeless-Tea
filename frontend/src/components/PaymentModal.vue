@@ -7,7 +7,7 @@
         <!-- Auswahl der Zahlungsoption -->
         <div class="form-group">
           <label for="paymentOption">Zahlungsoption</label>
-          <select id="paymentOption" v-model="payment.paymentOption" class="form-control">
+          <select id="paymentOption" v-model="localPayment.paymentOption" class="form-control">
             <option value="credit card">Kreditkarte</option>
             <option value="bank transfer">Banküberweisung</option>
             <option value="paypal">PayPal</option>
@@ -15,14 +15,14 @@
         </div>
 
         <!-- Felder für Kreditkarte -->
-        <div v-if="payment.paymentOption === 'credit card'" class="payment-fields">
+        <div v-if="localPayment.paymentOption === 'credit card'" class="payment-fields">
           <div class="form-group">
             <label for="creditCardNumber">Kartennummer</label>
             <input
               id="creditCardNumber"
               type="text"
               class="form-control"
-              v-model="payment.creditCardNumber"
+              v-model="localPayment.creditCardNumber"
               placeholder="z.B. 1234 5678 9012 3456"
             />
           </div>
@@ -32,7 +32,7 @@
               id="expiryDate"
               type="text"
               class="form-control"
-              v-model="payment.expiryDate"
+              v-model="localPayment.expiryDate"
               placeholder="MM/YY"
             />
           </div>
@@ -42,35 +42,35 @@
               id="cvc"
               type="text"
               class="form-control"
-              v-model="payment.cvc"
+              v-model="localPayment.cvc"
               placeholder="z.B. 123"
             />
           </div>
         </div>
 
         <!-- Felder für Banküberweisung -->
-        <div v-else-if="payment.paymentOption === 'bank transfer'" class="payment-fields">
+        <div v-else-if="localPayment.paymentOption === 'bank transfer'" class="payment-fields">
           <div class="form-group">
             <label for="iban">IBAN</label>
             <input
               id="iban"
               type="text"
               class="form-control"
-              v-model="payment.iban"
+              v-model="localPayment.iban"
               placeholder="z.B. DE89370400440532013000"
             />
           </div>
         </div>
 
         <!-- Felder für PayPal -->
-        <div v-else-if="payment.paymentOption === 'paypal'" class="payment-fields">
+        <div v-else-if="localPayment.paymentOption === 'paypal'" class="payment-fields">
           <div class="form-group">
             <label for="paypalEmail">PayPal E-Mail</label>
             <input
               id="paypalEmail"
               type="email"
               class="form-control"
-              v-model="payment.paypalEmail"
+              v-model="localPayment.paypalEmail"
               placeholder="z.B. user@mail.com"
             />
           </div>
@@ -87,10 +87,13 @@
 </template>
 
 <script setup>
+import { reactive, watch } from 'vue'
 import axios from 'axios'
 import { useUserStore } from '@/stores/user'
-import { defineProps, defineEmits } from 'vue'
 
+const emit = defineEmits(['close', 'save'])
+const userStore = useUserStore()
+const localPayment = reactive({})
 const props = defineProps({
   show: {
     type: Boolean,
@@ -99,12 +102,18 @@ const props = defineProps({
   payment: {
     type: Object,
     required: true,
+    default: () => ({}),
   },
 })
 
-const emit = defineEmits(['close', 'save'])
-
-const userStore = useUserStore()
+// Syncronisiere `localPayment` mit der Prop
+watch(
+  () => props.payment,
+  (newPayment) => {
+    Object.assign(localPayment, newPayment || {})
+  },
+  { immediate: true },
+)
 
 const closeModal = () => {
   emit('close')
@@ -113,12 +122,12 @@ const closeModal = () => {
 const handleConfirm = async () => {
   try {
     let result
-    if (props.payment.id) {
+    if (localPayment.id) {
       // Zahlungsmethode aktualisieren
-      result = await updatePayment(props.payment.id, props.payment)
+      result = await updatePayment(localPayment.id, localPayment)
     } else {
       // Neue Zahlungsmethode erstellen
-      result = await createPayment(props.payment)
+      result = await createPayment(localPayment)
     }
     emit('save', result.data) // Emit der neuen/aktualisierten Zahlungsmethode
     resetPayment() // Eingabefelder zurücksetzen
@@ -129,7 +138,7 @@ const handleConfirm = async () => {
 }
 
 const resetPayment = () => {
-  Object.assign(props.payment, {
+  Object.assign(localPayment, {
     paymentOption: '',
     creditCardNumber: '',
     iban: '',
@@ -141,25 +150,21 @@ const resetPayment = () => {
 // Methode zum Erstellen einer neuen Zahlung
 async function createPayment(paymentData) {
   try {
-    const response = await axios.post(`/payment/create`, {
+    return await axios.post(`/payment/create`, {
       userId: userStore.user.id,
       ...paymentData,
     })
-    return response
   } catch (error) {
     console.error('Fehler beim Erstellen der Zahlung:', error)
-    throw error
   }
 }
 
 // Methode zum Aktualisieren einer bestehenden Zahlung
 async function updatePayment(paymentId, paymentData) {
   try {
-    const response = await axios.put(`/payment/${paymentId}`, paymentData)
-    return response
+    return await axios.put(`/payment/${paymentId}`, paymentData)
   } catch (error) {
     console.error('Fehler beim Aktualisieren der Zahlung:', error)
-    throw error
   }
 }
 </script>
