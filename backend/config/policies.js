@@ -53,5 +53,5 @@ module.exports.policies = {
     findOne: 'isAdmin',
     destroy: 'isAdmin',
     create: true
-  }
+  },
 };

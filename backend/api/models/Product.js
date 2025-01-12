@@ -14,7 +14,7 @@ module.exports = {
      */
     name: {
       type: 'string',
-      columnType: 'varchar(80)',
+      columnType: 'varchar(30)',
       required: true
     },
 

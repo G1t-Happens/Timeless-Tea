@@ -455,4 +455,6 @@ module.exports = {
       return res.serverError('An unexpected error occurred.');
     }
   }
+
+  //TODO: Soft Delete fuer Orders implementieren bzw ueberhaupt noetig ? Canceln und fertig ?
 };

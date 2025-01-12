@@ -89,10 +89,8 @@
 <script setup>
 import { reactive, watch } from 'vue'
 import axios from 'axios'
-import { useUserStore } from '@/stores/user'
 
 const emit = defineEmits(['close', 'save'])
-const userStore = useUserStore()
 const localPayment = reactive({})
 const props = defineProps({
   show: {
@@ -103,6 +101,10 @@ const props = defineProps({
     type: Object,
     required: true,
     default: () => ({}),
+  },
+  userId: {
+    type: Number,
+    required: true, // Die `userId` muss übergeben werden
   },
 })
 
@@ -121,14 +123,21 @@ const closeModal = () => {
 
 const handleConfirm = async () => {
   try {
+    const paymentData = {
+      ...localPayment,
+    }
+
+    paymentData.user = props.userId
+
     let result
     if (localPayment.id) {
       // Zahlungsmethode aktualisieren
-      result = await updatePayment(localPayment.id, localPayment)
+      result = await updatePayment(localPayment.id, paymentData)
     } else {
       // Neue Zahlungsmethode erstellen
-      result = await createPayment(localPayment)
+      result = await createPayment(paymentData)
     }
+
     emit('save', result.data) // Emit der neuen/aktualisierten Zahlungsmethode
     resetPayment() // Eingabefelder zurücksetzen
     emit('close')
@@ -150,10 +159,7 @@ const resetPayment = () => {
 // Methode zum Erstellen einer neuen Zahlung
 async function createPayment(paymentData) {
   try {
-    return await axios.post(`/payment/create`, {
-      userId: userStore.user.id,
-      ...paymentData,
-    })
+    return await axios.post(`/payment/create`, paymentData)
   } catch (error) {
     console.error('Fehler beim Erstellen der Zahlung:', error)
   }
@@ -162,7 +168,7 @@ async function createPayment(paymentData) {
 // Methode zum Aktualisieren einer bestehenden Zahlung
 async function updatePayment(paymentId, paymentData) {
   try {
-    return await axios.put(`/payment/${paymentId}`, paymentData)
+    return await axios.patch(`/payment/${paymentId}`, paymentData)
   } catch (error) {
     console.error('Fehler beim Aktualisieren der Zahlung:', error)
   }

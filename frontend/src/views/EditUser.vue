@@ -3,7 +3,7 @@
     <BackButton />
     <h2 class="page-title form-label">Benutzer bearbeiten</h2>
 
-    <div v-if="loading" class="text-center">
+    <div v-if="loading || !user" class="text-center">
       <p>Lade Benutzer...</p>
     </div>
 
@@ -206,6 +206,7 @@
       v-if="showPaymentModal"
       :show="showPaymentModal"
       :payment="editingPayment"
+      :userId="user.id"
       @close="closePaymentModal"
       @save="savePayment"
     />
@@ -248,7 +249,7 @@ const user = ref({
     postalCode: '',
     country: '',
   },
-  payments: [], // Neue Eigenschaft für mehrere Zahlungsmethoden
+  payments: [],
 })
 
 const isFormChanged = computed(() => {
@@ -287,8 +288,16 @@ const fetchUser = async (id) => {
   loading.value = true
   try {
     const { data } = await axios.get(`/user/${id}`)
-    user.value = data
-    originalUser.value = JSON.parse(JSON.stringify(data))
+    user.value = {
+      ...user.value, // Behalte die Standardstruktur bei
+      ...data, // Überschreibe mit den API-Daten
+      address: {
+        ...user.value.address, // Behalte Standardstruktur der Adresse
+        ...data.address, // Überschreibe mit den API-Daten
+      },
+      payments: data.payments || [], // Stelle sicher, dass Zahlungen immer ein Array sind
+    }
+    originalUser.value = JSON.parse(JSON.stringify(user.value))
   } catch (error) {
     console.error('Fehler beim Laden des Benutzers:', error)
     alert('Benutzer konnte nicht geladen werden.')
@@ -296,6 +305,7 @@ const fetchUser = async (id) => {
     loading.value = false
   }
 }
+
 const deleteUser = async (id) => {
   const confirmed = window.confirm('Möchten Sie diesen User wirklich löschen?')
   if (!confirmed) {

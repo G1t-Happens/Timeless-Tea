@@ -19,10 +19,7 @@ module.exports = {
     try {
       const { emailAddress, password } = req.body;
       // Benutzer über den Service einloggen
-      const user = await LoginService.loginUser(emailAddress, password);
-      // Session aktualisieren (kann alternativ auch direkt im Service erfolgen)
-      req.session.userId = user.id;
-      req.session.user = user;
+      const user = await LoginService.loginUser(emailAddress, password, req);
       return res.json(user);
     } catch (err) {
       sails.log.error('Error:', err.message);

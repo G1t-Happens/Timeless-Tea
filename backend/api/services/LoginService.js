@@ -22,7 +22,7 @@ module.exports = {
    * @returns {Object} Der gefundene User (ohne Passwort)
    * @throws {NotFoundError|UnauthorizedError} Wirft entsprechende Fehler, falls Benutzer nicht existiert oder das Passwort nicht stimmt
    */
-  loginUser: async function (emailAddress, password) {
+  loginUser: async function (emailAddress, password, req) {
     // User anhand der E-Mail-Adresse suchen
     let user = await User.findOne({
       emailAddress: emailAddress.toLowerCase(),
@@ -40,6 +40,14 @@ module.exports = {
           // Falls das Passwort nicht stimmt, wird hier ein UnauthorizedError geworfen
           throw new errors.UnauthorizedError('Incorrect password');
         });
+
+    //Session resetten
+    req.session.userId = null;
+    req.session.user = null;
+
+    //Neu eingeloggter User setzen
+    req.session.userId = user.id;
+    req.session.user = user;
 
     // Gebe den User zurück falls gefunden und authorisiert
     return user;

@@ -27,6 +27,7 @@ export const useUserStore = defineStore('user', {
       axios
         .post('/login', loginInformation)
         .then((response) => {
+          this.user = null
           this.user = response.data
           if (this.user.isAdmin) {
             router.push('/admin')
@@ -59,6 +60,7 @@ export const useUserStore = defineStore('user', {
       axios
         .post('/register', registerInformation)
         .then((response) => {
+          this.user = null
           this.user = response.data
           router.push('/user')
         })
