@@ -20,6 +20,15 @@
         method="post"
         enctype="multipart/form-data"
       >
+        <!-- Soft Delete Toggle (nur wenn der Artikel bereits existiert) -->
+        <div v-if="product.id" class="form-group toggle-switch">
+          <label class="form-label" for="isDeleted">Als gelöscht markieren</label>
+          <label class="switch" aria-labelledby="isDeleted">
+            <input v-model="product.isDeleted" type="checkbox" id="isDeleted" />
+            <span class="slider round"></span>
+          </label>
+        </div>
+
         <!-- Bildvorschau -->
         <div v-if="imagePreview" class="image-preview">
           <img :src="imagePreview" alt="Vorschau des hochgeladenen Bildes" class="preview-image" />
@@ -71,12 +80,17 @@
         <!-- Dropdown für die Kategorienauswahl -->
         <div class="form-group">
           <label for="categories" class="form-label">Kategorien</label>
-          <button class="dropdown-button" type="button" @click="toggleDropdown('categories')">
+          <button
+            class="dropdown-button"
+            type="button"
+            @click="toggleDropdown('categories')"
+            ref="dropdownButtonRef"
+          >
             ▾ Kategorien wählen
           </button>
 
-          <!-- Dropdown-Menü, das nur angezeigt wird, wenn der Button geklickt wurde -->
-          <div v-if="activeDropdown === 'categories'" class="dropdown-menu">
+          <!-- Dropdown-Menü -->
+          <div v-if="activeDropdown === 'categories'" class="dropdown-menu" ref="dropdownMenuRef">
             <div v-for="group in organizedCategories" :key="group.type">
               <strong>{{ group.type }}</strong>
               <div v-for="category in group.categories" :key="category.id">
@@ -109,7 +123,12 @@
         <!-- Button zum Speichern der Änderungen -->
         <div class="button-group">
           <button type="submit" class="btn btn-primary">Speichern</button>
-          <button type="button" @click="deleteArticle(product.id)" class="btn btn-danger">
+          <button
+            v-if="!product.isDeleted"
+            type="button"
+            @click="deleteArticle(product.id)"
+            class="btn btn-danger"
+          >
             Löschen
           </button>
         </div>
@@ -119,7 +138,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import axios from 'axios'
 import BackButton from '@/components/navigation/BackButton.vue'
@@ -130,7 +149,10 @@ const router = useRouter() // Für Navigation nach dem Speichern
 const loading = ref(true) // Flag, ob die Daten noch geladen werden
 const selectedCategories = ref([]) // Ausgewählte Kategorien-IDs
 const organizedCategories = ref([]) // Kategorien, gruppiert nach Typ
-const activeDropdown = ref(null) // Verfolgt, welches Dropdown aktiv ist
+// Reaktive Variablen
+const activeDropdown = ref(null) // Verfolgt das aktive Dropdown
+const dropdownButtonRef = ref(null) // Referenz zum Button
+const dropdownMenuRef = ref(null) // Referenz zum Dropdown-Menü
 const imagePreview = ref(null)
 const product = ref({
   id: null,
@@ -140,6 +162,7 @@ const product = ref({
   quantity: 0,
   categories: [],
   image: null,
+  isDeleted: false,
 })
 
 // Funktion zum Gruppieren von Kategorien nach ihrem Typ
@@ -165,10 +188,39 @@ const getCategoryNames = () => {
 
 // Funktion, die beim Laden der Seite aufgerufen wird
 onMounted(async () => {
-  await fetchCategories() // Kategorien abrufen
-  await fetchArticle(route.params.id) // Artikel anhand der ID abrufen
-  imagePreview.value = product.value.image // Aktuellstes Bild ins preview laden
+  await fetchCategories()
+  await fetchArticle(route.params.id)
+  imagePreview.value = product.value.image
+
+  // Hinzufügen eines globalen Click-Listeners, um das Popup zu schließen
+  document.addEventListener('click', handleOutsideClick)
 })
+
+onUnmounted(() => {
+  // Entfernen des globalen Click-Listeners beim Verlassen der Komponente
+  document.removeEventListener('click', handleOutsideClick)
+})
+
+/// Funktion zum Umschalten des Dropdown-Menüs
+const toggleDropdown = (dropdown) => {
+  if (activeDropdown.value === dropdown) {
+    activeDropdown.value = null
+  } else {
+    activeDropdown.value = dropdown
+  }
+}
+
+// Funktion, um Klicks außerhalb des Dropdowns zu behandeln
+const handleOutsideClick = (event) => {
+  const clickedInsideButton =
+    dropdownButtonRef.value && dropdownButtonRef.value.contains(event.target)
+  const clickedInsideMenu = dropdownMenuRef.value && dropdownMenuRef.value.contains(event.target)
+
+  // Nur schließen, wenn der Klick außerhalb von Button und Dropdown erfolgt
+  if (!clickedInsideButton && !clickedInsideMenu) {
+    activeDropdown.value = null
+  }
+}
 
 // Funktion zum Abrufen aller Kategorien
 const fetchCategories = async () => {
@@ -182,12 +234,14 @@ const fetchCategories = async () => {
 
 // Funktion zum Abrufen des Artikels, der bearbeitet werden soll
 const fetchArticle = async (id) => {
-  loading.value = true // Setzt das Loading-Flag auf true, um die Ladeanzeige zu zeigen
+  loading.value = true
   try {
     const { data } = await axios.get(`/product/${id}`)
-    product.value = data // Produktdaten zuweisen
+    // Konvertiere isDeleted zu Boolean, wobei 1 true und 0 false ist
+    data.isDeleted = !!data.isDeleted // Wandelt 1 zu true und 0 zu false um
+    product.value = data
 
-    // IDs der ausgewählten Kategorien aus den Produktkategorien extrahieren
+    // Extrahiere IDs der ausgewählten Kategorien aus den Produktkategorien
     selectedCategories.value = data.productCategories.map((cat) => cat.id)
   } catch (error) {
     console.error('Fehler beim Laden des Artikels:', error)
@@ -205,6 +259,7 @@ const handleSave = async () => {
   formData.append('description', product.value.description)
   formData.append('price', product.value.price)
   formData.append('quantity', product.value.quantity)
+  formData.append('isDeleted', product.value.isDeleted)
   formData.append('categories', JSON.stringify(selectedCategories.value))
 
   // Optional: Bild nur anhängen, wenn ein neues Bild hochgeladen wurde
@@ -231,17 +286,13 @@ const deleteArticle = async (id) => {
   }
 
   try {
+    //Softdelete
     await axios.delete(`/product/${id}`)
     // Nach dem Löschen auf das Admin-Dashboard weiterleiten
     await router.push('/admin')
   } catch (error) {
     console.error('Fehler beim Löschen des Artikels:', error)
   }
-}
-
-// Funktion zum Umschalten des Dropdown-Menüs
-const toggleDropdown = (dropdown) => {
-  activeDropdown.value = activeDropdown.value === dropdown ? null : dropdown
 }
 
 //Vorschau des Bilds
@@ -388,5 +439,61 @@ button {
   display: flex;
   justify-content: space-between;
   gap: 10px;
+}
+
+.toggle-switch {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 60px;
+  height: 34px;
+  margin-left: 10px;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: 0.4s;
+  border-radius: 34px;
+}
+
+.slider:before {
+  position: absolute;
+  content: '';
+  height: 26px;
+  width: 26px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  transition: 0.4s;
+  border-radius: 50%;
+}
+
+input:checked + .slider {
+  background-color: #4a5043;
+}
+
+input:focus + .slider {
+  box-shadow: 0 0 1px #4a5043;
+}
+
+input:checked + .slider:before {
+  transform: translateX(26px);
 }
 </style>

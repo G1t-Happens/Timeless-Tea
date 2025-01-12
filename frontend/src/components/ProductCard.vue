@@ -1,6 +1,6 @@
 <template>
   <router-link :to="{ name: 'ProductDetail', params: { id: product.id } }" class="product-card">
-    <div class="product-card">
+    <div :class="['product-card', { 'product-card-deleted': product.isDeleted }]">
       <div class="card mb-4 shadow-sm">
         <!-- Produktbild -->
         <img :src="product.image" class="card-img-top" alt="Produktbild" loading="lazy" />
@@ -97,14 +97,20 @@ const truncatedDescription = computed(() => {
 <style scoped>
 .product-card {
   display: flex;
-  text-decoration: none; /* Entferne den Unterstrich des Links */
+  text-decoration: none;
   flex-direction: column;
   height: 100%;
   width: 100%;
-  position: relative; /* Wichtig für die Positionierung der Buttons */
+  position: relative;
 }
 
-/* Hintergrund, Schatten, und Rand für die Karte */
+.product-card-deleted {
+  filter: grayscale(100%); /* Karte grau machen */
+  opacity: 0.6; /* Leicht transparent */
+  pointer-events: none; /* Interaktion deaktivieren */
+}
+
+/* Hintergrund, Schatten und Rand für die Karte */
 .card {
   display: flex;
   flex-direction: column;
@@ -113,11 +119,11 @@ const truncatedDescription = computed(() => {
   background-color: #f1e2c5; /* Heller Beigeton für den Hintergrund */
   border: 2px solid #4a5043; /* Dunkles Grau für den Rand */
   box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2); /* Sanfter Schatten für Tiefe */
-  min-height: 500px; /* Mindesthöhe für die Karten */
-  max-height: 500px; /* Mindesthöhe für die Karten */
-  height: 100%; /* Die Karte füllt den gesamten verfügbaren Platz */
-  position: relative; /* Damit die Buttons absolut positioniert werden können */
-  overflow: hidden; /* Verhindert, dass der Inhalt über die Karte hinausgeht */
+  min-height: 500px;
+  max-height: 500px;
+  height: 100%;
+  position: relative;
+  overflow: hidden;
 }
 
 /* Das Produktbild */

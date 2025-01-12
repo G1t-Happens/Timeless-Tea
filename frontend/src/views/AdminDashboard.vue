@@ -91,7 +91,13 @@
             <!-- Buttons für Bearbeiten und Löschen -->
             <div class="text-center mb-5 cardset-admin-button">
               <button @click="editArticle(product)" class="btn btn-warning">Bearbeiten</button>
-              <button @click="deleteArticle(product.id)" class="btn btn-danger">Löschen</button>
+              <button
+                v-if="!product.isDeleted"
+                @click="deleteArticle(product.id)"
+                class="btn btn-danger"
+              >
+                Löschen
+              </button>
             </div>
           </div>
         </div>
@@ -341,22 +347,21 @@ const editArticle = (article) => {
 
 // Artikel löschen
 const deleteArticle = async (id) => {
-  const confirmed = window.confirm('Möchten Sie diesen Artikel wirklich löschen?')
+  const confirmed = window.confirm('Möchten Sie dieses Produkt wirklich löschen?')
   if (!confirmed) {
     return
   }
 
   try {
-    await axios.delete(`/product/${id}`)
-    const index = articles.value.findIndex((article) => article.id === id)
-    if (index !== -1) {
-      articles.value.splice(index, 1)
-      // Optional: Zeige eine Erfolgsmeldung
-      alert('Artikel erfolgreich gelöscht.')
+    // Simuliere das Setzen des Soft-Delete-Status über eine API
+    await axios.patch(`/product/${id}`, { isDeleted: true })
+    const product = articles.value.find((p) => p.id === id)
+    if (product) {
+      product.isDeleted = true
     }
   } catch (error) {
-    console.error('Fehler beim Löschen des Artikels:', error)
-    alert('Fehler beim Löschen des Artikels.') // Optional: Ersetze durch eine bessere Fehleranzeige
+    console.error('Fehler beim Löschen des Produkts:', error)
+    alert('Fehler beim Löschen des Produkts.')
   }
 }
 

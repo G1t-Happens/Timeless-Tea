@@ -86,6 +86,7 @@ module.exports = {
              p.price,
              p.quantity,
              p.image,
+             p.isDeleted,
              COUNT(pr.rating) AS "reviews",
              COALESCE(AVG(r.stars), 0) AS "averageRating",
              (
@@ -136,8 +137,9 @@ module.exports = {
    * @returns {Object} Ein Objekt mit einer Liste von gefundenen Produkten sowie Informationen zur Pagination.
    */
   findProducts: async function (req) {
+    const isAdmin = checkIsAdmin(req);
     const { search, page, size, categories, price, rating } = extractFilters(req);
-    const { whereClauses, havingClauses, queryParams } = buildQueryConditions({ search, categories, price, rating });
+    const { whereClauses, havingClauses, queryParams } = buildQueryConditions({ search, categories, price, rating, isAdmin });
     let baseQuery = buildProductQuery({ whereClauses, havingClauses });
 
     let totalCount = 0;
@@ -170,12 +172,8 @@ module.exports = {
       throw new errors.BadRequestError('Product ID is required.');
     }
 
-    // Zuerst zugehörige JoinTable-Einträge löschen
-    await ProductCategory.destroy({ product: productId });
-    await ProductRating.destroy({ product: productId });
-
-    // Dann das Produkt selbst löschen
-    await Product.destroy({ id: productId });
+    // Soft-Delete durchführen
+    await Product.updateOne({ id: productId }).set({ isDeleted: true });
   },
 
 
@@ -200,7 +198,7 @@ module.exports = {
     }
 
     // Erwartete Daten aus dem Body
-    const { name, description, categories, price, quantity } = req.body;
+    const { name, description, categories, price, quantity, isDeleted } = req.body;
 
     // Produkt anhand der ID laden
     const product = await Product.findOne({ id: productId });
@@ -228,7 +226,7 @@ module.exports = {
     return await sails.getDatastore().transaction(async (db) => {
       // Produkt aktualisieren
       await Product.updateOne({ id: productId })
-        .set({ name, description, price, quantity, image: optimizedUrl })
+        .set({ name, description, price, quantity, isDeleted, image: optimizedUrl })
         .usingConnection(db);
 
       // Kategorien neu setzen, falls übergeben
@@ -296,30 +294,39 @@ function extractFilters(req) {
  * @param {Object} filters - Ein Objekt mit den Filtern (search, categories, price, rating).
  * @returns {Object} Ein Objekt mit den Arrays für WHERE- und HAVING-Klauseln, den Query-Parametern und dem aktuellen Param-Index.
  */
-function buildQueryConditions({ search, categories, price, rating }) {
-  let whereClauses = [];
+function buildQueryConditions({ search, categories, price, rating, isAdmin }) {
+  let whereClauses = []; // Standard-Filter für die WHERE-Bedingungen
   let havingClauses = [];
   let queryParams = [];
   let paramIndex = 1;
 
+  // Filter für isDeleted abhängig von isAdmin
+  if (!isAdmin) {
+    whereClauses.push('p.isDeleted = false');
+  }
+
+  // Suchbegriff hinzufügen
   if (search) {
     whereClauses.push(`p.name LIKE $${paramIndex}`);
     queryParams.push(search);
     paramIndex++;
   }
 
+  // Filter für Kategorien hinzufügen
   if (categories && categories.length > 0) {
     const categoryPlaceholders = categories.map(() => `$${paramIndex++}`).join(',');
     whereClauses.push(`c.id IN (${categoryPlaceholders})`);
     queryParams.push(...categories);
   }
 
+  // Filter für Preis hinzufügen
   if (price !== null && !isNaN(price)) {
     whereClauses.push(`p.price <= $${paramIndex}`);
     queryParams.push(price);
     paramIndex++;
   }
 
+  // Filter für Bewertung hinzufügen
   if (rating !== null && !isNaN(rating)) {
     havingClauses.push(`averageRating >= $${paramIndex}`);
     queryParams.push(rating);
@@ -526,6 +533,22 @@ async function uploadFileToCloudinary(req, fieldName, productImage = '') {
     upstream.noMoreFiles();
     return productImage;
   }
+}
+
+/**
+ * Prüft, ob der aktuelle Benutzer ein Admin ist
+ *
+ * @param {Request} req - Der eingehende HTTP-Request von Sails.js
+ * @returns {boolean} - `true`, wenn der Benutzer ein Admin ist, ansonsten `false`
+ */
+function checkIsAdmin(req) {
+  // Sicherheitsprüfung: Ist der Benutzer eingeloggt und hat eine gültige Session?
+  if (!req.session || !req.session.user) {
+    return false;
+  }
+
+  // Rückgabe, ob der Benutzer ein Admin ist
+  return req.session.user.isAdmin === true;
 }
 
 

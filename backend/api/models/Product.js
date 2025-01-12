@@ -59,6 +59,16 @@ module.exports = {
     },
 
     /**
+     * @description Soft Delete Flag, da wir Produkte die schonmal angeboten und in Bestellungen
+     * gelanden sind, niemals loeschen sollte wegen Nachvollziehbarkeit/Referenzen
+     */
+    isDeleted: {
+      type: 'boolean',
+      defaultsTo: false,
+      description: 'Gibt an, ob das Produkt gelöscht wurde.',
+    },
+
+    /**
      * @description Beziehung zu ProductRating, um Produktbewertungen abzubilden (Many-to-Many über Rating).
      * Ein Produkt kann mehrere Ratings besitzen.
      * Eine Rating z.B. 5 Stars kann jeweils zu mehreren Produkten zugeordnet werden.
