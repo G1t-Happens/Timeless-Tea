@@ -72,7 +72,7 @@
       </div>
 
       <!-- Absenden -->
-      <button type="submit" class="btn-submit">Nachricht senden</button>
+      <button type="submit" class="btn-submit" :disabled="!form.privacy">Nachricht senden</button>
     </form>
 
     <!-- Erfolgsnachricht -->
@@ -133,11 +133,8 @@ const validateForm = () => {
 const submitForm = async () => {
   if (validateForm()) {
     try {
-      const response = await axios.post('/message', form.value);
-      successMessage.value = 'Vielen Dank! Ihre Nachricht wurde erfolgreich gesendet.';
-
-      console.log('Server-Antwort:', response.data);
-
+      await axios.post('/message', form.value)
+      successMessage.value = 'Vielen Dank! Ihre Nachricht wurde erfolgreich gesendet.'
       // Formular zurücksetzen
       form.value = {
         name: '',
@@ -145,14 +142,15 @@ const submitForm = async () => {
         subject: '',
         message: '',
         privacy: false,
-      };
-      errors.value = {};
+      }
+      errors.value = {}
     } catch (error) {
-      console.error('Fehler beim Senden der Nachricht:', error.response?.data || error.message);
-      errors.value.server = 'Es gab ein Problem beim Senden Ihrer Nachricht. Bitte versuchen Sie es später erneut.';
+      console.error('Fehler beim Senden der Nachricht:', error.response?.data || error.message)
+      errors.value.server =
+        'Es gab ein Problem beim Senden Ihrer Nachricht. Bitte versuchen Sie es später erneut.'
     }
   }
-};
+}
 </script>
 
 <style scoped>
@@ -238,6 +236,12 @@ textarea {
   font-size: 16px;
   cursor: pointer;
   transition: background-color 0.3s ease;
+}
+
+.btn-submit:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+  opacity: 0.6;
 }
 
 .btn-submit:hover {
