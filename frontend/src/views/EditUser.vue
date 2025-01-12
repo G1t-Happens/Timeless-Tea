@@ -105,10 +105,14 @@
               <div v-else-if="payment.paymentOption === 'paypal'">
                 <p>E-Mail: {{ obfuscatePaypalEmail(payment.paypalEmail) }}</p>
               </div>
-              <button type="button" @click="editPayment(payment)" class="btn btn-secondary">
+              <button type="button" @click="editPayment(payment)" class="btn btn-edit-payment">
                 Bearbeiten
               </button>
-              <button type="button" @click="deletePayment(payment.id)" class="btn btn-danger">
+              <button
+                type="button"
+                @click="deletePayment(payment.id)"
+                class="btn btn-delete-payment"
+              >
                 Löschen
               </button>
             </div>
@@ -402,6 +406,36 @@ const obfuscatePaypalEmail = (email) => {
 
 .payment-summary p {
   margin: 0 0 5px;
+}
+
+.btn-edit-payment {
+  margin-right: 10px;
+  color: white;
+  background-color: #6c757d;
+}
+
+.btn-edit-payment:hover {
+  background-color: #5a6268;
+}
+
+.btn-delete-payment {
+  color: white;
+  background-color: #c06e52;
+}
+
+.btn-delete-payment:hover {
+  background-color: #c0392b;
+}
+
+/* Zusätzliche Symbole für Bearbeiten und Löschen */
+.btn-edit-payment:before {
+  content: '✎\00a0';
+  font-size: 18px;
+}
+
+.btn-delete-payment:before {
+  content: '✖\00a0';
+  font-size: 18px;
 }
 
 .btn {
