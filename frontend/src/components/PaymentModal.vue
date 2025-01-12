@@ -78,7 +78,9 @@
 
         <!-- Modal-Aktionen -->
         <div class="modal-actions">
-          <button class="btn btn-primary" @click="handleConfirm">Übernehmen</button>
+          <button class="btn btn-primary" @click="handleConfirm" :disabled="isConfirmDisabled">
+            Übernehmen
+          </button>
           <button class="btn btn-danger" @click="closeModal">Abbrechen</button>
         </div>
       </div>
@@ -87,7 +89,7 @@
 </template>
 
 <script setup>
-import { reactive, watch } from 'vue'
+import { computed, reactive, watch } from 'vue'
 import axios from 'axios'
 
 const emit = defineEmits(['close', 'save'])
@@ -116,6 +118,21 @@ watch(
   },
   { immediate: true },
 )
+
+const isConfirmDisabled = computed(() => {
+  if (!localPayment.paymentOption) return true
+
+  switch (localPayment.paymentOption) {
+    case 'credit card':
+      return !localPayment.creditCardNumber || !localPayment.expiryDate || !localPayment.cvc
+    case 'bank transfer':
+      return !localPayment.iban
+    case 'paypal':
+      return !localPayment.paypalEmail
+    default:
+      return true
+  }
+})
 
 const closeModal = () => {
   emit('close')
