@@ -257,12 +257,30 @@ module.exports = {
         }
         : null;
 
+      // Adressdaten aus der `shipping`-Tabelle extrahieren
+      let shippingAddress = null;
+      if (order.shipping && order.shipping.address) {
+        const address = await Address.findOne({ id: order.shipping.address });
+        if (address) {
+          shippingAddress = {
+            country: address.country,
+            state: address.state || '',
+            city: address.city,
+            postalCode: address.postalCode,
+            street: address.street,
+            houseNumber: address.houseNumber,
+            addressAddition: address.addressAddition || '',
+          };
+        }
+      }
+
       const filteredShipping = order.shipping
         ? {
           carrier: order.shipping.carrier,
           deliveryStatus: order.shipping.deliveryStatus,
           estimatedDeliveryDate: order.shipping.estimatedDeliveryDate,
           shippingDate: order.shipping.shippingDate,
+          address: shippingAddress, // Integrierte Adressdaten
         }
         : null;
 
