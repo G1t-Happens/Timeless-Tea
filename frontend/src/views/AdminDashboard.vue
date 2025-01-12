@@ -321,22 +321,22 @@ const loadMoreArticles = async () => {
 
 // Artikel erstellen
 const createNewArticle = () => {
-  router.push('/admin/create-article')
+  router.push({ name: 'CreateArticle' })
 }
 
 // Kategorie erstellen
 const createNewCategory = () => {
-  router.push('/admin/create-category')
+  router.push({ name: 'CreateCategory' })
 }
 
 // Kategorien bearbeiten
 const editCategories = () => {
-  router.push('/admin/edit-category')
+  router.push({ name: 'EditCategory' })
 }
 
 // Artikel bearbeiten
 const editArticle = (article) => {
-  router.push(`/admin/edit-article/${article.id}`)
+  router.push({ name: 'EditArticle', params: { id: article.id } })
 }
 
 // Artikel löschen
@@ -426,7 +426,7 @@ const loadMoreUsers = async () => {
 
 // User bearbeiten
 const editUser = (user) => {
-  router.push(`/admin/edit-user/${user.id}`)
+  router.push({ name: 'AdminEditUser', params: { id: user.id } })
 }
 
 // User löschen
