@@ -1,14 +1,19 @@
 <template>
   <div class="user-dashboard">
     <div class="header">
-      <h2 class="text-center user-title">User Dashboard</h2>
+      <h1 class="text-center user-title">User Dashboard</h1>
+      <h2 v-if="currentUserName" class="welcome-message">
+        Willkommen zurück, {{ currentUserName }}!
+      </h2>
     </div>
 
     <!-- Navigation Buttons -->
     <div class="navigation mb-4">
       <button @click="navigateToOrders" class="btn navigation-btn">Meine Bestellungen</button>
       <button @click="navigateToFavorites" class="btn navigation-btn">Meine Favoriten</button>
-      <button @click="navigateToUserSettings" class="btn navigation-btn">Meine Kontoeinstellungen</button>
+      <button @click="navigateToUserSettings" class="btn navigation-btn">
+        Meine Kontoeinstellungen
+      </button>
     </div>
 
     <!-- Suchfeld für Artikel -->
@@ -50,26 +55,34 @@
 </template>
 
 <script setup>
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import SearchField from '@/components/SearchField.vue'
 import ProductCard from '@/components/ProductCard.vue'
 import { useRouter } from 'vue-router'
+import { useUserStore } from '@/stores/user.js'
 import axios from 'axios'
 
 const router = useRouter()
+const userStore = useUserStore()
+
+const currentUserName = computed(() => {
+  if (!userStore.user || !userStore.user.firstName || !userStore.user.lastName) {
+    return null
+  }
+  return `${userStore.user.firstName} ${userStore.user.lastName}`
+})
 
 // Navigation zu Bestellungen
 const navigateToOrders = () => {
-  router.push('/user/order')
+  router.push({ name: 'OrderDetail' })
 }
 
-// Navigation zu Favoriten
 const navigateToFavorites = () => {
-  router.push('/user/favorite')
+  router.push({ name: 'Favorites' })
 }
 
 const navigateToUserSettings = () => {
-  router.push('/user/edit-user')
+  router.push({ name: 'UserEditUser' })
 }
 
 // Artikel-Daten
@@ -220,5 +233,14 @@ onMounted(() => {
 
 .btn-secondary:active {
   background-color: #d4b483;
+}
+
+.welcome-message {
+  text-align: center;
+  font-size: 1.5rem;
+  font-weight: normal;
+  color: #4a5043;
+  margin-top: -10px;
+  margin-bottom: 30px;
 }
 </style>

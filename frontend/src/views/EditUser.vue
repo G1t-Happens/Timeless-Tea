@@ -9,7 +9,7 @@
 
     <div v-else>
       <!-- Hauptformular -->
-      <form @submit.prevent="handleSave" class="form-container">
+      <form @submit.prevent="handleSave" class="form-container" autocomplete="off">
         <!-- USER-ID -->
         <div class="form-group">
           <label for="userId" class="form-label">User ID</label>
@@ -53,6 +53,60 @@
             <input v-model="user.isAdmin" type="checkbox" id="isAdmin" />
             <span class="slider round"></span>
           </label>
+        </div>
+
+        <!-- Passwort ändern -->
+        <!-- Passwort ändern -->
+        <h3 class="form-label">Passwort ändern</h3>
+        <div class="form-group password-fields">
+          <!-- Dummy-Feld -->
+          <input type="text" style="display: none" autocomplete="username" />
+
+          <!-- Neues Passwort -->
+          <label for="newPassword" class="form-label">Neues Passwort</label>
+          <div class="password-input-group">
+            <input
+              v-model="newPassword"
+              :type="showPassword ? 'text' : 'password'"
+              id="newPassword"
+              class="form-control"
+              placeholder="Neues Passwort"
+              autocomplete="off"
+            />
+            <button
+              type="button"
+              class="btn btn-show-password"
+              @mousedown="togglePasswordVisibility(true)"
+              @mouseup="togglePasswordVisibility(false)"
+              @mouseleave="togglePasswordVisibility(false)"
+            >
+              <i :class="showPassword ? 'bi bi-eye-slash' : 'bi bi-eye'"></i>
+            </button>
+          </div>
+
+          <!-- Passwort-Bestätigung -->
+          <label for="confirmPassword" class="form-label">Passwort bestätigen</label>
+          <div class="password-input-group">
+            <input
+              v-model="confirmPassword"
+              :type="showPassword ? 'text' : 'password'"
+              id="confirmPassword"
+              class="form-control"
+              placeholder="Passwort bestätigen"
+              autocomplete="off"
+            />
+            <button
+              type="button"
+              class="btn btn-show-password"
+              @mousedown="togglePasswordVisibility(true)"
+              @mouseup="togglePasswordVisibility(false)"
+              @mouseleave="togglePasswordVisibility(false)"
+            >
+              <i :class="showPassword ? 'bi bi-eye-slash' : 'bi bi-eye'"></i>
+            </button>
+          </div>
+
+          <p v-if="passwordMismatch" class="error-text">Die Passwörter stimmen nicht überein.</p>
         </div>
 
         <!-- Adressfelder -->
@@ -171,9 +225,13 @@ const currentUser = computed(() => userStore.user)
 const route = useRoute()
 const router = useRouter()
 const loading = ref(true)
+const newPassword = ref('')
+const confirmPassword = ref('')
+const showPassword = ref(false)
 const showPaymentModal = ref(false)
 const editingPayment = ref(null)
 const originalUser = ref(null)
+
 // Lokales User-Objekt und Kopie für Vergleich
 const user = ref({
   id: null,
@@ -197,8 +255,24 @@ const isFormChanged = computed(() => {
   const addressChanged =
     JSON.stringify(user.value.address) !== JSON.stringify(originalUser.value.address)
   const generalChanged = JSON.stringify(user.value) !== JSON.stringify(originalUser.value)
-  return generalChanged || addressChanged
+
+  const passwordChanged =
+    newPassword.value !== '' &&
+    confirmPassword.value !== '' &&
+    newPassword.value === confirmPassword.value
+
+  return (generalChanged || addressChanged || passwordChanged) && !passwordMismatch.value
 })
+
+// Berechnete Eigenschaft für Passwortvergleich
+const passwordMismatch = computed(
+  () => newPassword.value && confirmPassword.value && newPassword.value !== confirmPassword.value,
+)
+
+// Passwort-Sichtbarkeit ein-/ausblenden
+const togglePasswordVisibility = (state) => {
+  showPassword.value = state
+}
 
 // Admins können auf beliebigen User zugreifen, nicht Admins nur auf die eigenen Daten
 onMounted(async () => {
@@ -240,18 +314,22 @@ const deleteUser = async (id) => {
  * ALLES in einem PATCH-Call
  */
 const handleSave = async () => {
+  if (passwordMismatch.value) {
+    alert('Passwörter stimmen nicht überein.')
+    return
+  }
+
+  const updatedUserData = {
+    emailAddress: user.value.emailAddress,
+    firstName: user.value.firstName,
+    lastName: user.value.lastName,
+    isAdmin: user.value.isAdmin,
+    address: user.value.address,
+    password: newPassword.value || undefined,
+  }
+
   try {
-    const updatedUserData = {
-      emailAddress: user.value.emailAddress,
-      firstName: user.value.firstName,
-      lastName: user.value.lastName,
-      isAdmin: user.value.isAdmin,
-      address: user.value.address,
-    }
-
-    // 1 Patch Call
     await axios.patch(`/user/${user.value.id}`, updatedUserData)
-
     alert('Benutzerdaten erfolgreich aktualisiert!')
     router.go()
   } catch (error) {
@@ -536,5 +614,36 @@ input:focus + .slider {
 
 input:checked + .slider:before {
   transform: translateX(26px);
+}
+
+.password-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.password-input-group {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.password-input-group .form-control {
+  flex: 1;
+  padding-right: 40px;
+}
+
+.password-input-group .btn-show-password {
+  position: absolute;
+  right: 10px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1.2rem;
+}
+
+.error-text {
+  color: #c0392b;
+  font-size: 0.9rem;
 }
 </style>

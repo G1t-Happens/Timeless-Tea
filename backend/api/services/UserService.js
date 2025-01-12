@@ -198,9 +198,13 @@ module.exports = {
         })
         .usingConnection(db);
 
+      //Session aktualisieren, falls Session zum user gehoert der den call gemacht hat
+      if (req.session.user && Number(userId) === Number(req.session.userId)) {
+        req.session.user = { ...req.session.user, ...updatedUser };
+      }
+
       // Passwort aus dem Rückgabeobjekt löschen
       delete updatedUser.password;
-
       return updatedUser;
     });
   },

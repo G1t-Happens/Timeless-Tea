@@ -1,7 +1,10 @@
 <template>
   <div class="admin-dashboard">
     <div class="header">
-      <h2 class="text-center admin-title">Admin Dashboard</h2>
+      <h1 class="text-center admin-title">Admin Dashboard</h1>
+      <h2 v-if="currentUserName" class="welcome-message">
+        Willkommen zurück, {{ currentUserName }}!
+      </h2>
       <div class="stats-row">
         <div class="stat-card">
           <h3>Artikel</h3>
@@ -204,15 +207,18 @@
 </template>
 
 <script setup>
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import SearchField from '@/components/SearchField.vue'
 import ProductCard from '@/components/ProductCard.vue'
 import UserCard from '@/components/UserCard.vue'
 import OrderCard from '@/components/OrderCard.vue'
 import { useRouter } from 'vue-router'
+import { useUserStore } from '@/stores/user.js'
 import axios from 'axios'
 
-// Navigation Panels
+const currentPanel = ref('articles')
+const router = useRouter()
+const userStore = useUserStore()
 const panels = ref([
   { key: 'articles', name: 'Artikel verwalten' },
   { key: 'users', name: 'User verwalten' },
@@ -220,8 +226,12 @@ const panels = ref([
   { key: 'messages', name: 'Nachrichten verwalten' },
 ])
 
-const currentPanel = ref('articles')
-const router = useRouter()
+const currentUserName = computed(() => {
+  if (!userStore.user.firstName || !userStore.user.lastName) {
+    return null
+  }
+  return `${userStore.user.firstName} ${userStore.user.lastName}`
+})
 
 // Gemeinsame Loading-Status
 const loading = ref({
@@ -754,5 +764,14 @@ onMounted(() => {
   display: flex;
   justify-content: space-between;
   font-size: 1.2rem;
+}
+
+.welcome-message {
+  text-align: center;
+  font-size: 1.5rem;
+  font-weight: normal;
+  color: #4a5043;
+  margin-top: -10px;
+  margin-bottom: 30px;
 }
 </style>
