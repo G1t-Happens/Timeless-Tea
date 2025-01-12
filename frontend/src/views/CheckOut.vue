@@ -299,7 +299,7 @@ const submitOrder = async () => {
 
     const response = await axios.post('/order', orderData)
     cartStore.clearCart()
-    await router.push({ name: 'OrderDetail', params: { id: response.data.id } })
+    await router.push({ name: 'OrderSuccess', query: { id: response.data.id } });
   } catch (error) {
     console.error('Fehler beim Abschicken der Bestellung:', error)
     alert('Fehler beim Abschicken der Bestellung.')
@@ -454,12 +454,12 @@ onMounted(async () => {
 }
 
 .btn-primary {
-  background-color: #007bff;
+  background-color: #4a5043;
   color: white;
 }
 
 .btn-primary:hover {
-  background-color: #0069d9;
+  background-color: #9fa86d;
 }
 
 .btn-success {

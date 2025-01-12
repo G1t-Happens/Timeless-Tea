@@ -160,7 +160,7 @@
         <SearchField
           v-model="orderSearchQuery"
           @search="fetchOrders"
-          placeholder="Bestellungen suchen..."
+          placeholder="Suche nach ID, Status oder Name"
           :showFilter="false"
         />
       </div>
@@ -184,7 +184,7 @@
 
             <!-- Buttons für Details und Löschen -->
             <div class="text-center mb-5 cardset-admin-button">
-              <button @click="viewOrder(order)" class="btn btn-info">Details</button>
+              <button @click="viewOrder(order.id)" class="btn btn-warning">Details</button>
               <button @click="deleteOrder(order.id)" class="btn btn-danger">Löschen</button>
             </div>
           </div>
@@ -515,8 +515,8 @@ const loadMoreOrders = async () => {
 }
 
 // Bestellungen anzeigen
-const viewOrder = (order) => {
-  router.push(`/admin/view-order/${order.id}`)
+const viewOrder = (id) => {
+  router.push(`/admin/order/${id}`)
 }
 
 // Bestellungen löschen
@@ -564,9 +564,8 @@ const fetchMetaData = async () => {
 }
 
 // ----------------- Panel Management -----------------
-const selectPanel = (panelKey) => {
-  currentPanel.value = panelKey
-  // Daten neu laden, wenn ein Panel ausgewählt wird
+
+const fetchPanelData = (panelKey) => {
   switch (panelKey) {
     case 'articles':
       fetchArticles()
@@ -585,9 +584,22 @@ const selectPanel = (panelKey) => {
   }
 }
 
+const selectPanel = (panelKey) => {
+  currentPanel.value = panelKey
+  // Speichere den Panel-Zustand nur, wenn es nicht 'messages', da wir Messages auf einer eigenen Seite behandeln
+  if (panelKey !== 'messages') {
+    localStorage.setItem('adminDashboardPanel', panelKey)
+  }
+  fetchPanelData(panelKey)
+}
+
 // Initiales Laden der Standard-Panels
 onMounted(() => {
-  fetchArticles()
+  const savedPanel = localStorage.getItem('adminDashboardPanel')
+  if (savedPanel && panels.value.some((p) => p.key === savedPanel)) {
+    currentPanel.value = savedPanel // Panel auf gespeicherten Zustand setzen
+  }
+  fetchPanelData(currentPanel.value)
   fetchMetaData()
 })
 </script>

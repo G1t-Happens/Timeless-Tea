@@ -63,6 +63,7 @@ module.exports = {
       }
 
       const formatDateForDateColumn = (date) => date.toISOString().split('T')[0];
+      let createdOrder;
 
       // Transaktion
       await sails.getDatastore().transaction(async (db) => {
@@ -75,18 +76,18 @@ module.exports = {
           const { address } = orderUser;
           const newAddress = await Address.create({
             country: address.country,
-            state: address.state || null,
+            state: address.state || '',
             city: address.city,
             postalCode: address.postalCode,
             street: address.street,
             houseNumber: address.houseNumber,
-            addressAddition: address.addressAddition || null
+            addressAddition: address.addressAddition || ''
           }).fetch().usingConnection(db);
           shippingAddressId = newAddress.id;
         }
 
         // Bestellung erstellen
-        const order = await Order.create({
+        createdOrder = await Order.create({
           totalAmount: calculatedTotal,
           orderStatus: 'open',
           user,
@@ -104,7 +105,7 @@ module.exports = {
           estimatedDeliveryDate: estimatedDeliveryDate,
           shippingDate: shippingDate,
           address: shippingAddressId,
-          order: order.id
+          order: createdOrder.id
         }).fetch().usingConnection(db);
 
         // Zahlung erstellen
@@ -117,27 +118,198 @@ module.exports = {
           paypalEmail: originalPayment.paypalEmail,
           isForOrder: true,
           user,
-          order: order.id
+          order: createdOrder.id
         }).fetch().usingConnection(db);
 
         // Bestellung aktualisieren nachdem payment und shipping erstellt wurden
-        await Order.updateOne({ id: order.id }).set({
+        await Order.updateOne({ id: createdOrder.id }).set({
           payment: orderPayment.id,
-          shipping: order.id
+          shipping: createdOrder.id
         }).usingConnection(db);
 
         // Produkte zur Bestellung hinzufügen
         const orderProductRecords = orderProducts.map(op => ({
-          order: order.id,
+          order: createdOrder.id,
           product: op.product,
           quantity: op.quantity,
         }));
         await OrderProduct.createEach(orderProductRecords).usingConnection(db);
       });
-      return res.sendStatus(201);
+      // Rückgabe der Bestell-ID mit Status 201
+      return res.status(201).json({ id: createdOrder.id });
     } catch (error) {
       sails.log.error('Error creating order:', error);
       return res.serverError({ error: 'An error occurred while creating the order.' });
+    }
+  },
+
+  find: async function (req, res) {
+    try {
+      const { page = 1, size = 10, search, productId, userName } = req.query;
+
+      // Pagination
+      const limit = parseInt(size);
+      const skip = (parseInt(page) - 1) * limit;
+
+      // Query-Filter
+      let query = {};
+
+      // Suche nach Status, ID oder Benutzername
+      if (search) {
+        const numericSearch = !isNaN(search) ? parseInt(search) : null;
+
+        // Benutzer anhand des Namens finden
+        const userMatches = await User.find({
+          where: {
+            or: [
+              { firstName: { contains: search } },
+              { lastName: { contains: search } },
+            ],
+          },
+          select: ['id'],
+        });
+        const userIds = userMatches.map((user) => user.id);
+
+        query.or = [
+          { orderStatus: search }, // Exakter Vergleich für Status
+          ...(numericSearch ? [{ id: numericSearch }] : []), // Suche nach numerischer ID
+          ...(userIds.length > 0 ? [{ user: { in: userIds } }] : []), // Suche nach Benutzer
+        ];
+      }
+
+      // Suche nach Produkt-ID
+      if (productId) {
+        query['orderProducts'] = { some: { product: productId } };
+      }
+
+      // Suche nach Benutzername (falls nicht über `search` abgedeckt)
+      if (userName) {
+        const users = await User.find({
+          where: { fullName: { contains: userName } },
+          select: ['id'],
+        });
+        const userIds = users.map((user) => user.id);
+        if (userIds.length > 0) {
+          query['user'] = { in: userIds };
+        }
+      }
+
+      // Fetch orders
+      const orders = await Order.find(query)
+        .sort('createdAt DESC')
+        .limit(limit)
+        .skip(skip);
+
+      // Fetch associated user data for each order
+      const enrichedOrders = await Promise.all(
+        orders.map(async (order) => {
+          const user = await User.findOne({ id: order.user }).select([
+            'id',
+            'firstName',
+            'lastName',
+          ]);
+          return {
+            ...order,
+            user, // Benutzerinformationen hinzufügen
+          };
+        })
+      );
+
+      // Total count for pagination
+      const totalOrders = await Order.count(query);
+
+      return res.json({
+        total: totalOrders,
+        orders: enrichedOrders,
+      });
+    } catch (error) {
+      sails.log.error('Error fetching orders:', error);
+      return res.serverError({ error: 'An error occurred while fetching orders.' });
+    }
+  },
+
+  findOne: async function (req, res) {
+    try {
+      const { id } = req.params;
+
+      if (!id) {
+        return res.badRequest({ error: 'Order ID is required.' });
+      }
+
+      // Finde die Bestellung ohne Subkriterien in populate
+      const order = await Order.findOne({ id })
+        .populate('user') // Holen der gesamten User-Daten (ohne Subkriterien)
+        .populate('shipping') // Holen der gesamten Versanddaten
+        .populate('payment') // Holen der gesamten Zahlungsdaten
+        .populate('orderProducts'); // Holen der Bestellprodukte
+
+      if (!order) {
+        return res.notFound({ error: 'Order not found.' });
+      }
+
+      // Filtere die Felder manuell für `user`, `shipping`, und `payment`
+      const filteredUser = order.user
+        ? {
+          id: order.user.id,
+          firstName: order.user.firstName,
+          lastName: order.user.lastName,
+          emailAddress: order.user.emailAddress,
+        }
+        : null;
+
+      const filteredShipping = order.shipping
+        ? {
+          carrier: order.shipping.carrier,
+          deliveryStatus: order.shipping.deliveryStatus,
+          estimatedDeliveryDate: order.shipping.estimatedDeliveryDate,
+          shippingDate: order.shipping.shippingDate,
+        }
+        : null;
+
+      const filteredPayment = order.payment
+        ? {
+          paymentOption: order.payment.paymentOption,
+          iban: order.payment.iban,
+          paypalEmail: order.payment.paypalEmail,
+          creditCardNumber: order.payment.creditCardNumber,
+          expiryDate: order.payment.expiryDate,
+          cvc: order.payment.cvc,
+        }
+        : null;
+
+      // Hole die vollständigen Produktinformationen für jedes OrderProduct
+      const orderProductsWithDetails = await Promise.all(
+        order.orderProducts.map(async (orderProduct) => {
+          const product = await Product.findOne({ id: orderProduct.product });
+          return {
+            ...orderProduct,
+            product: product
+              ? {
+                id: product.id,
+                name: product.name,
+                description: product.description,
+                price: product.price,
+                quantity: product.quantity,
+                image: product.image,
+              }
+              : null,
+          };
+        })
+      );
+
+      // Bereite die vollständigen Daten für die Antwort vor
+      const detailedOrder = {
+        ...order,
+        user: filteredUser,
+        shipping: filteredShipping,
+        payment: filteredPayment,
+        orderProducts: orderProductsWithDetails,
+      };
+
+      return res.json(detailedOrder);
+    } catch (error) {
+      sails.log.error('Error fetching order details:', error);
+      return res.serverError({ error: 'An error occurred while fetching order details.' });
     }
   },
 

@@ -48,6 +48,7 @@ module.exports.routes = {
   //OrderController.js
   'POST /order': { controller: 'OrderController', action: 'create' },
   'GET /order': 'OrderController.find',
+  'GET /order/:id': 'OrderController.findOne',
   'GET /order/detail': 'OrderController.findOrdersByUser',
   'PATCH /order/:id/cancel': 'OrderController.cancelOrder',
   'GET /order/count': 'OrderController.count',

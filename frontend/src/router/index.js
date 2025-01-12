@@ -89,6 +89,13 @@ const routes = [
     beforeEnter: adminGuard,
   },
   {
+    path: '/admin/order/:id',
+    name: 'ViewOrder',
+    component: () => import('@/views/ViewOrder.vue'),
+    meta: { breadcrumb: 'view order', requiresAdmin: true },
+    beforeEnter: adminGuard,
+  },
+  {
     path: '/admin/message',
     name: 'Message',
     component: () => import('@/views/MessageView.vue'),
@@ -137,6 +144,14 @@ const routes = [
     name: 'CheckOut',
     component: () => import('@/views/CheckOut.vue'),
     meta: { breadcrumb: 'checkout', requiresAuth: true },
+    beforeEnter: authGuard,
+  },
+  {
+    path: '/cart/checkout/success',
+    name: 'OrderSuccess',
+    component: () => import('@/views/OrderSuccess.vue'),
+    props: (route) => ({ orderId: route.query.id }),
+    meta: { breadcrumb: 'checkout success', requiresAuth: true },
     beforeEnter: authGuard,
   },
   {
