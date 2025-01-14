@@ -65,6 +65,14 @@ module.exports.routes = {
   'DELETE /payment/:id': 'PaymentController.destroy',
   'PATCH /payment/:id': 'PaymentController.updatePayment',
 
+  // Catch-All-Route für Vue SPA
+  '/*': {
+    skipAssets: true, // Ignoriere statische Assets wie CSS/JS/Bilder
+    fn: function (req, res) {
+      return res.sendFile(sails.config.appPath + '/assets/index.html');
+    },
+  },
+
 
 
 
