@@ -47,6 +47,12 @@ module.exports = {
     *                                                                          *
     ***************************************************************************/
     default: {
+      adapter: 'sails-mysql',
+      host: '193.196.53.194',
+      port: 33061,
+      user: 'user5_prod',
+      database: 'timelesstea_prod'
+
       // adapter: 'sails-mysql',
       // url: 'mysql://user:password@host:port/database',
       //--------------------------------------------------------------------------
@@ -265,6 +271,7 @@ module.exports = {
     * > Be sure to use the right protocol!  ("http://" vs. "https://")         *
     *                                                                          *
     ***************************************************************************/
+    onlyAllowOrigins: [ ],
     // onlyAllowOrigins: [
     //   'https://example.com',
     //   'https://staging.example.com',
@@ -340,7 +347,7 @@ module.exports = {
     * (https://sailsjs.com/config/http)                                        *
     *                                                                          *
     ***************************************************************************/
-    // trustProxy: true,
+    trustProxy: true,
 
   },
 
@@ -355,7 +362,7 @@ module.exports = {
   * this, just try deploying without setting it and see if it works.)       *
   *                                                                         *
   ***************************************************************************/
-  // port: 80,
+  port: 10000,
 
 
 
