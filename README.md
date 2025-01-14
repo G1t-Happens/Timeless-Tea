@@ -1,14 +1,20 @@
 # Aufgabe 5
 
+Render: https://timeless-tea.onrender.com/
 
-### http://localhost:5173
+Login:
+
+Adminemail: admin@example.com |  pw: admin
+
+Useremail: user@example.com | pw: user
+
 
 Aufgabe 5:
-- [ ] a) Startseite
-- [ ] b) Stammdaten
-- [ ] c) Transaktionen
-- [ ] d) Consistency
-- [ ] e) Security
-- [ ] f) Deployment
+- [x] a) Startseite
+- [x] b) Stammdaten
+- [x] c) Transaktionen
+- [x] d) Consistency
+- [x] e) Security
+- [x] f) Deployment
 - [ ] g) Code Qualität
 - [ ] h) Dokumentation
