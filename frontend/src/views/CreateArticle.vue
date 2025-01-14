@@ -1,11 +1,24 @@
 <template>
   <!-- Hauptcontainer für die Artikel-Erstellung -->
   <div class="create-article">
+    <!-- Verwende die BackButton-Komponente -->
+    <BackButton />
+
     <!-- Überschrift -->
     <h2 class="page-title">Neuen Artikel erstellen</h2>
 
     <!-- Formular für die Artikeldaten -->
-    <form @submit.prevent="createArticle" class="form-container">
+    <form
+      @submit.prevent="createArticle"
+      class="form-container"
+      method="post"
+      enctype="multipart/form-data"
+    >
+      <!-- Bildvorschau -->
+      <div v-if="imagePreview" class="image-preview">
+        <img :src="imagePreview" alt="Vorschau des hochgeladenen Bildes" class="preview-image" />
+      </div>
+
       <!-- Eingabefeld für den Artikelnamen -->
       <div class="form-group">
         <label for="name" class="form-label">Artikelname</label>
@@ -22,6 +35,19 @@
       <div class="form-group">
         <label for="price" class="form-label">Preis in €</label>
         <input type="number" step="0.01" v-model="price" id="price" class="form-control" required />
+      </div>
+
+      <!-- Menge pro Produkt -->
+      <div class="form-group">
+        <label for="price" class="form-label">Menge in g (Gram)</label>
+        <input
+          type="number"
+          step="0.01"
+          v-model="quantity"
+          id="quantity"
+          class="form-control"
+          required
+        />
       </div>
 
       <!-- Dropdown für Kategorienauswahl -->
@@ -51,6 +77,18 @@
         </div>
       </div>
 
+      <!-- Eingabefeld für das Bild -->
+      <div class="form-group">
+        <label for="image" class="form-label">Bild hochladen</label>
+        <input
+          type="file"
+          id="image"
+          class="form-control"
+          @change="onFileChange"
+          accept="image/*"
+        />
+      </div>
+
       <!-- Submit-Button für das Formular -->
       <button type="submit" class="btn btn-primary w-100">Artikel erstellen</button>
     </form>
@@ -61,14 +99,18 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import axios from 'axios'
+import BackButton from '@/components/navigation/BackButton.vue'
 
 // Reaktive Variablen für Formulardaten
 const name = ref('')
 const description = ref('')
 const price = ref('')
-const selectedCategories = ref([]) // Array für ausgewählte Kategorien-IDs
-const organizedCategories = ref([]) // Liste der Kategorien, nach Typ gruppiert
-const activeDropdown = ref(null) // Aktuell geöffnetes Dropdown-Menü
+const quantity = ref('')
+const selectedCategories = ref([])
+const organizedCategories = ref([])
+const activeDropdown = ref(null)
+const imageFile = ref(null)
+const imagePreview = ref(null)
 
 // Router-Instanz für Navigation nach erfolgreicher Erstellung des Artikels
 const router = useRouter()
@@ -109,19 +151,33 @@ const getCategoryNames = () => {
   )
 }
 
+// Funktion zur Verarbeitung der Bildauswahl
+const onFileChange = (event) => {
+  const files = event.target.files
+  if (files && files[0]) {
+    imageFile.value = files[0]
+    imagePreview.value = URL.createObjectURL(files[0]) // Erzeuge eine temporäre URL für die Vorschau
+  }
+}
+
 // Funktion zum Erstellen eines neuen Artikels
 const createArticle = async () => {
-  // Artikelobjekt basierend auf den Formulardaten
-  const newArticle = {
-    name: name.value,
-    description: description.value,
-    price: price.value,
-    categories: selectedCategories.value,
+  const formData = new FormData()
+  formData.append('name', name.value)
+  formData.append('description', description.value)
+  formData.append('price', price.value)
+  formData.append('quantity', quantity.value)
+  formData.append('categories', JSON.stringify(selectedCategories.value))
+
+  // Optional: Bild nur anhängen, wenn ein neues Bild hochgeladen wurde
+  if (imageFile.value instanceof File) {
+    formData.append('image', imageFile.value)
   }
 
   try {
     // Anfrage zum Erstellen des Artikels auf dem Server
-    await axios.post('/product', newArticle)
+    await axios.post('/product', formData)
+
     // Nach erfolgreicher Erstellung zur Admin-Seite navigieren
     await router.push('/admin')
   } catch (error) {
@@ -131,6 +187,23 @@ const createArticle = async () => {
 </script>
 
 <style scoped>
+.image-preview {
+  margin-top: 10px;
+  text-align: center;
+}
+
+.preview-image {
+  width: 100%; /* Passt die Breite des Bildes an den Container an */
+  max-width: 100%; /* Begrenzung auf die maximale Breite des Containers */
+  max-height: 400px; /* Begrenzung auf eine maximale Höhe */
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  object-fit: contain; /* Zeigt das gesamte Bild an, ohne etwas abzuschneiden */
+  display: block; /* Zentriert das Bild im Container */
+  margin: 0 auto; /* Zentrierung für das Bild */
+  background-color: #f8f9fa; /* Optional: Hintergrundfarbe für Leerflächen */
+}
+
 /* Stil für den Hauptcontainer der Seite */
 .create-article {
   padding: 30px;

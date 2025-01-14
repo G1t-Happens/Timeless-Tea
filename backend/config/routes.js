@@ -18,14 +18,54 @@ module.exports.routes = {
    * `assets` directory)                                                      *
    *                                                                          *
    ***************************************************************************/
+  '/': { view: 'pages/homepage' },
+
+  //LoginController.js
+  'POST /login': 'LoginController.login',
+  'POST /register': 'LoginController.register',
+  'GET /sessionUser': 'LoginController.sessionUser',
+  'GET /logout': 'LoginController.logout',
+
+  // Benutzer-Routen
+  'GET /user/:id': 'UserController.findOne',
+  'GET /user': 'UserController.find',
+  'PATCH /user/:id': 'UserController.patch',
+  'DELETE /user/:id': 'UserController.destroy',
+  'GET /user/count': 'UserController.count',
+
   //ProductController.js
   'POST /product': { controller: 'ProductController', action: 'create' },
   'GET /product': 'ProductController.find',
   'GET /product/:id': 'product.findOne',
   'DELETE /product/:id': 'product.destroy',
   'PATCH /product/:id': 'product.patch',
+  'GET /product/count': 'ProductController.count',
+
   //CategoryController.js
-  'GET /category': 'CategoryController.find'
+  'POST /category': { controller: 'CategoryController', action: 'create' },
+  'GET /category': 'CategoryController.find',
+
+  //OrderController.js
+  'POST /order': { controller: 'OrderController', action: 'create' },
+  'GET /order': 'OrderController.find',
+  'GET /order/:id': 'OrderController.findOne',
+  'GET /order/detail': 'OrderController.findOrdersByUser',
+  'PATCH /order/:id/cancel': 'OrderController.cancelOrder',
+  'GET /order/count': 'OrderController.count',
+
+  //ContactMessageController.js
+  'POST /message': { controller: 'ContactMessageController', action: 'create' },
+  'GET /message': 'ContactMessageController.find',
+  'GET /message/:id': 'ContactMessageController.findOne',
+  'DELETE /message/:id': 'ContactMessageController.destroy',
+
+  //PaymentController.js
+  'POST /payment/create': 'PaymentController.create',
+  'GET /payment/:userId': 'PaymentController.findPaymentsByUser',
+  'DELETE /payment/:id': 'PaymentController.destroy',
+  'PATCH /payment/:id': 'PaymentController.updatePayment',
+
+
 
 
   /***************************************************************************

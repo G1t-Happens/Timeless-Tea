@@ -1,4 +1,6 @@
 const errors = require('../utils/errors');
+const { v2: cloudinary } = require('cloudinary');
+
 
 /**
  * ProductService
@@ -19,32 +21,42 @@ module.exports = {
    * @throws {BadRequestError} Wenn kein Name oder Preis übergeben wurde.
    */
   createProduct: async function (req) {
-    const { name, description, price, categories } = req.body;
+    const { name, description, categories, price, quantity } = req.body;
 
-    // Name und Preis sind Pflichtfelder, bei Fehlen -> BadRequestError
-    if (!name || !price) {
+    if (!name || !price || !quantity) {
       throw new errors.BadRequestError('Product name and price are required.');
     }
 
-    // Alle Datenbankoperationen innerhalb einer Transaktion ausführen
+    const optimizedUrl = await uploadFileToCloudinary(req, 'image');
+
+    // Kategorien validieren und verarbeiten
+    let categoryArray = [];
+    if (categories) {
+      // Kategorien verarbeiten (String -> Array)
+      categoryArray = typeof categories === 'string' ? JSON.parse(categories) : categories;
+      // Prüfen, ob alle Elemente numerisch sind
+      if (!Array.isArray(categoryArray) || categoryArray.some((id) => typeof id !== 'number')) {
+        throw new errors.BadRequestError('Categories must be an array of numeric IDs.');
+      }
+    }
+
+    // Datenbankoperationen innerhalb einer Transaktion
     return await sails.getDatastore().transaction(async (db) => {
-      // Neues Produkt anlegen
-      const newProduct = await Product.create({ name, description, price })
+      const newProduct = await Product.create({ name, description, price, quantity, image: optimizedUrl })
         .fetch()
         .usingConnection(db);
 
-      // Falls Kategorien vorhanden, Verknüpfungen in ProductCategory setzen
-      if (categories && categories.length > 0) {
-        const productCategories = categories.map((categoryId) => ({
+      if (categoryArray.length > 0) {
+        const productCategories = categoryArray.map((categoryId) => ({
           product: newProduct.id,
-          category: categoryId
+          category: categoryId,
         }));
         await ProductCategory.createEach(productCategories).usingConnection(db);
       }
-
       return newProduct;
     });
   },
+
 
 
   /**
@@ -72,7 +84,9 @@ module.exports = {
              p.name,
              p.description,
              p.price,
+             p.quantity,
              p.image,
+             p.isDeleted,
              COUNT(pr.rating) AS "reviews",
              COALESCE(AVG(r.stars), 0) AS "averageRating",
              (
@@ -123,8 +137,9 @@ module.exports = {
    * @returns {Object} Ein Objekt mit einer Liste von gefundenen Produkten sowie Informationen zur Pagination.
    */
   findProducts: async function (req) {
+    const isAdmin = checkIsAdmin(req);
     const { search, page, size, categories, price, rating } = extractFilters(req);
-    const { whereClauses, havingClauses, queryParams } = buildQueryConditions({ search, categories, price, rating });
+    const { whereClauses, havingClauses, queryParams } = buildQueryConditions({ search, categories, price, rating, isAdmin });
     let baseQuery = buildProductQuery({ whereClauses, havingClauses });
 
     let totalCount = 0;
@@ -157,12 +172,8 @@ module.exports = {
       throw new errors.BadRequestError('Product ID is required.');
     }
 
-    // Zuerst zugehörige JoinTable-Einträge löschen
-    await ProductCategory.destroy({ product: productId });
-    await ProductRating.destroy({ product: productId });
-
-    // Dann das Produkt selbst löschen
-    await Product.destroy({ id: productId });
+    // Soft-Delete durchführen
+    await Product.updateOne({ id: productId }).set({ isDeleted: true });
   },
 
 
@@ -187,7 +198,7 @@ module.exports = {
     }
 
     // Erwartete Daten aus dem Body
-    const { name, description, price, productCategories } = req.body;
+    const { name, description, categories, price, quantity, isDeleted } = req.body;
 
     // Produkt anhand der ID laden
     const product = await Product.findOne({ id: productId });
@@ -197,27 +208,51 @@ module.exports = {
       throw new errors.NotFoundError(`Product with id ${productId} not found.`);
     }
 
+    //Hochladen der
+    const optimizedUrl = await uploadFileToCloudinary(req, 'image', product.image);
+
+    // Kategorien validieren und verarbeiten
+    let categoryArray = [];
+    if (categories) {
+      // Kategorien verarbeiten (String -> Array)
+      categoryArray = typeof categories === 'string' ? JSON.parse(categories) : categories;
+      // Prüfen, ob alle Elemente numerisch sind
+      if (!Array.isArray(categoryArray) || categoryArray.some((id) => typeof id !== 'number')) {
+        throw new errors.BadRequestError('Categories must be an array of numeric IDs.');
+      }
+    }
+
     // Update-Vorgang in einer Transaktion
     return await sails.getDatastore().transaction(async (db) => {
       // Produkt aktualisieren
       await Product.updateOne({ id: productId })
-        .set({ name, description, price })
+        .set({ name, description, price, quantity, isDeleted, image: optimizedUrl })
         .usingConnection(db);
 
       // Kategorien neu setzen, falls übergeben
-      if (productCategories) {
-        await ProductCategory.destroy({ product: productId }).usingConnection(db);
-        const newCategories = productCategories.map((categoryId) => ({
-          product: productId,
-          category: categoryId
-        }));
-        await ProductCategory.createEach(newCategories).usingConnection(db);
-      }
-
+      await ProductCategory.destroy({ product: productId }).usingConnection(db);
+      const newCategories = categoryArray.map((categoryId) => ({
+        product: productId,
+        category: categoryId
+      }));
+      await ProductCategory.createEach(newCategories).usingConnection(db);
       // Aktualisiertes Produkt mit Kategorien zurückgeben
       return await Product.findOne({ id: productId }).populate('productCategories').usingConnection(db);
     });
+  },
+
+  /**
+   * Zaehlt die Produkt
+   *
+   * @description
+   * Zaehlt alle vorhandenen Produkte in der Datenbank und liefert die Anzahl zurueck
+   *
+   */
+  countArticles: async function () {
+    // Zähle die Anzahl der Artikel
+    return await Product.count();
   }
+
 };
 
 
@@ -259,30 +294,39 @@ function extractFilters(req) {
  * @param {Object} filters - Ein Objekt mit den Filtern (search, categories, price, rating).
  * @returns {Object} Ein Objekt mit den Arrays für WHERE- und HAVING-Klauseln, den Query-Parametern und dem aktuellen Param-Index.
  */
-function buildQueryConditions({ search, categories, price, rating }) {
-  let whereClauses = [];
+function buildQueryConditions({ search, categories, price, rating, isAdmin }) {
+  let whereClauses = []; // Standard-Filter für die WHERE-Bedingungen
   let havingClauses = [];
   let queryParams = [];
   let paramIndex = 1;
 
+  // Filter für isDeleted abhängig von isAdmin
+  if (!isAdmin) {
+    whereClauses.push('p.isDeleted = false');
+  }
+
+  // Suchbegriff hinzufügen
   if (search) {
     whereClauses.push(`p.name LIKE $${paramIndex}`);
     queryParams.push(search);
     paramIndex++;
   }
 
+  // Filter für Kategorien hinzufügen
   if (categories && categories.length > 0) {
     const categoryPlaceholders = categories.map(() => `$${paramIndex++}`).join(',');
     whereClauses.push(`c.id IN (${categoryPlaceholders})`);
     queryParams.push(...categories);
   }
 
+  // Filter für Preis hinzufügen
   if (price !== null && !isNaN(price)) {
     whereClauses.push(`p.price <= $${paramIndex}`);
     queryParams.push(price);
     paramIndex++;
   }
 
+  // Filter für Bewertung hinzufügen
   if (rating !== null && !isNaN(rating)) {
     havingClauses.push(`averageRating >= $${paramIndex}`);
     queryParams.push(rating);
@@ -413,7 +457,6 @@ function buildProductQuery({ whereClauses, havingClauses }) {
   return baseQuery;
 }
 
-
 /**
  * Führt die Produkt-Query aus, bereitet das Ergebnis auf und gibt es formatiert zurück.
  * Bei Bedarf wird zudem Pagination angewendet bzw Paginationwerte zurueckgelierfert.
@@ -457,3 +500,55 @@ async function executeProductQuery(baseQuery, queryParams, page, size, totalCoun
     };
   }
 }
+
+/**
+ * Lädt eine Datei zu Cloudinary hoch und gibt die URL zurück
+ *
+ * @param {object} req - Das Sails.js-Request-Objekt
+ * @param {string} fieldName - Der Name des Datei-Feldes im Request
+ * @param {null} productImage - (Optional) Backup Image, falls Cloudinary upload fehlschlaegt
+ * @returns {Promise<string>} - Die URL der hochgeladenen und optimierten Datei
+ * @throws {errors.BadRequestError} - Wenn keine Datei hochgeladen wurde oder ein Fehler auftritt
+ */
+async function uploadFileToCloudinary(req, fieldName, productImage = '') {
+  const upstream = req.file(fieldName);
+  const newFile = upstream._files[0];
+
+  if (newFile) {
+    // Konfig
+    cloudinary.config(sails.config);
+
+    // Holen der hochgeladenen file oder Fehler werfen
+    const file = await new Promise((resolve, reject) =>
+      req.file(fieldName).upload((err, files) =>
+        err || !files.length ? reject(new errors.BadRequestError('No file uploaded.')) : resolve(files[0])
+      )
+    );
+
+    // Hochladen der File in Cloudinary und URL zurueckliefern
+    const { public_id } = await cloudinary.uploader.upload(file.fd, { public_id: `product/${Date.now()}` });
+    return cloudinary.url(public_id, { fetch_format: 'auto', quality: 'auto' });
+  } else {
+    // Keine neue Datei: Bestehendes Bild zurückgeben oder `null` falls nichts übergeben wurde
+    upstream.noMoreFiles();
+    return productImage;
+  }
+}
+
+/**
+ * Prüft, ob der aktuelle Benutzer ein Admin ist
+ *
+ * @param {Request} req - Der eingehende HTTP-Request von Sails.js
+ * @returns {boolean} - `true`, wenn der Benutzer ein Admin ist, ansonsten `false`
+ */
+function checkIsAdmin(req) {
+  // Sicherheitsprüfung: Ist der Benutzer eingeloggt und hat eine gültige Session?
+  if (!req.session || !req.session.user) {
+    return false;
+  }
+
+  // Rückgabe, ob der Benutzer ein Admin ist
+  return req.session.user.isAdmin === true;
+}
+
+

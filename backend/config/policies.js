@@ -17,6 +17,41 @@ module.exports.policies = {
   *                                                                          *
   ***************************************************************************/
 
-  // '*': true,
+  //Globale Standard-Policy
+  '*': 'isLoggedIn',
 
+  UserController: {
+    patch: 'isOwnerOrAdmin',
+    destroy: 'isAdmin',
+    find: 'isAdmin',
+    findOne: 'isOwnerOrAdmin',
+  },
+
+  LoginController:{
+    '*': true,
+  },
+
+  ProductController:{
+    '*': 'isAdmin',
+    findOne: true,
+    find: true,
+  },
+
+  CategoryController: {
+    create: 'isAdmin',
+    find: true
+  },
+
+  OrderController: {
+    find: 'isAdmin',
+    findOne: 'isAdmin',
+    count: 'isAdmin',
+  },
+
+  ContactMessageController: {
+    find: 'isAdmin',
+    findOne: 'isAdmin',
+    destroy: 'isAdmin',
+    create: true
+  },
 };

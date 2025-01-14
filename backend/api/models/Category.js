@@ -5,6 +5,7 @@
  *                 Kategorien können verschiedene Typen haben und sind über eine Many-to-Many-Beziehung
  *                 mit Produkten verknüpft (über die ProductCategory-Tabelle).
  */
+
 module.exports = {
   attributes: {
     /**
@@ -14,7 +15,7 @@ module.exports = {
      */
     name: {
       type: 'string',
-      columnType: 'varchar(80)',
+      columnType: 'varchar(20)',
       required: true
     },
 
@@ -25,7 +26,7 @@ module.exports = {
      */
     type: {
       type: 'string',
-      columnType: 'varchar(80)',
+      columnType: 'varchar(20)',
       required: true
     },
 

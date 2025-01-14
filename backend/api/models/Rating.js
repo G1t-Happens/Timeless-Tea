@@ -4,6 +4,7 @@
  * @description :: Unser Datenmodell für Bewertungen von Produkten.
  *                 Jede Bewertung hat eine Zahl(1-5) und kann mit vielen Produkten verknüpft sein.
  */
+
 module.exports = {
   attributes: {
     /**

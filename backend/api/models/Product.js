@@ -4,6 +4,7 @@
  * @description :: Unser Datenmodell für Produkte.
  *                 Produkte können einer oder mehreren Kategorien und Ratings angehören (Many-to-Many).
  */
+
 module.exports = {
   attributes: {
     /**
@@ -13,7 +14,7 @@ module.exports = {
      */
     name: {
       type: 'string',
-      columnType: 'varchar(80)',
+      columnType: 'varchar(30)',
       required: true
     },
 
@@ -23,7 +24,7 @@ module.exports = {
      */
     description: {
       type: 'string',
-      columnType: 'varchar(256)'
+      columnType: 'varchar(1024)'
     },
 
     /**
@@ -47,14 +48,24 @@ module.exports = {
     },
 
     /**
-     * @description Die Menge des Produkts in Gramm.
+     * @description Die Menge in dem das Produkt in einem Stueck angeboten wird.
      * @type {number}
-     * @example Für Productbestellung: 250 (für 250 Gramm)
+     * @example idr. 100g
      */
     quantity: {
       type: 'number',
       columnType: 'decimal(10,2)',
       required: false
+    },
+
+    /**
+     * @description Soft Delete Flag, da wir Produkte die schonmal angeboten und in Bestellungen
+     * gelanden sind, niemals loeschen sollte wegen Nachvollziehbarkeit/Referenzen
+     */
+    isDeleted: {
+      type: 'boolean',
+      defaultsTo: false,
+      description: 'Gibt an, ob das Produkt gelöscht wurde.',
     },
 
     /**
@@ -75,6 +86,16 @@ module.exports = {
     productCategories: {
       collection: 'productcategory',
       via: 'product'
+    },
+
+    /**
+     * @description Beziehung zu OrderCategory, um Orders zu verknüpfen (Many-to-Many).
+     * Ein Produkt kann mehrere in mehreren Orders vorkommen
+     */
+    orderProducts: {
+      collection: 'orderproduct',
+      via: 'product'
     }
+
   }
 };

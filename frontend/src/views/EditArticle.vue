@@ -1,5 +1,8 @@
 <template>
   <div class="edit-article">
+    <!-- Verwende die BackButton-Komponente -->
+    <BackButton />
+
     <!-- Titel für die Bearbeitungsseite -->
     <h2 class="page-title">Artikel bearbeiten</h2>
 
@@ -11,7 +14,26 @@
     <!-- Formular zur Bearbeitung des Artikels, nur wenn nicht geladen -->
     <div v-else>
       <!-- Formular für die Bearbeitung eines Artikels -->
-      <form @submit.prevent="handleSave" class="form-container">
+      <form
+        @submit.prevent="handleSave"
+        class="form-container"
+        method="post"
+        enctype="multipart/form-data"
+      >
+        <!-- Soft Delete Toggle (nur wenn der Artikel bereits existiert) -->
+        <div v-if="product.id" class="form-group toggle-switch">
+          <label class="form-label" for="isDeleted">Als gelöscht markieren</label>
+          <label class="switch" aria-labelledby="isDeleted">
+            <input v-model="product.isDeleted" type="checkbox" id="isDeleted" />
+            <span class="slider round"></span>
+          </label>
+        </div>
+
+        <!-- Bildvorschau -->
+        <div v-if="imagePreview" class="image-preview">
+          <img :src="imagePreview" alt="Vorschau des hochgeladenen Bildes" class="preview-image" />
+        </div>
+
         <!-- Eingabefeld für den Artikelnamen -->
         <div class="form-group">
           <label for="name" class="form-label">Artikelname</label>
@@ -42,15 +64,33 @@
           />
         </div>
 
+        <!-- Menge pro Produkt -->
+        <div class="form-group">
+          <label for="price" class="form-label">Menge in g (Gram)</label>
+          <input
+            type="number"
+            step="0.01"
+            v-model="product.quantity"
+            id="quantity"
+            class="form-control"
+            required
+          />
+        </div>
+
         <!-- Dropdown für die Kategorienauswahl -->
         <div class="form-group">
           <label for="categories" class="form-label">Kategorien</label>
-          <button class="dropdown-button" type="button" @click="toggleDropdown('categories')">
+          <button
+            class="dropdown-button"
+            type="button"
+            @click="toggleDropdown('categories')"
+            ref="dropdownButtonRef"
+          >
             ▾ Kategorien wählen
           </button>
 
-          <!-- Dropdown-Menü, das nur angezeigt wird, wenn der Button geklickt wurde -->
-          <div v-if="activeDropdown === 'categories'" class="dropdown-menu">
+          <!-- Dropdown-Menü -->
+          <div v-if="activeDropdown === 'categories'" class="dropdown-menu" ref="dropdownMenuRef">
             <div v-for="group in organizedCategories" :key="group.type">
               <strong>{{ group.type }}</strong>
               <div v-for="category in group.categories" :key="category.id">
@@ -68,10 +108,27 @@
           </div>
         </div>
 
+        <!-- Eingabefeld für das Bild -->
+        <div class="form-group">
+          <label for="image" class="form-label">Neues Bild hochladen</label>
+          <input
+            type="file"
+            id="image"
+            class="form-control"
+            @change="onFileChange"
+            accept="image/*"
+          />
+        </div>
+
         <!-- Button zum Speichern der Änderungen -->
         <div class="button-group">
           <button type="submit" class="btn btn-primary">Speichern</button>
-          <button type="button" @click="deleteArticle(product.id)" class="btn btn-danger">
+          <button
+            v-if="!product.isDeleted"
+            type="button"
+            @click="deleteArticle(product.id)"
+            class="btn btn-danger"
+          >
             Löschen
           </button>
         </div>
@@ -81,9 +138,10 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import axios from 'axios'
+import BackButton from '@/components/navigation/BackButton.vue'
 
 // Reaktive Variablen
 const route = useRoute() // Holt die aktuellen Routenparameter
@@ -91,14 +149,21 @@ const router = useRouter() // Für Navigation nach dem Speichern
 const loading = ref(true) // Flag, ob die Daten noch geladen werden
 const selectedCategories = ref([]) // Ausgewählte Kategorien-IDs
 const organizedCategories = ref([]) // Kategorien, gruppiert nach Typ
-const activeDropdown = ref(null) // Verfolgt, welches Dropdown aktiv ist
+// Reaktive Variablen
+const activeDropdown = ref(null) // Verfolgt das aktive Dropdown
+const dropdownButtonRef = ref(null) // Referenz zum Button
+const dropdownMenuRef = ref(null) // Referenz zum Dropdown-Menü
+const imagePreview = ref(null)
 const product = ref({
   id: null,
   name: '',
   description: '',
   price: 0,
+  quantity: 0,
   categories: [],
-}) // Artikel, der bearbeitet werden soll
+  image: null,
+  isDeleted: false,
+})
 
 // Funktion zum Gruppieren von Kategorien nach ihrem Typ
 const organizeCategoriesByType = (categories) => {
@@ -123,9 +188,39 @@ const getCategoryNames = () => {
 
 // Funktion, die beim Laden der Seite aufgerufen wird
 onMounted(async () => {
-  await fetchCategories() // Kategorien abrufen
-  await fetchArticle(route.params.id) // Artikel anhand der ID abrufen
+  await fetchCategories()
+  await fetchArticle(route.params.id)
+  imagePreview.value = product.value.image
+
+  // Hinzufügen eines globalen Click-Listeners, um das Popup zu schließen
+  document.addEventListener('click', handleOutsideClick)
 })
+
+onUnmounted(() => {
+  // Entfernen des globalen Click-Listeners beim Verlassen der Komponente
+  document.removeEventListener('click', handleOutsideClick)
+})
+
+/// Funktion zum Umschalten des Dropdown-Menüs
+const toggleDropdown = (dropdown) => {
+  if (activeDropdown.value === dropdown) {
+    activeDropdown.value = null
+  } else {
+    activeDropdown.value = dropdown
+  }
+}
+
+// Funktion, um Klicks außerhalb des Dropdowns zu behandeln
+const handleOutsideClick = (event) => {
+  const clickedInsideButton =
+    dropdownButtonRef.value && dropdownButtonRef.value.contains(event.target)
+  const clickedInsideMenu = dropdownMenuRef.value && dropdownMenuRef.value.contains(event.target)
+
+  // Nur schließen, wenn der Klick außerhalb von Button und Dropdown erfolgt
+  if (!clickedInsideButton && !clickedInsideMenu) {
+    activeDropdown.value = null
+  }
+}
 
 // Funktion zum Abrufen aller Kategorien
 const fetchCategories = async () => {
@@ -139,12 +234,14 @@ const fetchCategories = async () => {
 
 // Funktion zum Abrufen des Artikels, der bearbeitet werden soll
 const fetchArticle = async (id) => {
-  loading.value = true // Setzt das Loading-Flag auf true, um die Ladeanzeige zu zeigen
+  loading.value = true
   try {
     const { data } = await axios.get(`/product/${id}`)
-    product.value = data // Produktdaten zuweisen
+    // Konvertiere isDeleted zu Boolean, wobei 1 true und 0 false ist
+    data.isDeleted = !!data.isDeleted // Wandelt 1 zu true und 0 zu false um
+    product.value = data
 
-    // IDs der ausgewählten Kategorien aus den Produktkategorien extrahieren
+    // Extrahiere IDs der ausgewählten Kategorien aus den Produktkategorien
     selectedCategories.value = data.productCategories.map((cat) => cat.id)
   } catch (error) {
     console.error('Fehler beim Laden des Artikels:', error)
@@ -155,17 +252,24 @@ const fetchArticle = async (id) => {
 
 // Funktion zum Speichern der Änderungen
 const handleSave = async () => {
-  try {
-    // Daten für den Patch-Aufruf vorbereiten
-    const updatedData = {
-      name: product.value.name,
-      description: product.value.description,
-      price: product.value.price,
-      productCategories: selectedCategories.value,
-    }
+  const formData = new FormData()
 
+  // Pflichtfelder hinzufügen
+  formData.append('name', product.value.name)
+  formData.append('description', product.value.description)
+  formData.append('price', product.value.price)
+  formData.append('quantity', product.value.quantity)
+  formData.append('isDeleted', product.value.isDeleted)
+  formData.append('categories', JSON.stringify(selectedCategories.value))
+
+  // Optional: Bild nur anhängen, wenn ein neues Bild hochgeladen wurde
+  if (product.value.image instanceof File) {
+    formData.append('image', product.value.image)
+  }
+
+  try {
     // PATCH-Anfrage, um den Artikel zu aktualisieren
-    await axios.patch(`/product/${product.value.id}`, updatedData)
+    await axios.patch(`/product/${product.value.id}`, formData)
 
     // Nach dem Speichern auf das Admin-Dashboard weiterleiten
     await router.push('/admin')
@@ -176,7 +280,13 @@ const handleSave = async () => {
 
 // Artikel löschen
 const deleteArticle = async (id) => {
+  const confirmed = window.confirm('Möchten Sie diesen Artikel wirklich löschen?')
+  if (!confirmed) {
+    return
+  }
+
   try {
+    //Softdelete
     await axios.delete(`/product/${id}`)
     // Nach dem Löschen auf das Admin-Dashboard weiterleiten
     await router.push('/admin')
@@ -185,9 +295,13 @@ const deleteArticle = async (id) => {
   }
 }
 
-// Funktion zum Umschalten des Dropdown-Menüs
-const toggleDropdown = (dropdown) => {
-  activeDropdown.value = activeDropdown.value === dropdown ? null : dropdown
+//Vorschau des Bilds
+const onFileChange = (event) => {
+  const files = event.target.files
+  if (files && files[0]) {
+    product.value.image = files[0]
+    imagePreview.value = URL.createObjectURL(files[0])
+  }
 }
 </script>
 
@@ -200,6 +314,23 @@ const toggleDropdown = (dropdown) => {
   background-color: #fff;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   border-radius: 8px;
+}
+
+.image-preview {
+  margin-top: 10px;
+  text-align: center;
+}
+
+.preview-image {
+  width: 100%; /* Passt die Breite des Bildes an den Container an */
+  max-width: 100%; /* Begrenzung auf die maximale Breite des Containers */
+  max-height: 400px; /* Begrenzung auf eine maximale Höhe */
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  object-fit: contain; /* Zeigt das gesamte Bild an, ohne etwas abzuschneiden */
+  display: block; /* Zentriert das Bild im Container */
+  margin: 0 auto; /* Zentrierung für das Bild */
+  background-color: #f8f9fa; /* Optional: Hintergrundfarbe für Leerflächen */
 }
 
 /* Titel */
@@ -233,7 +364,6 @@ const toggleDropdown = (dropdown) => {
   border: 1px solid #ddd;
   border-radius: 8px;
   font-size: 1rem;
-  transition: border-color 0.3s ease;
 }
 
 .form-control:focus {
@@ -246,13 +376,17 @@ button {
   padding: 10px 20px;
   font-size: 1rem;
   border-radius: 5px;
-  transition: background-color 0.3s;
+  transition: all 0.3s ease;
+  border: none;
+  display: flex; /* Buttons nebeneinander anordnen */
+  flex: 1;
+  justify-content: center;
+  text-align: center;
 }
 
 .btn-primary {
   background-color: #4a5043;
   color: white;
-  border: none;
 }
 
 .btn-primary:hover {
@@ -260,13 +394,12 @@ button {
 }
 
 .btn-danger {
-  background-color: #dc3545;
+  background-color: #c06e52;
   color: white;
-  border: none;
 }
 
 .btn-danger:hover {
-  background-color: #c82333;
+  background-color: #c0392b;
 }
 
 /* Dropdown-Menü */
@@ -305,5 +438,62 @@ button {
 .button-group {
   display: flex;
   justify-content: space-between;
+  gap: 10px;
+}
+
+.toggle-switch {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 60px;
+  height: 34px;
+  margin-left: 10px;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: 0.4s;
+  border-radius: 34px;
+}
+
+.slider:before {
+  position: absolute;
+  content: '';
+  height: 26px;
+  width: 26px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  transition: 0.4s;
+  border-radius: 50%;
+}
+
+input:checked + .slider {
+  background-color: #4a5043;
+}
+
+input:focus + .slider {
+  box-shadow: 0 0 1px #4a5043;
+}
+
+input:checked + .slider:before {
+  transform: translateX(26px);
 }
 </style>

@@ -143,5 +143,32 @@ module.exports = {
 
       return res.serverError('An unexpected error occurred.');
     }
+  },
+
+  /**
+   * `ProductController.count()`
+   *
+   * @description
+   * Zaehlt alle bestehenden Produkte.
+   * Gibt die Anzahl an Produkten (HTTP 200 OK) zurück.
+   *
+   * @param {Request} req - Der eingehende HTTP-Request(Hier nicht benoetigt)
+   * @param {Response} res - Die HTTP-Response, um die Anzahl an Produkten zurückzugeben.
+   * @returns {Response} articleCount oder ein Fehlerstatus.
+   */
+  count: async function (req, res) {
+    try {
+      const articleCount = await ProductService.countArticles();
+      return res.json(articleCount);
+    } catch (err) {
+      sails.log.error('Error:', err.message);
+
+      if (err instanceof errors.CustomError) {
+        return res.status(err.status).json({ error: err.message });
+      }
+
+      return res.serverError('An unexpected error occurred.');
+    }
   }
+
 };

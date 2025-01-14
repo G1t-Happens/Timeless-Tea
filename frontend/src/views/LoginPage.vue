@@ -11,7 +11,7 @@
               <h2 class="text-center mb-4">Einloggen</h2>
 
               <!-- Formular zur Benutzerauthentifizierung -->
-              <form @submit.prevent="handleLogin">
+              <form @submit.prevent="login">
                 <!-- Eingabefeld für die E-Mail-Adresse -->
                 <div class="mb-3">
                   <label for="email" class="form-label">E-Mail</label>
@@ -37,7 +37,10 @@
           </div>
 
           <!-- Verweis auf die Registrierungsseite, falls der Nutzer noch kein Konto hat -->
-          <p class="text-center mt-3">Noch kein Konto? <a href="/member">Registrieren</a></p>
+          <p class="text-center mt-3">
+            Noch kein Konto?
+            <router-link :to="{ name: 'MemberShip' }">Registrieren</router-link>
+          </p>
         </div>
       </div>
     </div>
@@ -46,15 +49,18 @@
 
 <script setup>
 import { ref } from 'vue'
+import { useUserStore } from '../stores/user'
 
-// Reaktive Variablen für die Eingabefelder E-Mail und Passwort
-const email = ref('') // E-Mail des Benutzers
-const password = ref('') // Passwort des Benutzers
+const userStore = useUserStore()
 
-// Funktion, die beim Absenden des Formulars aufgerufen wird
-const handleLogin = () => {
-  //TODO: Login-Logik einfügen, z.B. ein API-Aufruf zur Authentifizierung
-  console.log('Login:', { email: email.value, password: password.value })
+let email = ref('')
+let password = ref('')
+
+async function login() {
+  await userStore.signIn(email.value, password.value)
+  if (useUserStore.user) {
+    console.log('Logged in')
+  }
 }
 </script>
 
