@@ -1,0 +1,28 @@
+# Grundlegende Regeln
+User-agent: *
+Disallow: /admin/            # Verhindert das Crawlen sensibler Admin-Bereiche
+Disallow: /login/            # Verhindert das Crawlen der Login-Seite
+Disallow: /cart/             # Verhindert das Crawlen des Einkaufswagens
+Disallow: /user/             # Verhindert das Crawlen persönlicher Benutzerseiten
+Disallow: /checkout/         # Verhindert das Crawlen des Checkout-Bereichs
+Disallow: /search/           # Verhindert das Crawlen der internen Suche
+Disallow: /private/          # Verhindert das Crawlen vertraulicher Daten
+
+# Blockiere unnötige Dateien
+Disallow: /css/              # Verhindert das Crawlen von CSS-Dateien
+Disallow: /js/               # Verhindert das Crawlen von JavaScript-Dateien
+Disallow: /assets/           # Verhindert das Crawlen statischer Assets wie Bilder
+
+# Crawl-Verzögerung (nur bei Problemen mit Serverlast)
+Crawl-delay: 10              # Reduziert die Crawling-Rate auf alle 10 Sekunden (optional)
+
+# Sitemap angeben
+Sitemap: https://www.example.com/sitemap.xml
+
+# Blockiere bekannte Spam-Bots (optional)
+User-agent: BadBot
+Disallow: /
+
+# Blockiere Twitterbot
+User-agent: Twitterbot
+Disallow: /
