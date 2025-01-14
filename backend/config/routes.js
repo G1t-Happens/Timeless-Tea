@@ -36,7 +36,7 @@ module.exports.routes = {
   //ProductController.js
   'POST /product': { controller: 'ProductController', action: 'create' },
   'GET /product': 'ProductController.find',
-  'GET /product/:id': 'product.findOne',
+  'GET /api/product/:id': 'product.findOne',
   'DELETE /product/:id': 'product.destroy',
   'PATCH /product/:id': 'product.patch',
   'GET /product/count': 'ProductController.count',
@@ -68,7 +68,7 @@ module.exports.routes = {
 
   // Catch-All-Route für Vue SPA
   '/*': {
-    skipAssets: true, // Ignoriere statische Assets wie CSS/JS/Bilder
+    skipAssets: true,
     fn: function (req, res) {
       return res.sendFile(sails.config.appPath + '/assets/index.html');
     },
