@@ -191,7 +191,6 @@
             <!-- Buttons für Details und Löschen -->
             <div class="text-center mb-5 cardset-admin-button">
               <button @click="viewOrder(order.id)" class="btn btn-warning">Details</button>
-              <button @click="deleteOrder(order.id)" class="btn btn-danger">Löschen</button>
             </div>
           </div>
         </div>
@@ -233,7 +232,7 @@ const panels = ref([
 ])
 
 const currentUserName = computed(() => {
-  if (!userStore.user.firstName || !userStore.user.lastName) {
+  if (!userStore.user || !userStore.user.firstName || !userStore.user.lastName) {
     return null
   }
   return `${userStore.user.firstName} ${userStore.user.lastName}`
@@ -522,27 +521,6 @@ const loadMoreOrders = async () => {
 // Bestellungen anzeigen
 const viewOrder = (id) => {
   router.push(`/admin/order/${id}`)
-}
-
-// Bestellungen löschen
-const deleteOrder = async (id) => {
-  const confirmed = window.confirm('Möchten Sie diese Bestellung wirklich löschen?')
-  if (!confirmed) {
-    return
-  }
-
-  try {
-    await axios.delete(`/order/${id}`)
-    const index = orders.value.findIndex((order) => order.id === id)
-    if (index !== -1) {
-      orders.value.splice(index, 1)
-      // Optional: Zeige eine Erfolgsmeldung
-      alert('Bestellung erfolgreich gelöscht.')
-    }
-  } catch (error) {
-    console.error('Fehler beim Löschen der Bestellung:', error)
-    alert('Fehler beim Löschen der Bestellung.') // Optional: Ersetze durch eine bessere Fehleranzeige
-  }
 }
 
 const fetchMetaData = async () => {

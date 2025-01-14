@@ -3,7 +3,7 @@
     <div :class="['product-card', { 'product-card-deleted': product.isDeleted }]">
       <div class="card mb-4 shadow-sm">
         <!-- Produktbild -->
-        <img :src="product.image" class="card-img-top" alt="Produktbild" loading="lazy" />
+        <img :src="product.image" class="card-img-top" alt="Produktbild" />
         <div class="card-body">
           <!-- Produktname -->
           <h5 class="card-title">{{ product.name }}</h5>
