@@ -186,9 +186,7 @@
 
         <!-- Speichern/Löschen -->
         <div class="button-group">
-          <button type="submit" class="btn btn-primary" :disabled="!isFormChanged">
-            Speichern
-          </button>
+          <button type="submit" class="btn save-btn" :disabled="!isFormChanged">Speichern</button>
           <button
             v-if="currentUser.isAdmin"
             type="button"
@@ -537,13 +535,13 @@ const obfuscatePaypalEmail = (email) => {
   cursor: pointer;
 }
 
-.btn-primary {
+.save-btn {
   background-color: #4a5043;
   color: white;
   margin-right: 10px;
 }
 
-.btn-primary:hover {
+.save-btn:hover {
   background-color: #9fa86d;
 }
 
