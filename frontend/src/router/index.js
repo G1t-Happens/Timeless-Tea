@@ -1,29 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { useUserStore } from '../stores/user'
 import LandingPage from '@/views/LandingPage.vue'
-import LoginPage from '@/views/LoginPage.vue'
-import MemberShip from '@/views/MemberShip.vue'
-import AdminDashboard from '@/views/AdminDashboard.vue'
-import CreateArticle from '@/views/CreateArticle.vue'
-import CreateCategory from '@/views/CreateCategory.vue'
-import EditCategory from '@/views/EditCategory.vue'
-import EditArticle from '@/views/EditArticle.vue'
-import EditUser from '@/views/EditUser.vue'
-import ViewOrder from '@/views/ViewOrder.vue'
-import MessageView from '@/views/MessageView.vue'
-import UserDashboard from '@/views/UserDashboard.vue'
-import OrderDetail from '@/views/OrderDetail.vue'
-import ProductDetail from '@/views/ProductDetail.vue'
-import ShoppingCart from '@/views/ShoppingCart.vue'
-import CheckOut from '@/views/CheckOut.vue'
-import OrderSuccess from '@/views/OrderSuccess.vue'
-import ContactInfo from '@/views/ContactInfo.vue'
-import ContactForm from '@/views/ContactForm.vue'
-import ReturnAndExchange from '@/views/ReturnAndExchange.vue'
-import FAQ from '@/views/FAQ.vue'
-import LegalNotice from '@/views/LegalNotice.vue'
-import PaymentShippingInfo from '@/views/PaymentShippingInfo.vue'
-import PrivacyPolicy from '@/views/PrivacyPolicy.vue'
 
 const authGuard = async (to, from, next) => {
   const userStore = useUserStore()
@@ -50,40 +27,40 @@ const routes = [
   {
     path: '/member',
     name: 'MemberShip',
-    component: MemberShip,
+    component: () => import('@/views/MemberShip.vue'),
     meta: { breadcrumb: 'membership' },
   },
   {
     path: '/login',
     name: 'Login',
-    component: LoginPage,
+    component: () => import('@/views/LoginPage.vue'),
     meta: { breadcrumb: 'login' },
   },
   {
     path: '/admin',
     name: 'AdminDasboard',
-    component: AdminDashboard,
+    component: () => import('@/views/AdminDashboard.vue'),
     meta: { requiresAdmin: true, breadcrumb: 'admin' },
     beforeEnter: adminGuard,
   },
   {
     path: '/admin/create-article',
     name: 'CreateArticle',
-    component: CreateArticle,
+    component: () => import('@/views/CreateArticle.vue'),
     meta: { breadcrumb: 'create article', requiresAdmin: true },
     beforeEnter: adminGuard,
   },
   {
     path: '/admin/create-category',
     name: 'CreateCategory',
-    component: CreateCategory,
+    component: () => import('@/views/CreateCategory.vue'),
     meta: { breadcrumb: 'create category', requiresAdmin: true },
     beforeEnter: adminGuard,
   },
   {
     path: '/admin/edit-category',
     name: 'EditCategory',
-    component: EditCategory,
+    component: () => import('@/views/EditCategory.vue'),
     meta: { breadcrumb: 'edit category', requiresAdmin: true },
     beforeEnter: adminGuard,
   },
@@ -95,7 +72,7 @@ const routes = [
   {
     path: '/admin/edit-article/:id',
     name: 'EditArticle',
-    component: EditArticle,
+    component: () => import('@/views/EditArticle.vue'),
     meta: { breadcrumb: 'edit article', requiresAdmin: true },
     beforeEnter: adminGuard,
   },
@@ -107,42 +84,42 @@ const routes = [
   {
     path: '/admin/edit-user/:id',
     name: 'AdminEditUser',
-    component: EditUser,
+    component: () => import('@/views/EditUser.vue'),
     meta: { breadcrumb: 'edit user', requiresAdmin: true },
     beforeEnter: adminGuard,
   },
   {
     path: '/admin/order/:id',
     name: 'ViewOrder',
-    component: ViewOrder,
+    component: () => import('@/views/ViewOrder.vue'),
     meta: { breadcrumb: 'view order', requiresAdmin: true },
     beforeEnter: adminGuard,
   },
   {
     path: '/admin/message',
     name: 'Message',
-    component: MessageView,
+    component: () => import('@/views/MessageView.vue'),
     meta: { breadcrumb: 'message', requiresAdmin: true },
     beforeEnter: adminGuard,
   },
   {
     path: '/user',
     name: 'UserDashboard',
-    component: UserDashboard,
+    component: () => import('@/views/UserDashboard.vue'),
     meta: { breadcrumb: 'user', requiresAuth: true },
     beforeEnter: authGuard,
   },
   {
     path: '/user/edit-user/',
     name: 'UserEditUser',
-    component: EditUser,
+    component: () => import('@/views/EditUser.vue'),
     meta: { breadcrumb: 'edit user', requiresAuth: true },
     beforeEnter: authGuard,
   },
   {
     path: '/user/order',
     name: 'OrderDetail',
-    component: OrderDetail,
+    component: () => import('@/views/OrderDetail.vue'),
     meta: { breadcrumb: 'orders', requiresAuth: true },
     beforeEnter: authGuard,
   },
@@ -153,26 +130,26 @@ const routes = [
   {
     path: '/product/:id',
     name: 'ProductDetail',
-    component: ProductDetail,
+    component: () => import('@/views/ProductDetail.vue'),
     meta: { breadcrumb: 'product' },
   },
   {
     path: '/cart',
     name: 'ShoppingCart',
-    component: ShoppingCart,
+    component: () => import('@/views/ShoppingCart.vue'),
     meta: { breadcrumb: 'cart' },
   },
   {
     path: '/cart/checkout',
     name: 'CheckOut',
-    component: CheckOut,
+    component: () => import('@/views/CheckOut.vue'),
     meta: { breadcrumb: 'checkout', requiresAuth: true },
     beforeEnter: authGuard,
   },
   {
     path: '/cart/checkout/success',
     name: 'OrderSuccess',
-    component: OrderSuccess,
+    component: () => import('@/views/OrderSuccess.vue'),
     props: (route) => ({ orderId: route.query.id }),
     meta: { breadcrumb: 'checkout success', requiresAuth: true },
     beforeEnter: authGuard,
@@ -180,43 +157,43 @@ const routes = [
   {
     path: '/contact',
     name: 'ContactInfo',
-    component: ContactInfo,
+    component: () => import('@/views/ContactInfo.vue'),
     meta: { breadcrumb: 'contact' },
   },
   {
     path: '/contact/contact_form',
     name: 'ContactForm',
-    component: ContactForm,
+    component: () => import('@/views/ContactForm.vue'),
     meta: { breadcrumb: 'contact form' },
   },
   {
     path: '/returns',
     name: 'Return',
-    component: ReturnAndExchange,
+    component: () => import('@/views/ReturnAndExchange.vue'),
     meta: { breadcrumb: 'returns & exchanges' },
   },
   {
     path: '/faq',
     name: 'FAQ',
-    component: FAQ,
+    component: () => import('@/views/FAQ.vue'),
     meta: { breadcrumb: 'faq' },
   },
   {
     path: '/impressum',
     name: 'Impressum',
-    component: LegalNotice,
+    component: () => import('@/views/LegalNotice.vue'),
     meta: { breadcrumb: 'legal notice' },
   },
   {
     path: '/payment_shipping',
     name: 'PaymentShippingInfo',
-    component: PaymentShippingInfo,
+    component: () => import('@/views/PaymentShippingInfo.vue'),
     meta: { breadcrumb: 'shipping and payment' },
   },
   {
     path: '/privacy',
     name: 'Privacy Policy',
-    component: PrivacyPolicy,
+    component: () => import('@/views/PrivacyPolicy.vue'),
     meta: { breadcrumb: 'privacy policy' },
   },
 ]

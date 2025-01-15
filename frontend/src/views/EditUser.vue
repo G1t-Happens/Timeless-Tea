@@ -287,7 +287,7 @@ onMounted(async () => {
 const fetchUser = async (id) => {
   loading.value = true
   try {
-    const { data } = await axios.get(`/user/${id}`)
+    const { data } = await axios.get(`/api/user/${id}`)
     user.value = {
       ...user.value, // Behalte die Standardstruktur bei
       ...data, // Überschreibe mit den API-Daten
@@ -312,7 +312,7 @@ const deleteUser = async (id) => {
     return
   }
   try {
-    await axios.delete(`/user/${id}`)
+    await axios.delete(`/api/user/${id}`)
     await router.push({ name: 'AdminDasboard' })
   } catch (error) {
     console.error('Fehler beim Löschen des Users:', error)
@@ -339,7 +339,7 @@ const handleSave = async () => {
   }
 
   try {
-    await axios.patch(`/user/${user.value.id}`, updatedUserData)
+    await axios.patch(`/api/user/${user.value.id}`, updatedUserData)
     alert('Benutzerdaten erfolgreich aktualisiert!')
     router.go()
   } catch (error) {
@@ -358,7 +358,7 @@ const editPayment = (payment) => {
 const deletePayment = async (paymentId) => {
   const confirmed = window.confirm('Möchten Sie diese Zahlungsmethode wirklich löschen?')
   if (!confirmed) return
-  await axios.delete(`/payment/${paymentId}`)
+  await axios.delete(`/api/payment/${paymentId}`)
   user.value.payments = user.value.payments.filter((payment) => payment.id !== paymentId)
 }
 

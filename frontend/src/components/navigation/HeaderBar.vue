@@ -93,7 +93,9 @@
               </ul>
               <div class="cart-total">
                 <p>Gesamt: {{ cartStore.totalAmount }}€</p>
-                <router-link to="/cart" class="btn to-cart">Zum Warenkorb</router-link>
+                <router-link :to="{ name: 'ShoppingCart' }" class="btn to-cart"
+                  >Zum Warenkorb</router-link
+                >
               </div>
             </div>
           </div>
@@ -199,7 +201,7 @@ onBeforeUnmount(() => {
 // Einstellungen-Icon klicken
 const handleSettingsIconClick = () => {
   if (!user.value) {
-    router.push('/login')
+    router.push({ name: 'Login' })
   } else {
     showSettingsPopup.value = !showSettingsPopup.value
   }
@@ -211,7 +213,7 @@ const handleAccountIconClick = () => {
     showCart.value = false
   }
   if (!user.value) {
-    router.push('/login')
+    router.push({ name: 'Login' })
   } else {
     showLogoutPopup.value = !showLogoutPopup.value
   }
@@ -222,7 +224,7 @@ const logout = async () => {
   try {
     await userStore.logout()
     showLogoutPopup.value = false
-    await router.push('/')
+    await router.push({ name: 'LandingPage' })
   } catch (error) {
     console.error('Fehler beim Logout:', error)
   }

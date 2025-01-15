@@ -288,7 +288,7 @@ const fetchArticles = async ({
   const priceParam = ((p) => (p && p !== 0 ? p : undefined))(parseFloat(filters.price))
 
   try {
-    const response = await axios.get('/product', {
+    const response = await axios.get('/api/product', {
       params: {
         search: query || undefined,
         categories: categoriesParam,
@@ -353,7 +353,7 @@ const deleteArticle = async (id) => {
 
   try {
     // Simuliere das Setzen des Soft-Delete-Status über eine API
-    await axios.patch(`/product/${id}`, { isDeleted: true })
+    await axios.patch(`/api/product/${id}`, { isDeleted: true })
     const product = articles.value.find((p) => p.id === id)
     if (product) {
       product.isDeleted = true
@@ -394,7 +394,7 @@ const fetchUsers = async ({
   loading.value.users = true
 
   try {
-    const response = await axios.get('/user', {
+    const response = await axios.get('/api/user', {
       params: {
         search: query || undefined,
         role: filters.role || undefined,
@@ -441,7 +441,7 @@ const deleteUser = async (id) => {
   }
 
   try {
-    await axios.delete(`/user/${id}`)
+    await axios.delete(`/api/user/${id}`)
     const index = users.value.findIndex((user) => user.id === id)
     if (index !== -1) {
       users.value.splice(index, 1)
@@ -484,7 +484,7 @@ const fetchOrders = async ({
   loading.value.orders = true
 
   try {
-    const response = await axios.get('/order', {
+    const response = await axios.get('/api/order', {
       params: {
         search: query || undefined,
         status: filters.status || undefined,
@@ -520,26 +520,26 @@ const loadMoreOrders = async () => {
 
 // Bestellungen anzeigen
 const viewOrder = (id) => {
-  router.push(`/admin/order/${id}`)
+  router.push({ name: 'ViewOrder', params: { id } })
 }
 
 const fetchMetaData = async () => {
   try {
-    const productCountResponse = await axios.get('/product/count')
+    const productCountResponse = await axios.get('/api/product/count')
     articlesCount.value = productCountResponse.data
   } catch (error) {
     console.error('Fehler beim Abrufen der Artikel Metadaten:', error.message)
   }
 
   try {
-    const userCountResponse = await axios.get('/user/count')
+    const userCountResponse = await axios.get('/api/user/count')
     usersCount.value = userCountResponse.data
   } catch (error) {
     console.error('Fehler beim Abrufen der User Metadaten:', error.message)
   }
 
   try {
-    const orderCountResponse = await axios.get('/order/count')
+    const orderCountResponse = await axios.get('/api/order/count')
     ordersCount.value = orderCountResponse.data
   } catch (error) {
     console.error('Fehler beim Abrufen der User Metadaten:', error.message)
@@ -560,7 +560,7 @@ const fetchPanelData = (panelKey) => {
       fetchOrders()
       break
     case 'messages':
-      router.push('/admin/message')
+      router.push({ name: 'Message' })
       break
     default:
       break

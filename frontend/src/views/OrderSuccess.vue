@@ -13,7 +13,7 @@
       </router-link>
       einsehen.
     </p>
-    <router-link to="/" class="btn btn-primary">Zurück zum Shop</router-link>
+    <router-link :to="{ name: 'LandingPage' }" class="btn btn-primary">Zurück zum Shop</router-link>
   </div>
 </template>
 

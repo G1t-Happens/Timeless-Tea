@@ -128,7 +128,7 @@ watch(
 // Initial loading of categories
 onMounted(async () => {
   try {
-    const response = await axios.get('/category/')
+    const response = await axios.get('/api/category/')
     const category = response.data
     tastes.value = category.filter((category) => category.type === 'Taste')
     effects.value = category.filter((category) => category.type === 'Effect')

@@ -225,7 +225,7 @@ const handleOutsideClick = (event) => {
 // Funktion zum Abrufen aller Kategorien
 const fetchCategories = async () => {
   try {
-    const { data } = await axios.get('/category')
+    const { data } = await axios.get('/api/category')
     organizedCategories.value = organizeCategoriesByType(data) // Kategorien gruppieren
   } catch (error) {
     console.error('Fehler beim Laden der Kategorien:', error)
@@ -236,7 +236,7 @@ const fetchCategories = async () => {
 const fetchArticle = async (id) => {
   loading.value = true
   try {
-    const { data } = await axios.get(`/product/${id}`)
+    const { data } = await axios.get(`/api/product/${id}`)
     // Konvertiere isDeleted zu Boolean, wobei 1 true und 0 false ist
     data.isDeleted = !!data.isDeleted // Wandelt 1 zu true und 0 zu false um
     product.value = data
@@ -269,10 +269,10 @@ const handleSave = async () => {
 
   try {
     // PATCH-Anfrage, um den Artikel zu aktualisieren
-    await axios.patch(`/product/${product.value.id}`, formData)
+    await axios.patch(`/api/product/${product.value.id}`, formData)
 
     // Nach dem Speichern auf das Admin-Dashboard weiterleiten
-    await router.push('/admin')
+    await router.push({ name: 'AdminDasboard' })
   } catch (error) {
     console.error('Fehler beim Speichern des Artikels:', error)
   }
@@ -287,9 +287,9 @@ const deleteArticle = async (id) => {
 
   try {
     //Softdelete
-    await axios.delete(`/product/${id}`)
+    await axios.delete(`/api/product/${id}`)
     // Nach dem Löschen auf das Admin-Dashboard weiterleiten
-    await router.push('/admin')
+    await router.push({ name: 'AdminDasboard' })
   } catch (error) {
     console.error('Fehler beim Löschen des Artikels:', error)
   }

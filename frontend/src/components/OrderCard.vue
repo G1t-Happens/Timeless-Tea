@@ -38,7 +38,7 @@ export default {
       return new Intl.NumberFormat('de-DE', {
         style: 'currency',
         currency: 'EUR',
-      }).format(amount);
+      }).format(amount)
     },
     formatDate(timestamp) {
       return new Date(timestamp).toLocaleDateString('de-DE', {
@@ -47,10 +47,10 @@ export default {
         day: 'numeric',
         hour: '2-digit',
         minute: '2-digit',
-      });
+      })
     },
   },
-};
+}
 </script>
 
 <style scoped>
@@ -62,8 +62,11 @@ export default {
   margin-bottom: 20px;
   background-color: #ffffff;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
 }
+
 .order-card:hover {
   transform: translateY(-5px);
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
@@ -76,12 +79,14 @@ export default {
   align-items: center;
   margin-bottom: 16px;
 }
+
 .order-header h5 {
   margin: 0;
   font-size: 1.25rem;
   font-weight: 600;
   color: #333333;
 }
+
 .status {
   padding: 6px 12px;
   border-radius: 16px;
@@ -90,12 +95,15 @@ export default {
   text-transform: capitalize;
   color: #ffffff;
 }
+
 .status.open {
   background-color: #f7b731;
 }
+
 .status.successful {
   background-color: #20bf6b;
 }
+
 .status.canceled {
   background-color: #eb3b5a;
 }
@@ -106,16 +114,19 @@ export default {
   flex-direction: column;
   gap: 8px;
 }
+
 .detail-item {
   display: flex;
   justify-content: space-between;
   font-size: 1rem;
   color: #555555;
 }
+
 .detail-label {
   font-weight: 500;
   color: #888888;
 }
+
 .detail-value {
   font-weight: 600;
   color: #333333;
@@ -126,9 +137,11 @@ export default {
   .order-card {
     padding: 16px;
   }
+
   .order-header h5 {
     font-size: 1rem;
   }
+
   .detail-item {
     font-size: 0.9rem;
   }

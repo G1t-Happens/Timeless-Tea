@@ -176,7 +176,7 @@ const resetPayment = () => {
 // Methode zum Erstellen einer neuen Zahlung
 async function createPayment(paymentData) {
   try {
-    return await axios.post(`/payment/create`, paymentData)
+    return await axios.post(`/api/payment/create`, paymentData)
   } catch (error) {
     console.error('Fehler beim Erstellen der Zahlung:', error)
   }
@@ -185,7 +185,7 @@ async function createPayment(paymentData) {
 // Methode zum Aktualisieren einer bestehenden Zahlung
 async function updatePayment(paymentId, paymentData) {
   try {
-    return await axios.patch(`/payment/${paymentId}`, paymentData)
+    return await axios.patch(`/api/payment/${paymentId}`, paymentData)
   } catch (error) {
     console.error('Fehler beim Aktualisieren der Zahlung:', error)
   }

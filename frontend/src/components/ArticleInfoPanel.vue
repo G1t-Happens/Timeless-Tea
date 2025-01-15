@@ -2,14 +2,37 @@
   <div class="article-info-panel">
     <h3>Über unsere Produkte</h3>
     <ul>
-      <li>Alle unsere Teesorten stammen aus biologischem Anbau und werden unter höchsten Standards geerntet.</li>
-      <li>Unsere Tees werden sorgfältig von Hand verpackt, um die Frische und Qualität zu bewahren.</li>
-      <li>Wir garantieren höchste Qualität durch regelmäßige Qualitätskontrollen und nachhaltige Produktionsverfahren.</li>
-      <li>Faire und nachhaltige Produktion stehen bei uns an erster Stelle – von der Plantage bis zu Ihnen nach Hause.</li>
-      <li>Unsere Verpackungen bestehen aus umweltfreundlichen Materialien und sind vollständig recycelbar.</li>
-      <li>Wir arbeiten eng mit lokalen Bauern zusammen, um deren Gemeinden zu unterstützen und faire Löhne zu gewährleisten.</li>
-      <li>Unser Ziel ist es, Ihnen ein einzigartiges Geschmackserlebnis zu bieten – 100% natürlich und unverfälscht.</li>
-      <li>Durch die Kombination traditioneller Handwerkskunst und moderner Verfahren schaffen wir ein Premium-Produkt.</li>
+      <li>
+        Alle unsere Teesorten stammen aus biologischem Anbau und werden unter höchsten Standards
+        geerntet.
+      </li>
+      <li>
+        Unsere Tees werden sorgfältig von Hand verpackt, um die Frische und Qualität zu bewahren.
+      </li>
+      <li>
+        Wir garantieren höchste Qualität durch regelmäßige Qualitätskontrollen und nachhaltige
+        Produktionsverfahren.
+      </li>
+      <li>
+        Faire und nachhaltige Produktion stehen bei uns an erster Stelle – von der Plantage bis zu
+        Ihnen nach Hause.
+      </li>
+      <li>
+        Unsere Verpackungen bestehen aus umweltfreundlichen Materialien und sind vollständig
+        recycelbar.
+      </li>
+      <li>
+        Wir arbeiten eng mit lokalen Bauern zusammen, um deren Gemeinden zu unterstützen und faire
+        Löhne zu gewährleisten.
+      </li>
+      <li>
+        Unser Ziel ist es, Ihnen ein einzigartiges Geschmackserlebnis zu bieten – 100% natürlich und
+        unverfälscht.
+      </li>
+      <li>
+        Durch die Kombination traditioneller Handwerkskunst und moderner Verfahren schaffen wir ein
+        Premium-Produkt.
+      </li>
     </ul>
   </div>
 </template>

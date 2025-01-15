@@ -159,7 +159,7 @@ const maskCard = (cardNumber) => {
 const fetchOrder = async () => {
   try {
     const orderId = route.params.id // ID aus der URL
-    const { data } = await axios.get(`/order/${orderId}`) // API-Aufruf
+    const { data } = await axios.get(`/api/order/${orderId}`) // API-Aufruf
     order.value = data // Daten speichern
   } catch (error) {
     console.error('Fehler beim Laden der Bestellung:', error)

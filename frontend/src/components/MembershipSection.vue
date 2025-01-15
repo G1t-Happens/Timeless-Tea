@@ -9,7 +9,7 @@
 
     <!-- Button und RouterLink zum Mitgliedsbereich -->
     <div class="text-center">
-      <RouterLink to="member">
+      <RouterLink :to="{ name: 'MemberShip' }">
         <button class="btn btn-image" type="button">
           <!-- Membership Icon -->
           <img src="../../src/assets/icons/membership.png" alt="Mitglied werden" />
@@ -19,9 +19,7 @@
   </section>
 </template>
 
-<script setup>
-// Kein zusätzlicher JavaScript-Code erforderlich
-</script>
+<script setup></script>
 
 <style scoped>
 /* Container für den Textbereich */

@@ -131,7 +131,7 @@ const organizeCategoriesByType = (categories) => {
 // Beim Laden der Komponente: Kategoriedaten abrufen und gruppieren
 onMounted(async () => {
   try {
-    const response = await axios.get('/category')
+    const response = await axios.get('/api/category')
     organizedCategories.value = organizeCategoriesByType(response.data)
   } catch (error) {
     console.error('Fehler beim Laden der Kategorien:', error)
@@ -176,10 +176,10 @@ const createArticle = async () => {
 
   try {
     // Anfrage zum Erstellen des Artikels auf dem Server
-    await axios.post('/product', formData)
+    await axios.post('/api/product', formData)
 
     // Nach erfolgreicher Erstellung zur Admin-Seite navigieren
-    await router.push('/admin')
+    await router.push({ name: 'AdminDasboard' })
   } catch (error) {
     console.error('Fehler beim Erstellen des Artikels:', error)
   }

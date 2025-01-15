@@ -12,7 +12,7 @@ export const useUserStore = defineStore('user', {
     async fetchUser() {
       if (this.user == null) {
         try {
-          const response = await axios.get('/sessionUser')
+          const response = await axios.get('/api/sessionUser')
           this.user = response.data
           return this.user
         } catch (error) {
@@ -25,7 +25,7 @@ export const useUserStore = defineStore('user', {
     async signIn(email, password) {
       let loginInformation = { emailAddress: email, password: password }
       axios
-        .post('/login', loginInformation)
+        .post('/api/login', loginInformation)
         .then((response) => {
           this.user = null
           this.user = response.data
@@ -58,7 +58,7 @@ export const useUserStore = defineStore('user', {
         },
       }
       axios
-        .post('/register', registerInformation)
+        .post('/api/register', registerInformation)
         .then((response) => {
           this.user = null
           this.user = response.data
@@ -69,7 +69,7 @@ export const useUserStore = defineStore('user', {
         })
     },
     async logout() {
-      await axios.get('/logout')
+      await axios.get('/api/logout')
       this.user = null
     },
   },

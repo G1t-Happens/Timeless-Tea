@@ -8,6 +8,8 @@
  * https://sailsjs.com/anatomy/config/routes-js
  */
 
+const API_BASE = '/api'; // API base prefix, change this to '/api1', '/api2', etc., as needed
+
 module.exports.routes = {
 
   /***************************************************************************
@@ -20,51 +22,50 @@ module.exports.routes = {
    ***************************************************************************/
   '/': { view: 'pages/homepage' },
 
-  //LoginController.js
-  'POST /login': 'LoginController.login',
-  'POST /register': 'LoginController.register',
-  'GET /sessionUser': 'LoginController.sessionUser',
-  'GET /logout': 'LoginController.logout',
+  // LoginController.js
+  [`POST ${API_BASE}/login`]: 'LoginController.login',
+  [`POST ${API_BASE}/register`]: 'LoginController.register',
+  [`GET ${API_BASE}/sessionUser`]: 'LoginController.sessionUser',
+  [`GET ${API_BASE}/logout`]: 'LoginController.logout',
 
   // Benutzer-Routen
-  'GET /user/:id': 'UserController.findOne',
-  'GET /user': 'UserController.find',
-  'PATCH /user/:id': 'UserController.patch',
-  'DELETE /user/:id': 'UserController.destroy',
-  'GET /user/count': 'UserController.count',
+  [`GET ${API_BASE}/user/:id`]: 'UserController.findOne',
+  [`GET ${API_BASE}/user`]: 'UserController.find',
+  [`PATCH ${API_BASE}/user/:id`]: 'UserController.patch',
+  [`DELETE ${API_BASE}/user/:id`]: 'UserController.destroy',
+  [`GET ${API_BASE}/user/count`]: 'UserController.count',
 
-  //ProductController.js
-  'POST /product': { controller: 'ProductController', action: 'create' },
-  'GET /product': 'ProductController.find',
-  'GET /api/product/:id': 'product.findOne',
-  'DELETE /product/:id': 'product.destroy',
-  'PATCH /product/:id': 'product.patch',
-  'GET /product/count': 'ProductController.count',
+  // ProductController.js
+  [`POST ${API_BASE}/product`]: { controller: 'ProductController', action: 'create' },
+  [`GET ${API_BASE}/product`]: 'ProductController.find',
+  [`GET ${API_BASE}/product/:id`]: 'ProductController.findOne',
+  [`DELETE ${API_BASE}/product/:id`]: 'ProductController.destroy',
+  [`PATCH ${API_BASE}/product/:id`]: 'ProductController.patch',
+  [`GET ${API_BASE}/product/count`]: 'ProductController.count',
 
-  //CategoryController.js
-  'POST /category': { controller: 'CategoryController', action: 'create' },
-  'GET /category': 'CategoryController.find',
+  // CategoryController.js
+  [`POST ${API_BASE}/category`]: { controller: 'CategoryController', action: 'create' },
+  [`GET ${API_BASE}/category`]: 'CategoryController.find',
 
-  //OrderController.js
-  'POST /order': { controller: 'OrderController', action: 'create' },
-  'GET /order': 'OrderController.find',
-  'GET /order/:id': 'OrderController.findOne',
-  'GET /order/detail': 'OrderController.findOrdersByUser',
-  'PATCH /order/:id/cancel': 'OrderController.cancelOrder',
-  'GET /order/count': 'OrderController.count',
+  // OrderController.js
+  [`POST ${API_BASE}/order`]: { controller: 'OrderController', action: 'create' },
+  [`GET ${API_BASE}/order`]: 'OrderController.find',
+  [`GET ${API_BASE}/order/:id`]: 'OrderController.findOne',
+  [`GET ${API_BASE}/order/detail`]: 'OrderController.findOrdersByUser',
+  [`PATCH ${API_BASE}/order/:id/cancel`]: 'OrderController.cancelOrder',
+  [`GET ${API_BASE}/order/count`]: 'OrderController.count',
 
-  //ContactMessageController.js
-  'POST /message': { controller: 'ContactMessageController', action: 'create' },
-  'GET /message': 'ContactMessageController.find',
-  'GET /message/:id': 'ContactMessageController.findOne',
-  'DELETE /message/:id': 'ContactMessageController.destroy',
+  // ContactMessageController.js
+  [`POST ${API_BASE}/message`]: { controller: 'ContactMessageController', action: 'create' },
+  [`GET ${API_BASE}/message`]: 'ContactMessageController.find',
+  [`GET ${API_BASE}/message/:id`]: 'ContactMessageController.findOne',
+  [`DELETE ${API_BASE}/message/:id`]: 'ContactMessageController.destroy',
 
-  //PaymentController.js
-  'POST /payment/create': 'PaymentController.create',
-  'GET /payment/:userId': 'PaymentController.findPaymentsByUser',
-  'DELETE /payment/:id': 'PaymentController.destroy',
-  'PATCH /payment/:id': 'PaymentController.updatePayment',
-
+  // PaymentController.js
+  [`POST ${API_BASE}/payment/create`]: 'PaymentController.create',
+  [`GET ${API_BASE}/payment/:userId`]: 'PaymentController.findPaymentsByUser',
+  [`DELETE ${API_BASE}/payment/:id`]: 'PaymentController.destroy',
+  [`PATCH ${API_BASE}/payment/:id`]: 'PaymentController.updatePayment',
 
   // Catch-All-Route für Vue SPA
   '/*': {
@@ -73,8 +74,6 @@ module.exports.routes = {
       return res.sendFile(sails.config.appPath + '/assets/index.html');
     },
   },
-
-
 
   /***************************************************************************
    *                                                                          *
@@ -86,6 +85,5 @@ module.exports.routes = {
    * not match any of those, it is matched against static assets.             *
    *                                                                          *
    ***************************************************************************/
-
 
 };

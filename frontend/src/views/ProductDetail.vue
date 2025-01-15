@@ -33,8 +33,8 @@
         <p class="point-out-info">
           Preis inkl. 7% MwSt.
           <router-link :to="{ name: 'PaymentShippingInfo' }" class="shipping-link"
-            >zzgl. Versand</router-link
-          >
+            >zzgl. Versand
+          </router-link>
         </p>
         <p class="content-info">Inhalt: {{ product.quantity }}g ({{ pricePerKg }}€ / kg)</p>
         <p v-if="product.description">{{ product.description }}</p>
@@ -125,12 +125,12 @@ const isWished = computed(() => wishlistStore.isWished(productId))
 // Funktion zum Abrufen der Produktdetails
 const fetchProduct = async () => {
   try {
-    const { data } = await axios.get(`/product/${productId}`)
+    const { data } = await axios.get(`/api/product/${productId}`)
     product.value = data
   } catch (error) {
     console.error('Fehler beim Laden der Produktdetails:', error)
     alert('Produktdetails konnten nicht geladen werden.')
-    await router.push('/')
+    await router.push({ name: 'LandingPage' })
   } finally {
     loading.value = false
   }

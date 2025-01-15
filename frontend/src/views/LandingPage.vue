@@ -95,7 +95,7 @@ const fetchProducts = async ({ query = '', filters = localFilters.value }) => {
   const priceParam = ((p) => (p && p !== 0 ? p : undefined))(parseFloat(filters.price))
 
   try {
-    const response = await axios.get('/product', {
+    const response = await axios.get('/api/product', {
       params: {
         search: query || undefined,
         categories: categoriesParam,

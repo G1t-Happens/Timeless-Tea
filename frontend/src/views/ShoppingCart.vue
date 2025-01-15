@@ -5,7 +5,9 @@
 
     <div v-if="cartStore.items.length === 0" class="empty-cart">
       <p>Ihr Warenkorb ist leer.</p>
-      <router-link to="/" class="btn btn-primary">Zurück zum Shop</router-link>
+      <router-link :to="{ name: 'LandingPage' }" class="btn btn-primary"
+        >Zurück zum Shop
+      </router-link>
     </div>
 
     <div v-else class="cart-content">
@@ -23,7 +25,10 @@
           <tr v-for="item in cartStore.items" :key="item.productId">
             <td class="product-info">
               <img :src="item.image" :alt="item.name" class="product-image" />
-              <router-link :to="`/product/${item.productId}`" class="product-link">
+              <router-link
+                :to="{ name: 'ProductDetail', params: { id: item.productId } }"
+                class="product-link"
+              >
                 {{ item.name }}
               </router-link>
             </td>

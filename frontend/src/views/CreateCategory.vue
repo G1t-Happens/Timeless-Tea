@@ -63,8 +63,8 @@ const createCategory = async () => {
 
   try {
     // Anfrage zum Erstellen des Artikels auf dem Server
-    await axios.post('/category', formData, {})
-    await router.push('/admin')
+    await axios.post('/api/category', formData, {})
+    await router.push({ name: 'AdminDasboard' })
   } catch (error) {
     console.error('Fehler beim Erstellen der Kategorie:', error)
   }

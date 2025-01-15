@@ -98,7 +98,7 @@ const loading = ref(true)
 // Funktionen für die API-Kommunikation
 const fetchCategories = async () => {
   try {
-    const { data } = await axios.get('/category')
+    const { data } = await axios.get('/api/category')
     categories.value = data
     originalCategories.value = JSON.parse(JSON.stringify(data)) // Tiefenkopie für Vergleich
   } catch (error) {
@@ -183,7 +183,7 @@ const saveChanges = async () => {
   try {
     await Promise.all(
       pendingChanges.map((category) =>
-        axios.patch(`/category/${category.id}`, {
+        axios.patch(`/api/category/${category.id}`, {
           name: category.name,
           type: category.type,
         }),

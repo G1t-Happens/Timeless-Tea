@@ -221,7 +221,7 @@ const itemsPerPage = 5
 const fetchOrders = async () => {
   loading.value = true
   try {
-    const { data } = await axios.get('/order/detail')
+    const { data } = await axios.get('/api/order/detail')
     orders.value = data
   } catch (error) {
     console.error('Error loading orders:', error)
@@ -303,7 +303,7 @@ const cancelOrder = async (orderId) => {
       return
     }
 
-    await axios.patch(`/order/${orderId}/cancel`)
+    await axios.patch(`/api/order/${orderId}/cancel`)
 
     order.orderStatus = 'canceled'
     alert('Die Bestellung wurde erfolgreich storniert.')

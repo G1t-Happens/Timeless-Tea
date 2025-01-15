@@ -64,7 +64,7 @@ const selectedMessage = ref(null)
 const fetchMessages = async () => {
   loading.value = true
   try {
-    const response = await axios.get('/message')
+    const response = await axios.get('/api/message')
     messages.value = response.data.data
   } catch (error) {
     console.error('Fehler beim Laden der Nachrichten:', error)

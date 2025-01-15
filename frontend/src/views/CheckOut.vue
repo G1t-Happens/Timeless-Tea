@@ -237,7 +237,7 @@ const getSelectedPayment = () => {
 
 const fetchUserDetails = async () => {
   try {
-    const response = await axios.get(`/user/${userStore.user.id}`)
+    const response = await axios.get(`/api/user/${userStore.user.id}`)
     user.value = response.data
     payments.value = response.data.payments.filter((payment) => !payment.isForOrder)
   } catch (error) {
@@ -297,9 +297,9 @@ const submitOrder = async () => {
       newShippingAddress: useBillingAsShipping.value ? null : { ...shippingAddress.value },
     }
 
-    const response = await axios.post('/order', orderData)
+    const response = await axios.post('/api/order', orderData)
     cartStore.clearCart()
-    await router.push({ name: 'OrderSuccess', query: { id: response.data.id } });
+    await router.push({ name: 'OrderSuccess', query: { id: response.data.id } })
   } catch (error) {
     console.error('Fehler beim Abschicken der Bestellung:', error)
     alert('Fehler beim Abschicken der Bestellung.')

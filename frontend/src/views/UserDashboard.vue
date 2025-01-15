@@ -118,7 +118,7 @@ const fetchArticles = async ({
   const priceParam = filters.price && filters.price !== 0 ? filters.price : undefined
 
   try {
-    const response = await axios.get('/product', {
+    const response = await axios.get('/api/product', {
       params: {
         search: query || undefined,
         categories: categoriesParam,

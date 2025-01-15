@@ -119,11 +119,7 @@
   </div>
 </template>
 
-<script>
-export default {
-  name: 'PrivacyPolicy',
-}
-</script>
+<script setup></script>
 
 <style scoped>
 .privacy-policy {

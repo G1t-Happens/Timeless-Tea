@@ -133,7 +133,7 @@ const validateForm = () => {
 const submitForm = async () => {
   if (validateForm()) {
     try {
-      await axios.post('/message', form.value)
+      await axios.post('/api/message', form.value)
       successMessage.value = 'Vielen Dank! Ihre Nachricht wurde erfolgreich gesendet.'
       // Formular zurücksetzen
       form.value = {
