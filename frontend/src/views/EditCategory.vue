@@ -26,6 +26,7 @@
               <th>ID</th>
               <th>Name</th>
               <th>Typ</th>
+              <th>Aktion</th>
             </tr>
           </thead>
           <tbody>
@@ -54,6 +55,9 @@
                   class="edit-input"
                 />
                 <span v-else>{{ category.type }}</span>
+              </td>
+              <td class="actions-column">
+                <button @click="deleteCategory(category.id)" class="btn delete-btn">Löschen</button>
               </td>
             </tr>
           </tbody>
@@ -105,6 +109,17 @@ const fetchCategories = async () => {
     console.error('Fehler beim Laden der Kategorien:', error)
   } finally {
     loading.value = false
+  }
+}
+
+// Kategorie löschen
+const deleteCategory = async (id) => {
+  try {
+    await axios.delete(`/api/category/${id}`)
+    categories.value = categories.value.filter((category) => category.id !== id)
+    originalCategories.value = originalCategories.value.filter((category) => category.id !== id)
+  } catch (error) {
+    console.error('Fehler beim Löschen der Kategorie:', error)
   }
 }
 
@@ -201,6 +216,25 @@ onMounted(fetchCategories)
 </script>
 
 <style scoped>
+.actions-column {
+  text-align: center;
+  width: 100px;
+}
+
+.delete-btn {
+  padding: 5px 10px;
+  background: #c06e52 !important;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.delete-btn:hover {
+  background: #8f4c37 !important;
+}
+
 .back-button-wrapper {
   display: flex;
   justify-content: flex-start;

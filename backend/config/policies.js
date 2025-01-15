@@ -39,6 +39,8 @@ module.exports.policies = {
 
   CategoryController: {
     create: 'isAdmin',
+    patch: 'isAdmin',
+    destroy: 'isAdmin',
     find: true
   },
 

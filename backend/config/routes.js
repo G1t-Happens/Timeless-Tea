@@ -46,6 +46,8 @@ module.exports.routes = {
   // CategoryController.js
   [`POST ${API_BASE}/category`]: { controller: 'CategoryController', action: 'create' },
   [`GET ${API_BASE}/category`]: 'CategoryController.find',
+  [`PATCH ${API_BASE}/category/:id`]: 'CategoryController.patch',
+  [`DELETE ${API_BASE}/category/:id`]: 'CategoryController.destroy',
 
   // OrderController.js
   [`POST ${API_BASE}/order`]: { controller: 'OrderController', action: 'create' },

@@ -34,5 +34,62 @@ module.exports = {
    */
   findAllCategories: async function() {
     return await Category.find();
+  },
+
+  /**
+   * updateCategories()
+   *
+   * Updated eine vorhanden Kategory anhand der id.
+   *
+   * @returns Updated Category.
+   */
+  updateCategory: async function(req) {
+    const id = req.params.id;
+    const { name, type } = req.body;
+
+    if (!id) {
+      throw new errors.BadRequestError('Category id required.');
+    }
+
+    if (!name || !type) {
+      throw new errors.BadRequestError('Category name and type are required.');
+    }
+
+    // Finde das Payment mit der ID
+    const category = await Category.findOne({ id });
+
+    if (!category) {
+      throw new errors.NotFoundError('Category not found.');
+    }
+
+    return await Category.updateOne({ id }).set({ name, type });
+  },
+
+  /**
+   * deleteCategory()
+   *
+   * Loescht eine vorhandene Kategorie anhand der ID.
+   *
+   */
+  deleteCategory: async function (req) {
+    const id = req.params.id;
+
+    if (!id) {
+      throw new errors.BadRequestError('Category ID is required.');
+    }
+
+    // Finde die Kategorie mit der ID
+    const category = await Category.findOne({ id });
+
+    if (!category) {
+      throw new errors.NotFoundError('Category not found.');
+    }
+
+    // Lösche alle Verknüpfungen in der Zwischentabelle
+    await ProductCategory.destroy({ category: id });
+
+    // Lösche die Kategorie
+    await Category.destroy({ id });
   }
+
 };
