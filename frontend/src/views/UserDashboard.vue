@@ -10,7 +10,7 @@
     <!-- Navigation Buttons -->
     <div class="navigation mb-4">
       <button @click="navigateToOrders" class="btn navigation-btn">Meine Bestellungen</button>
-      <button @click="navigateToWishList" class="btn navigation-btn">Meine Favoriten</button>
+      <button @click="navigateToWishList" class="btn navigation-btn">Meine Wunschliste</button>
       <button @click="navigateToUserSettings" class="btn navigation-btn">
         Meine Kontoeinstellungen
       </button>

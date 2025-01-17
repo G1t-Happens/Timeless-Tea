@@ -5,7 +5,7 @@
         <div class="col-md-14">
           <div class="card shadow-sm fixed-card">
             <div class="card-body">
-              <h2 class="text-center mb-4">Meine Wunschliste</h2>
+              <h2 class="page-title">Meine Wunschliste</h2>
 
               <!-- Wenn es Wishlist-Items gibt -->
               <div v-if="wishlistItems.length">
@@ -26,7 +26,7 @@
                       >
                         <!-- Produktbild -->
                         <img :src="item.image" class="card-img-top" alt="Produktbild" />
-                        <div class="card-body">
+                        <div class="product-card-body">
                           <!-- Produktname -->
                           <h5 class="card-title">{{ item.name }}</h5>
 
@@ -152,6 +152,14 @@ const truncatedDescription = (description = '') => {
 </script>
 
 <style scoped>
+.page-title {
+  text-align: center;
+  font-size: 1.8rem;
+  color: #333;
+  font-weight: bold;
+  margin-bottom: 30px;
+}
+
 .wishlist-page {
   background-color: #f9f8f1;
 }
@@ -235,6 +243,23 @@ const truncatedDescription = (description = '') => {
   padding: 16px;
   flex-grow: 1;
   overflow: hidden;
+  background-color: #f1e2c5;
+}
+
+.product-card-body {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  height: 100%;
+  padding: 16px;
+  flex-grow: 1;
+  overflow: hidden;
+  background-color: #f1e2c5;
+}
+
+.bottom-buttons-wishlist {
+  background-color: #f1e2c5;
+  border-top: 2px solid #4a5043;
 }
 
 .card-title {
@@ -279,11 +304,5 @@ const truncatedDescription = (description = '') => {
   flex-grow: 1;
   overflow: hidden;
   max-height: 200px;
-}
-
-/* NEU: Zusätzliche Klasse für die Buttons unten in der Card */
-.bottom-buttons-wishlist {
-  background-color: #f1e2c5;
-  border-top: 2px solid #4a5043;
 }
 </style>

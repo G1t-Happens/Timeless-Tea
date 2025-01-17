@@ -12,12 +12,7 @@
 
         <!-- Settings-Popup -->
         <transition name="fade">
-          <div
-            v-if="showSettingsPopup && user"
-            ref="settingsPopupRef"
-            class="settings-popup"
-            @click.stop
-          >
+          <div v-if="showSettingsPopup" ref="settingsPopupRef" class="settings-popup" @click.stop>
             <router-link
               v-for="link in filteredLinks"
               :key="link.label"
@@ -158,7 +153,13 @@ const links = [
 
 // Gefilterte Links basierend auf Benutzerrolle
 const filteredLinks = computed(() => {
-  return links.filter((link) => (user.value?.isAdmin ? link.forAdmin : true))
+  if (!user.value) {
+    return [
+      { label: 'Warenkorb', componentName: 'ShoppingCart' },
+      { label: 'Wunschliste', componentName: 'WishList' },
+    ]
+  }
+  return links.filter((link) => (user.value.isAdmin ? link.forAdmin : true))
 })
 
 // Account-Icon dynamisch auswählen
@@ -209,11 +210,7 @@ onBeforeUnmount(() => {
 
 // Einstellungen-Icon klicken
 const handleSettingsIconClick = () => {
-  if (!user.value) {
-    router.push({ name: 'Login' })
-  } else {
-    showSettingsPopup.value = !showSettingsPopup.value
-  }
+  showSettingsPopup.value = !showSettingsPopup.value
 }
 
 // Account-Icon klicken
