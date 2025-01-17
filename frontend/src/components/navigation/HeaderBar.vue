@@ -272,7 +272,7 @@ header {
 /* Settings-Popup */
 .settings-popup {
   position: absolute;
-  top: 50px;
+  top: 60px;
   left: 0;
   background: white;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
@@ -300,17 +300,16 @@ header {
   color: #c06e52;
 }
 
-/* Logout-Popup */
 .logout-popup {
   position: absolute;
-  top: 70px;
-  right: 15px;
+  top: 100%; /* Direkt unter dem Button */
+  right: 40%; /* Rechtsbündig zum Button */
   background: white;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   border-radius: 8px;
   padding: 12px 16px;
-  z-index: 1000;
   min-width: 130px;
+  z-index: 1000;
 }
 
 .logout-popup button {

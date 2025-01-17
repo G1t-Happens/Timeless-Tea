@@ -42,6 +42,15 @@
         @click="selectPanel(panel.key)"
         :class="['btn navigation-btn', currentPanel === panel.key ? 'btn-active' : 'btn-outline']"
       >
+        <i
+          :class="{
+            'bi bi-box-seam': panel.key === 'articles',
+            'bi bi-people': panel.key === 'users',
+            'bi bi-cart': panel.key === 'orders',
+            'bi bi-chat-left-text': panel.key === 'messages',
+          }"
+          class="me-2"
+        ></i>
         {{ panel.name }}
       </button>
     </div>
