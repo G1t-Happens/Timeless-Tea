@@ -49,14 +49,22 @@
 
         <!-- Buttons für "Like" und "In den Warenkorb" -->
         <div class="bottom-buttons">
-          <button class="btn btn-image" type="button">
+          <!-- Like-Button -->
+          <button @click.stop.prevent="toggleWishlist" class="btn btn-image" type="button">
+            <!-- Dynamischer Icon-Wechsel abhängig davon, ob das Produkt in der Wishlist ist -->
             <img
-              src="../../src/assets/icons/likeEmpty.png"
-              alt="Tee nicht geliket."
+              :src="
+                isWished
+                  ? '../../src/assets/icons/likeFull.png'
+                  : '../../src/assets/icons/likeEmpty.png'
+              "
+              alt="Wishlist Icon"
               class="card-button me-4"
             />
           </button>
-          <button class="btn btn-image" type="button">
+
+          <!-- In den Warenkorb legen -->
+          <button @click.stop.prevent="addToCart" class="btn btn-image" type="button">
             <img
               src="../../src/assets/icons/shopingcart.png"
               alt="Zum Einkaufswagen hinzufügen"
@@ -71,27 +79,49 @@
 
 <script setup>
 import { computed } from 'vue'
+import { useCartStore } from '@/stores/shoppingCart.js'
+import { useWishlistStore } from '@/stores/wishlist.js'
 
-// Eigenschaften (Props) definieren, die von der Elternkomponente übergeben werden
+// Initialisieren der Stores
+const cartStore = useCartStore()
+const wishlistStore = useWishlistStore()
+
+// Props
 const props = defineProps({
   product: {
-    type: Object, // Erwartet ein Produktobjekt
-    required: true, // Pflichtfeld
+    type: Object,
+    required: true,
   },
 })
 
-// Berechnete Eigenschaft: Anzahl der vollen Sterne basierend auf der Bewertung
-const fullStars = computed(() => Math.floor(props.product.averageRating))
+// Computed: Produkt in Wishlist?
+const isWished = computed(() => wishlistStore.isWished(props.product.id))
 
-// Berechnete Eigenschaft: Anzahl der leeren Sterne, sodass die Summe immer 5 ergibt
+// Computed: Sterne
+const fullStars = computed(() => Math.floor(props.product.averageRating))
 const emptyStars = computed(() => 5 - fullStars.value)
 
-// Berechnete Eigenschaft: Abgeschnittene Beschreibung
+// Beschreibung kürzen
 const truncatedDescription = computed(() => {
-  const maxLength = 100 // Maximale Zeichenanzahl
+  const maxLength = 100
   const description = props.product.description || ''
   return description.length > maxLength ? description.slice(0, maxLength) + '...' : description
 })
+
+// In den Warenkorb
+const addToCart = () => {
+  cartStore.addToCart(props.product, 1)
+  alert(`${1} Einheit(en) von ${props.product.name} in den Warenkorb gelegt.`)
+}
+
+// Wishlist togglen
+const toggleWishlist = () => {
+  if (isWished.value) {
+    wishlistStore.removeFromWishlist(props.product.id)
+  } else {
+    wishlistStore.addToWishlist(props.product)
+  }
+}
 </script>
 
 <style scoped>
@@ -105,9 +135,9 @@ const truncatedDescription = computed(() => {
 }
 
 .product-card-deleted {
-  filter: grayscale(100%); /* Karte grau machen */
-  opacity: 0.6; /* Leicht transparent */
-  pointer-events: none; /* Interaktion deaktivieren */
+  filter: grayscale(100%);
+  opacity: 0.6;
+  pointer-events: none;
 }
 
 /* Hintergrund, Schatten und Rand für die Karte */
@@ -116,9 +146,9 @@ const truncatedDescription = computed(() => {
   flex-direction: column;
   justify-content: space-between;
   border-radius: 15px;
-  background-color: #f1e2c5; /* Heller Beigeton für den Hintergrund */
-  border: 2px solid #4a5043; /* Dunkles Grau für den Rand */
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2); /* Sanfter Schatten für Tiefe */
+  background-color: #f1e2c5;
+  border: 2px solid #4a5043;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
   min-height: 500px;
   max-height: 500px;
   height: 100%;
@@ -126,48 +156,43 @@ const truncatedDescription = computed(() => {
   overflow: hidden;
 }
 
-/* Das Produktbild */
 .card-img-top {
-  height: 200px; /* Einheitliche Höhe für das Bild */
-  object-fit: cover; /* Bild füllt den Raum ohne Verzerrung */
+  height: 200px;
+  object-fit: cover;
   border-top-left-radius: 15px;
   border-top-right-radius: 15px;
 }
 
-/* Body der Karte */
 .card-body {
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
   height: 100%;
-  padding: 16px; /* Etwas Innenabstand für das Layout */
-  flex-grow: 1; /* Sorgt dafür, dass die Karte in vertikaler Richtung wächst */
-  overflow: hidden; /* Verhindert das Überlaufen des Inhalts */
+  padding: 16px;
+  flex-grow: 1;
+  overflow: hidden;
 }
 
-/* Titel des Produkts */
 .card-title {
   font-size: 22pt;
-  color: #9fa86d; /* Grüner Farbton für den Titel */
-  margin-bottom: 8px; /* Abstand nach unten */
+  color: #9fa86d;
+  margin-bottom: 8px;
 }
 
-/* Die Kategorien als Badges */
 .categories-section {
   display: flex;
   gap: 8px;
-  flex-wrap: wrap; /* Zeilenumbruch bei vielen Kategorien */
+  flex-wrap: wrap;
 }
 
 .category-badge {
-  background-color: #9fa86d; /* Grüner Farbton für die Badges */
-  color: #fff; /* Weiße Schrift */
+  background-color: #9fa86d;
+  color: #fff;
   padding: 5px 10px;
   font-size: 12px;
   border-radius: 12px;
 }
 
-/* Die Icons für die Sternebewertung und Buttons */
 .card-icons {
   display: flex;
   justify-content: center;
@@ -175,38 +200,67 @@ const truncatedDescription = computed(() => {
   margin-bottom: 8px;
 }
 
-/* Größe der Buttons */
+/* Basisstil für die Buttons */
 .card-button {
   height: 50px;
   width: 50px;
+  border-radius: 50%; /* Macht den Button rund */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+  overflow: hidden; /* Verhindert, dass das Bild über den runden Rand hinausgeht */
 }
 
-/* Sternebewertung (Größe der Sterne) */
+/* Verhindern, dass das Bild das runde Aussehen sprengt */
+.card-button img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain; /* Stellt sicher, dass das Bild nicht verzerrt wird */
+}
+
+/* Hover-Effekte für die Buttons */
+.card-button:hover {
+  transform: scale(1.1); /* Vergrößert den Button beim Hover */
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); /* Fügt einen Schatten hinzu */
+}
+
+/* Hover-Effekt nur für den Wishlist-Button */
+.card-button.me-4:hover {
+  transform: scale(1.1); /* Vergrößert den Like-Button */
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+/* Hover-Effekt nur für den Warenkorb-Button */
+.card-button:nth-child(2):hover {
+  transform: scale(1.1); /* Vergrößert den Warenkorb-Button */
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+
 .card-rating {
   height: 20px;
   width: 20px;
 }
 
-/* Stil für die Preisangabe */
 .card-text {
   font-size: 14px;
-  color: #333; /* Dunklere Farbe für den Text */
+  color: #333;
   margin-bottom: 8px;
 }
 
-/* Stil für die Produktbeschreibung */
 .product-description {
-  flex-grow: 1; /* Sorgt dafür, dass die Beschreibung den restlichen Platz einnimmt */
-  overflow: hidden; /* Verhindert das Überlaufen des Inhalts */
-  max-height: 200px; /* Optional: Wenn du eine maximale Höhe für die Beschreibung festlegst */
+  flex-grow: 1;
+  overflow: hidden;
+  max-height: 200px;
 }
 
-/* Die Buttons immer ganz unten */
 .bottom-buttons {
   position: absolute;
-  bottom: 1px; /* Abstand zum unteren Rand der Karte */
-  left: 16px; /* Optional: Abstand vom linken Rand */
-  right: 16px; /* Optional: Abstand vom rechten Rand */
+  bottom: 1px;
+  left: 16px;
+  right: 16px;
   display: flex;
   justify-content: center;
   gap: 20px;

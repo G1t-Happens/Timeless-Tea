@@ -16,11 +16,11 @@
               </tr>
             </thead>
             <tbody>
-              <tr v-for="item in cartItems" :key="item.productId">
+              <tr v-for="item in cartItems" :key="item.id">
                 <td>{{ item.name }}</td>
-                <td>{{ item.quantity }}</td>
+                <td>{{ item.productQuantity }}</td>
                 <td>{{ item.price.toFixed(2) }}</td>
-                <td>{{ (item.price * item.quantity).toFixed(2) }}</td>
+                <td>{{ (item.price * item.productQuantity).toFixed(2) }}</td>
               </tr>
             </tbody>
           </table>

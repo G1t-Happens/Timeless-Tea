@@ -5,37 +5,49 @@ export const useCartStore = defineStore('cart', {
     items: JSON.parse(localStorage.getItem('cartItems')) || [],
   }),
   getters: {
+    // Gesamtpreis (Preis * productQuantity)
     totalAmount: (state) => {
-      return state.items.reduce((total, item) => total + item.price * item.quantity, 0).toFixed(2)
+      return state.items
+        .reduce((total, item) => total + item.price * item.productQuantity, 0)
+        .toFixed(2)
     },
+    // Gesamtanzahl aller Artikel im Warenkorb (aufsummierte productQuantity)
     totalItems: (state) => {
-      return state.items.reduce((total, item) => total + item.quantity, 0)
+      return state.items.reduce((total, item) => total + item.productQuantity, 0)
+    },
+    isWished: (state) => (productId) => {
+      return state.items.some((item) => item.id === productId)
     },
   },
   actions: {
     addToCart(product, quantity) {
-      const existingItem = this.items.find((item) => item.productId === product.id)
+      const existingItem = this.items.find((item) => item.id === product.id)
       if (existingItem) {
-        existingItem.quantity += quantity
+        existingItem.productQuantity += quantity
       } else {
         this.items.push({
-          productId: product.id,
+          productQuantity: quantity,
+          id: product.id,
           name: product.name,
           price: product.price,
-          quantity,
           image: product.image,
+          averageRating: product.averageRating,
+          reviews: product.reviews,
+          quantity: product.quantity,
+          description: product.description || '',
+          productCategories: product.productCategories || [],
         })
       }
       this.saveCart()
     },
     removeFromCart(productId) {
-      this.items = this.items.filter((item) => item.productId !== productId)
+      this.items = this.items.filter((item) => item.id !== productId)
       this.saveCart()
     },
     updateQuantity(productId, quantity) {
-      const item = this.items.find((item) => item.productId === productId)
+      const item = this.items.find((item) => item.id === productId)
       if (item) {
-        item.quantity = quantity
+        item.productQuantity = quantity
         this.saveCart()
       }
     },

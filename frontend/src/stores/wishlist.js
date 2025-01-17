@@ -3,40 +3,67 @@ import { defineStore } from 'pinia'
 
 export const useWishlistStore = defineStore('wishlist', {
   state: () => ({
-    items: [] // Array von Produkt-IDs oder vollständigen Produktobjekten
+    // Versuche aus dem localStorage zu lesen, oder initialisiere mit leerem Array
+    items: JSON.parse(localStorage.getItem('wishlistItems')) || [],
   }),
   getters: {
-    // Gibt die Anzahl der Artikel in der Wunschliste zurück
+    // Wie viele Produkte sind in der Wunschliste?
     itemCount: (state) => state.items.length,
 
-    // Überprüft, ob ein bestimmtes Produkt in der Wunschliste ist
-    isWished: (state) => (productId) => state.items.includes(productId),
-
-    // Gibt die vollständigen Produktobjekte der Wunschliste zurück
-    wishedProducts: (state) => state.items
-      .map(id => state.itemsDetails[id])
-      .filter(product => product !== undefined)
+    // Prüft, ob ein bestimmtes Produkt bereits gewünscht ist
+    isWished: (state) => (productId) => {
+      return state.items.some((item) => item.id === productId)
+    },
   },
   actions: {
-    // Fügt ein Produkt zur Wunschliste hinzu
-    addToWishlist(productId) {
-      if (!this.items.includes(productId)) {
-        this.items.push(productId)
+    // Produkt in die Wunschliste aufnehmen (inkl. aller Felder, die du speichern möchtest)
+    addToWishlist(product) {
+      // Prüfen, ob Produkt bereits existiert
+      const existingItem = this.items.find((item) => item.id === product.id)
+
+      // Nur hinzufügen, wenn noch nicht vorhanden
+      if (!existingItem) {
+        this.items.push({
+          id: product.id,
+          name: product.name,
+          price: product.price,
+          image: product.image,
+          averageRating: product.averageRating,
+          reviews: product.reviews,
+          quantity: product.quantity,
+          description: product.description || '',
+          productCategories: product.productCategories || [],
+          // weitere Felder, falls notwendig
+        })
+        this.saveWishlist()
       }
     },
 
-    // Entfernt ein Produkt aus der Wunschliste
+    // Produkt aus der Wunschliste entfernen
     removeFromWishlist(productId) {
-      this.items = this.items.filter(id => id !== productId)
+      this.items = this.items.filter((item) => item.id !== productId)
+      this.saveWishlist()
     },
 
-    // Toggle-Funktion zum Hinzufügen oder Entfernen von der Wunschliste
-    toggleWishlist(productId) {
-      if (this.isWished(productId)) {
-        this.removeFromWishlist(productId)
+    // Toggle-Funktion: Hinzufügen oder Entfernen
+    toggleWishlist(product) {
+      if (this.isWished(product.id)) {
+        this.removeFromWishlist(product.id)
       } else {
-        this.addToWishlist(productId)
+        this.addToWishlist(product)
       }
-    }
-  }
+    },
+
+    // Wunschliste in localStorage speichern
+    saveWishlist() {
+      localStorage.setItem('wishlistItems', JSON.stringify(this.items))
+    },
+    clearWishlist() {
+      // 1) Array im Store leeren
+      this.items = []
+
+      // 2) Eintrag im localStorage entfernen
+      localStorage.setItem('wishlistItems', JSON.stringify(this.items))
+    },
+  },
 })

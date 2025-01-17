@@ -22,11 +22,11 @@
             </tr>
           </thead>
           <tbody>
-            <tr v-for="item in cartStore.items" :key="item.productId">
+            <tr v-for="item in cartStore.items" :key="item.id">
               <td>{{ item.name }}</td>
-              <td>{{ item.quantity }}</td>
+              <td>{{ item.productQuantity }}</td>
               <td>{{ item.price.toFixed(2) }}</td>
-              <td>{{ (item.price * item.quantity).toFixed(2) }}</td>
+              <td>{{ (item.price * item.productQuantity).toFixed(2) }}</td>
             </tr>
           </tbody>
         </table>
@@ -291,8 +291,8 @@ const submitOrder = async () => {
       totalAmount: parseFloat(cartStore.totalAmount),
       payment: selectedPayment.value,
       orderProducts: cartStore.items.map((item) => ({
-        product: item.productId,
-        quantity: item.quantity,
+        product: item.id,
+        quantity: item.productQuantity,
       })),
       newShippingAddress: useBillingAsShipping.value ? null : { ...shippingAddress.value },
     }

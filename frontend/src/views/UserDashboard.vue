@@ -10,7 +10,7 @@
     <!-- Navigation Buttons -->
     <div class="navigation mb-4">
       <button @click="navigateToOrders" class="btn navigation-btn">Meine Bestellungen</button>
-      <button @click="navigateToFavorites" class="btn navigation-btn">Meine Favoriten</button>
+      <button @click="navigateToWishList" class="btn navigation-btn">Meine Favoriten</button>
       <button @click="navigateToUserSettings" class="btn navigation-btn">
         Meine Kontoeinstellungen
       </button>
@@ -77,8 +77,8 @@ const navigateToOrders = () => {
   router.push({ name: 'OrderDetail' })
 }
 
-const navigateToFavorites = () => {
-  router.push({ name: 'Favorites' })
+const navigateToWishList = () => {
+  router.push({ name: 'WishList' })
 }
 
 const navigateToUserSettings = () => {

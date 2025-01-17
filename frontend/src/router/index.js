@@ -140,6 +140,12 @@ const routes = [
     meta: { breadcrumb: 'cart' },
   },
   {
+    path: '/wishlist',
+    name: 'WishList',
+    component: () => import('@/views/WishList.vue'),
+    meta: { breadcrumb: 'wishlist' },
+  },
+  {
     path: '/cart/checkout',
     name: 'CheckOut',
     component: () => import('@/views/CheckOut.vue'),

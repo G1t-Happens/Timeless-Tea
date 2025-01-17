@@ -22,11 +22,11 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="item in cartStore.items" :key="item.productId">
+          <tr v-for="item in cartStore.items" :key="item.id">
             <td class="product-info">
               <img :src="item.image" :alt="item.name" class="product-image" />
               <router-link
-                :to="{ name: 'ProductDetail', params: { id: item.productId } }"
+                :to="{ name: 'ProductDetail', params: { id: item.id } }"
                 class="product-link"
               >
                 {{ item.name }}
@@ -35,7 +35,7 @@
             <td>
               <input
                 type="number"
-                v-model.number="item.quantity"
+                v-model.number="item.productQuantity"
                 min="1"
                 step="1"
                 @change="handleQuantityChange(item)"
@@ -43,9 +43,9 @@
               />
             </td>
             <td>{{ item.price.toFixed(2) }}</td>
-            <td>{{ (item.price * item.quantity).toFixed(2) }}</td>
+            <td>{{ (item.price * item.productQuantity).toFixed(2) }}</td>
             <td>
-              <button @click="removeItem(item.productId)" class="btn btn-danger remove-btn">
+              <button @click="removeItem(item.id)" class="btn btn-danger remove-btn">
                 Entfernen
               </button>
             </td>
@@ -75,9 +75,9 @@ const removeItem = (productId) => {
 }
 
 const handleQuantityChange = (item) => {
-  if (item.quantity < 1) {
+  if (item.productQuantity < 1) {
     alert('Bitte gültige Menge eingeben.')
-    cartStore.updateQuantity(item.productId, 1)
+    cartStore.updateQuantity(item.id, 1)
   }
 }
 

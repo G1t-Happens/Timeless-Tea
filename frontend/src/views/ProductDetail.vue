@@ -49,7 +49,7 @@
           </div>
           <!-- Warenkorb Button mit Icon -->
           <button @click="addToCart" class="btn">
-            <i class="bi bi-cart-fill"></i> In den Warenkorb
+            <i :class="isInCard ? 'bi bi-cart-fill' : 'bi bi-cart'"></i> In den Warenkorb
           </button>
         </div>
         <!-- Wunschzettel Button mit Herz-Icon -->
@@ -89,7 +89,6 @@ const product = ref(null)
 const loading = ref(true)
 const quantity = ref(1)
 const showImageModal = ref(false) // Zustand für das Modal
-
 const productId = route.params.id
 
 // Berechnete Eigenschaften
@@ -119,8 +118,9 @@ const pricePerKg = computed(() => {
   return 0.0
 })
 
-// Zustände für den Wunschzettel
+// Zustände für den Wunschzettel und Cart
 const isWished = computed(() => wishlistStore.isWished(productId))
+const isInCard = computed(() => cartStore.isWished(productId))
 
 // Funktion zum Abrufen der Produktdetails
 const fetchProduct = async () => {
@@ -168,8 +168,8 @@ const closeImageModal = () => {
 
 // Funktionen zum Wunschzettel
 const toggleWishlist = () => {
-  wishlistStore.toggleWishlist(productId)
-  if (wishlistStore.isWished(productId)) {
+  wishlistStore.toggleWishlist(product.value)
+  if (wishlistStore.isWished(product.value.id)) {
     alert(`${product.value.name} wurde zum Wunschzettel hinzugefügt.`)
   } else {
     alert(`${product.value.name} wurde vom Wunschzettel entfernt.`)

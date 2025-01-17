@@ -156,7 +156,47 @@ module.exports.bootstrap = async function() {
       {
         name: 'Hibiscus Bliss',
         description: 'Dieser Tee verzaubert mit seiner tiefroten Farbe und seinem fruchtig-säuerlichen Geschmack. Hibiscus Bliss ist erfrischend und belebend, perfekt für heiße Sommertage oder als Basis für einen selbstgemachten Eistee. Ein Fruchtgenuss, der die Sinne weckt.'
-      }
+      },
+      {
+        name: 'Dragon Well (Longjing)',
+        description: 'Ein edler grüner Tee aus China, der für seine zarten, flachen Blätter bekannt ist. Dragon Well hat einen leicht nussigen, süßlichen Geschmack mit einem Hauch von frisch geschnittenem Gras und einem milden, aber angenehmen Umami. Dieser Tee ist perfekt für eine erfrischende Auszeit.'
+      },
+      {
+        name: 'Jasmine Green Tea',
+        description: 'Ein grüner Tee, der mit duftenden Jasminblüten aromatisiert wird. Der Duft von frischen Blumen vermischt sich mit den grasigen, leicht süßen Noten des Tees und ergibt eine harmonische Tasse, die sowohl beruhigend als auch belebend wirkt. Ideal für Teeliebhaber, die florale Aromen schätzen.'
+      },
+      {
+        name: 'Matcha',
+        description: 'Matcha ist der fein gemahlene grüne Tee aus Japan, der für seine leuchtend grüne Farbe und seinen kräftigen Geschmack bekannt ist. Mit einem intensiven, umami-reichen Profil und einer sanften Süße ist Matcha ideal für Teekenner, die ein intensives Geschmackserlebnis suchen und von der belebenden Wirkung profitieren möchten.'
+      },
+      {
+        name: 'Sencha Asamushi',
+        description: 'Dieser japanische Sencha-Tee zeichnet sich durch ein besonders mildes und ausgewogenes Geschmacksprofil aus. Mit einem frischen, grasigen Geschmack und einer leicht süßlichen Note ist Sencha Asamushi eine ideale Wahl für all diejenigen, die einen sanften grünen Tee bevorzugen.'
+      },
+      {
+        name: 'Gunpowder Green Tea – Organic',
+        description: 'Die Bio-Variante des klassischen Gunpowder Green Teas überzeugt durch ihren kräftigen, leicht rauchigen Geschmack. Diese Teesorte wird aus handverlesenen, biologischen Blättern hergestellt und bietet ein intensives, erfrischendes Erlebnis für alle Liebhaber von grünem Tee.'
+      },
+      {
+        name: 'Tie Guan Yin (Iron Goddess)',
+        description: 'Tie Guan Yin ist ein hochwertiger Oolong-Tee, der durch seine grüne Teebasis und die floralen Aromen eine wunderbare Balance zwischen grünem und oolong Tee schafft. Mit einem lieblichen Duft und einem Geschmack, der an reife Früchte und Blumen erinnert, ist dieser Tee eine wahre Delikatesse.'
+      },
+      {
+        name: 'Lemongrass Green Tea',
+        description: 'Eine belebende Mischung aus grünem Tee und frisch duftendem Lemongrass, die für ihren erfrischenden, zitrusartigen Geschmack geschätzt wird. Lemongrass Green Tea bietet eine angenehme Frische und ist perfekt für eine belebende Tasse am Morgen oder als wohltuende Erfrischung an warmen Tagen.'
+      },
+      {
+        name: 'Bancha Green Tea',
+        description: 'Bancha ist ein japanischer grüner Tee, der aus den reiferen Blättern der Teepflanze gewonnen wird. Er hat einen milden, leicht grasigen Geschmack mit einer subtilen Süße und wird oft als weniger intensiv und beruhigend im Vergleich zu Sencha wahrgenommen. Ein perfekter Tee für den täglichen Genuss.'
+      },
+      {
+        name: 'Shou Mei Green Tea',
+        description: 'Shou Mei ist ein chinesischer grüner Tee, der aus den jüngeren Blättern der Teepflanze gewonnen wird. Er zeichnet sich durch einen sanften, leicht süßen Geschmack mit einem Hauch von Blüten und Pfirsich aus. Dieser Tee eignet sich besonders für Teetrinker, die einen leicht fruchtigen und milden grünen Tee bevorzugen.'
+      },
+      {
+        name: 'Kukicha (Twig Tea)',
+        description: 'Kukicha ist ein japanischer grüner Tee, der aus den Stängeln und Zweigen der Teepflanze hergestellt wird. Der Geschmack ist leicht und frisch, mit einer milden, fast süßlichen Note. Dieser Tee ist perfekt für Teeliebhaber, die etwas weniger intensives und beruhigendes suchen.'
+      },
     ];
 
     for (let teaInfo of teaNamesDescriptions) {

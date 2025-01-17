@@ -21,7 +21,7 @@
             <router-link
               v-for="link in filteredLinks"
               :key="link.label"
-              :to="getDynamicPath(link)"
+              :to="{ name: link.componentName }"
               class="popup-link"
             >
               {{ link.label }}
@@ -62,6 +62,22 @@
           </div>
         </transition>
 
+        <!-- Wishlist -->
+        <div class="position-relative icon-wrapper">
+          <!-- Router-Link, der zur WishlistView führt -->
+          <router-link :to="{ name: 'WishList' }" class="wishlist-link">
+            <img
+              src="@/assets/icons/wishlist.png"
+              alt="Wishlist Icon"
+              class="round-icon-responsive"
+            />
+            <!-- Badge/Counter für die Anzahl der Items in der Wishlist -->
+            <span v-if="wishlistStore.itemCount > 0" class="cart-count">
+              {{ wishlistStore.itemCount }}
+            </span>
+          </router-link>
+        </div>
+
         <!-- Shopping Cart -->
         <div class="position-relative icon-wrapper" @click="toggleCart">
           <img
@@ -80,22 +96,20 @@
             </div>
             <div v-else>
               <ul>
-                <li v-for="item in cartStore.items" :key="item.productId" class="cart-item">
+                <li v-for="item in cartStore.items" :key="item.id" class="cart-item">
                   <img :src="item.image" alt="Produktbild" class="cart-item-image" />
                   <div class="cart-item-details">
                     <p class="cart-item-name">{{ item.name }}</p>
-                    <p>{{ item.quantity }} Artikel - je {{ item.price }}€</p>
+                    <p>{{ item.productQuantity }} Artikel - je {{ item.price }}€</p>
                   </div>
-                  <button @click="removeItem(item.productId)" class="remove-button">
-                    Entfernen
-                  </button>
+                  <button @click="removeItem(item.id)" class="remove-button">Entfernen</button>
                 </li>
               </ul>
               <div class="cart-total">
                 <p>Gesamt: {{ cartStore.totalAmount }}€</p>
                 <router-link :to="{ name: 'ShoppingCart' }" class="btn to-cart"
-                  >Zum Warenkorb</router-link
-                >
+                  >Zum Warenkorb
+                </router-link>
               </div>
             </div>
           </div>
@@ -112,10 +126,12 @@ import { useUserStore } from '@/stores/user.js'
 import { useCartStore } from '@/stores/shoppingCart.js' // Importieren des Cart Stores
 import accountIcon from '@/assets/icons/account.png'
 import accountLoggedInIcon from '@/assets/icons/accountLoggedIn.png'
+import { useWishlistStore } from '@/stores/wishlist.js'
 
 // Initialisieren der Stores und Router
 const userStore = useUserStore()
 const cartStore = useCartStore()
+const wishlistStore = useWishlistStore()
 const router = useRouter()
 const user = computed(() => userStore.user)
 
@@ -128,29 +144,22 @@ const settingsContainerRef = ref(null)
 const popupRef = ref(null)
 const accountContainerRef = ref(null)
 
-// Dynamische Basis-URL basierend auf Benutzerrolle
-const basePath = computed(() => (user.value?.isAdmin ? '/admin' : '/user'))
-
-// Alle möglichen Links
+// Alle möglichen Links mit ComponentName
 const links = [
-  { label: 'Dashboard', path: '', forAdmin: true },
-  { label: 'Meine Bestellungen', path: 'order', forAdmin: false },
-  { label: 'Favoriten', path: 'favorites', forAdmin: false },
-  { label: 'Kontoeinstellungen', path: 'edit-user', forAdmin: false },
+  {
+    label: 'Dashboard',
+    componentName: user.value?.isAdmin ? 'AdminDasboard' : 'UserDashboard',
+    forAdmin: true,
+  },
+  { label: 'Meine Bestellungen', componentName: 'OrderDetail', forAdmin: false },
+  { label: 'Wunschliste', componentName: 'WishList', forAdmin: false },
+  { label: 'Kontoeinstellungen', componentName: 'UserEditUser', forAdmin: false },
 ]
 
 // Gefilterte Links basierend auf Benutzerrolle
 const filteredLinks = computed(() => {
   return links.filter((link) => (user.value?.isAdmin ? link.forAdmin : true))
 })
-
-// Dynamischer Pfad basierend auf Benutzer-ID
-const getDynamicPath = (link) => {
-  if (link.dynamicId && user.value) {
-    return `${basePath.value}/${link.path}/${user.value.id}`
-  }
-  return `${basePath.value}/${link.path}`
-}
 
 // Account-Icon dynamisch auswählen
 const currentAccountIcon = computed(() => {
