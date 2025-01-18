@@ -14,7 +14,9 @@
         <!-- Filter Button nur anzeigen, wenn showFilter true ist -->
         <button v-if="showFilter" class="btn btn-image" type="button" @click="toggleFilter">
           <img
-            src="../../src/assets/icons/filter.png"
+            src="../../src/assets/icons/filter.webp"
+            width="96"
+            height="61"
             class="oval-icon-responsive"
             alt="Filter Icon"
           />
@@ -23,7 +25,9 @@
         <!-- Such-Button -->
         <button class="btn btn-image" type="submit">
           <img
-            src="../../src/assets/icons/search.png"
+            src="../../src/assets/icons/search.webp"
+            width="97"
+            height="61"
             class="oval-icon-responsive"
             alt="Search Icon"
           />

@@ -46,14 +46,14 @@
                             <img
                               v-for="n in fullStars(item.averageRating)"
                               :key="'full-star-' + n"
-                              src="../../src/assets/icons/starFull.png"
+                              src="../../src/assets/icons/starFull.webp"
                               alt="Voller Stern"
                               class="card-rating"
                             />
                             <img
                               v-for="n in emptyStars(item.averageRating)"
                               :key="'empty-star-' + n"
-                              src="../../src/assets/icons/starEmpty.png"
+                              src="../../src/assets/icons/starEmpty.webp"
                               alt="Leerer Stern"
                               class="card-rating"
                             />

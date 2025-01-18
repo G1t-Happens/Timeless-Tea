@@ -4,7 +4,9 @@
       <!-- Einstellungen -->
       <div class="position-relative icon-wrapper" ref="settingsContainerRef">
         <img
-          src="@/assets/icons/settings.png"
+          src="@/assets/icons/settings.webp"
+          width="63"
+          height="63"
           alt="Settings"
           class="round-icon-responsive"
           @click="handleSettingsIconClick"
@@ -30,7 +32,9 @@
         <router-link to="/">
           <button class="btn btn-image" type="button">
             <img
-              src="@/assets/images/banner_logo.png"
+              src="@/assets/images/banner_logo.webp"
+              width="324"
+              height="123"
               class="banner-logo-responsive"
               alt="Tea Logo"
             />
@@ -44,6 +48,8 @@
         <img
           :src="currentAccountIcon"
           :class="['round-icon-responsive']"
+          width="63"
+          height="63"
           alt="Account-Icon"
           @click="handleAccountIconClick"
           class="icon-wrapper"
@@ -62,7 +68,9 @@
           <!-- Router-Link, der zur WishlistView führt -->
           <router-link :to="{ name: 'WishList' }" class="wishlist-link">
             <img
-              src="@/assets/icons/wishlist.png"
+              src="@/assets/icons/wishlist.webp"
+              width="63"
+              height="63"
               alt="Wishlist Icon"
               class="round-icon-responsive"
             />
@@ -76,7 +84,9 @@
         <!-- Shopping Cart -->
         <div class="position-relative icon-wrapper" @click="toggleCart">
           <img
-            src="@/assets/icons/shopingcart.png"
+            src="@/assets/icons/shopingcart.webp"
+            width="63"
+            height="63"
             alt="ShoppingCart"
             class="round-icon-responsive"
           />
@@ -119,8 +129,8 @@ import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/user.js'
 import { useCartStore } from '@/stores/shoppingCart.js' // Importieren des Cart Stores
-import accountIcon from '@/assets/icons/account.png'
-import accountLoggedInIcon from '@/assets/icons/accountLoggedIn.png'
+import accountIcon from '@/assets/icons/account.webp'
+import accountLoggedInIcon from '@/assets/icons/accountLoggedIn.webp'
 import { useWishlistStore } from '@/stores/wishlist.js'
 import Swal from 'sweetalert2'
 
@@ -247,7 +257,7 @@ const logout = async () => {
 <style scoped>
 /* Header */
 header {
-  background-image: url('@/assets/images/banner.png');
+  background-image: url('@/assets/images/banner.webp');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;

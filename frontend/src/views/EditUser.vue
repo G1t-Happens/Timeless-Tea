@@ -402,7 +402,7 @@ const deletePayment = async (paymentId) => {
   if (result.isConfirmed) {
     await axios.delete(`/api/payment/${paymentId}`)
     user.value.payments = user.value.payments.filter((payment) => payment.id !== paymentId)
-    Swal.fire({
+    await Swal.fire({
       title: 'Gelöscht',
       text: 'Die Zahlungsmethode wurde erfolgreich gelöscht.',
       icon: 'success',

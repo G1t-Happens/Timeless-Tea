@@ -12,7 +12,12 @@
       <RouterLink :to="{ name: 'MemberShip' }">
         <button class="btn btn-image" type="button">
           <!-- Membership Icon -->
-          <img src="../../src/assets/icons/membership.png" alt="Mitglied werden" />
+          <img
+            src="../../src/assets/icons/membership.webp"
+            width="152"
+            height="56"
+            alt="Mitglied werden"
+          />
         </button>
       </RouterLink>
     </div>

@@ -300,7 +300,7 @@ const cancelOrder = async (orderId) => {
   try {
     const order = orders.value.find((o) => o.id === orderId)
     if (!order) {
-      Swal.fire({
+      await Swal.fire({
         title: 'Bestellung nicht gefunden',
         text: 'Die angegebene Bestellung existiert nicht.',
         icon: 'warning',
@@ -310,7 +310,7 @@ const cancelOrder = async (orderId) => {
     }
 
     if (!['open', 'processing'].includes(order.orderStatus)) {
-      Swal.fire({
+      await Swal.fire({
         title: 'Stornierung nicht möglich',
         text: 'Nur offene oder in Bearbeitung befindliche Bestellungen können storniert werden.',
         icon: 'info',

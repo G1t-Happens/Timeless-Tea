@@ -24,14 +24,14 @@
             <img
               v-for="n in fullStars"
               :key="'full-star-' + n"
-              src="../../src/assets/icons/starFull.png"
+              src="../../src/assets/icons/starFull.webp"
               alt="Voller Stern"
               class="card-rating"
             />
             <img
               v-for="n in emptyStars"
               :key="'empty-star-' + n"
-              src="../../src/assets/icons/starEmpty.png"
+              src="../../src/assets/icons/starEmpty.webp"
               alt="Leerer Stern"
               class="card-rating"
             />
@@ -55,8 +55,8 @@
             <img
               :src="
                 isWished
-                  ? '../../src/assets/icons/likeFull.png'
-                  : '../../src/assets/icons/likeEmpty.png'
+                  ? '../../src/assets/icons/likeFull.webp'
+                  : '../../src/assets/icons/likeEmpty.webp'
               "
               alt="Wishlist Icon"
               class="card-button me-4"
@@ -66,7 +66,7 @@
           <!-- In den Warenkorb legen -->
           <button @click.stop.prevent="addToCart" class="btn btn-image" type="button">
             <img
-              src="../../src/assets/icons/shopingcart.png"
+              src="../../src/assets/icons/shopingcart.webp"
               alt="Zum Einkaufswagen hinzufügen"
               class="card-button"
             />

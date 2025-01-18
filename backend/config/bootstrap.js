@@ -85,14 +85,14 @@ module.exports.bootstrap = async function() {
     const categories = await Category.find();
     const allRatings = await Rating.find();
     const images = [
-      'blackTea.jpg',
-      'fruitTea.jpg',
-      'greenTea.jpg',
-      'herbalTea.jpg',
-      'jasmineTea.jpg',
-      'kraeutertee.jpg',
-      'schwarztee.jpg',
-      'whiteTea.jpg',
+      'blackTea.webp',
+      'fruitTea.webp',
+      'greenTea.webp',
+      'herbalTea.webp',
+      'jasmineTea.webp',
+      'kraeutertee.webp',
+      'schwarztee.webp',
+      'whiteTea.webp',
     ];
 
     // Random Artikel Namen und Beschreibungen
