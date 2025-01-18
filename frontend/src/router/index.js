@@ -38,7 +38,7 @@ const routes = [
   },
   {
     path: '/admin',
-    name: 'AdminDasboard',
+    name: 'AdminDashboard',
     component: () => import('@/views/AdminDashboard.vue'),
     meta: { requiresAdmin: true, breadcrumb: 'admin' },
     beforeEnter: adminGuard,

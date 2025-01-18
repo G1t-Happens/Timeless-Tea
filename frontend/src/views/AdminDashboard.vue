@@ -35,7 +35,7 @@
     </div>
 
     <!-- Navigationsmenü -->
-    <div class="navigation mb-4">
+    <div class="navigation">
       <button
         v-for="panel in panels"
         :key="panel.key"
@@ -54,6 +54,8 @@
         {{ panel.name }}
       </button>
     </div>
+
+    <div class="dashboard-divider"></div>
 
     <!-- Artikel verwalten Panel -->
     <div v-if="currentPanel === 'articles'">
@@ -681,7 +683,6 @@ onMounted(() => {
   flex-wrap: wrap; /* Erlaubt Zeilenumbruch bei kleineren Bildschirmen */
   justify-content: center;
   gap: 10px;
-  padding-bottom: 100px;
 }
 
 .navigation-btn {
@@ -846,5 +847,19 @@ onMounted(() => {
   color: #4a5043;
   margin-top: -10px;
   margin-bottom: 30px;
+}
+
+.dashboard-divider {
+  width: 100%; /* Trennlinie hat 100% der Breite */
+  height: 4px; /* Höhe der Trennlinie */
+  background: linear-gradient(
+    to left,
+    papayawhip,
+    navajowhite,
+    papayawhip
+  ); /* Farbverlauf von der Mitte nach außen */
+  margin: 10px auto; /* Zentrieren und Abstand */
+  border-bottom: whitesmoke;
+  border-radius: 20px; /* Runde Kanten */
 }
 </style>

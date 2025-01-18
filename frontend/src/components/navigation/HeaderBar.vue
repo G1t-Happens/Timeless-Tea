@@ -152,14 +152,11 @@ const accountContainerRef = ref(null)
 
 // Alle möglichen Links mit ComponentName
 const links = [
-  {
-    label: 'Dashboard',
-    componentName: user.value?.isAdmin ? 'AdminDasboard' : 'UserDashboard',
-    forAdmin: true,
-  },
-  { label: 'Meine Bestellungen', componentName: 'OrderDetail', forAdmin: false },
-  { label: 'Wunschliste', componentName: 'WishList', forAdmin: false },
-  { label: 'Kontoeinstellungen', componentName: 'UserEditUser', forAdmin: false },
+  { label: 'Dashboard', componentName: 'AdminDashboard' },
+  { label: 'Dashboard', componentName: 'UserDashboard' },
+  { label: 'Meine Bestellungen', componentName: 'OrderDetail' },
+  { label: 'Wunschliste', componentName: 'WishList' },
+  { label: 'Kontoeinstellungen', componentName: 'UserEditUser' },
 ]
 
 // Gefilterte Links basierend auf Benutzerrolle
@@ -170,7 +167,15 @@ const filteredLinks = computed(() => {
       { label: 'Wunschliste', componentName: 'WishList' },
     ]
   }
-  return links.filter((link) => (user.value.isAdmin ? link.forAdmin : true))
+  return links.filter((link) => {
+    if (link.componentName === 'AdminDashboard') {
+      return user.value.isAdmin
+    }
+    if (link.componentName === 'UserDashboard') {
+      return !user.value.isAdmin
+    }
+    return true
+  })
 })
 
 // Account-Icon dynamisch auswählen
