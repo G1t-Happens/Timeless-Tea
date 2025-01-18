@@ -15,7 +15,7 @@
         <thead>
           <tr>
             <th>Produkt</th>
-            <th>Menge (g)</th>
+            <th>Artikel</th>
             <th>Preis (€)</th>
             <th>Gesamt (€)</th>
             <th>Aktion</th>
@@ -67,6 +67,7 @@
 <script setup>
 import { useCartStore } from '@/stores/shoppingCart.js'
 import BackButton from '@/components/navigation/BackButton.vue'
+import Swal from 'sweetalert2'
 
 const cartStore = useCartStore()
 
@@ -76,7 +77,12 @@ const removeItem = (productId) => {
 
 const handleQuantityChange = (item) => {
   if (item.productQuantity < 1) {
-    alert('Bitte gültige Menge eingeben.')
+    Swal.fire({
+      title: 'Bitte gültige Menge eingeben.',
+      text: 'Die Menge der Produkte muss positiv sein.',
+      icon: 'warning',
+      confirmButtonText: 'OK',
+    })
     cartStore.updateQuantity(item.id, 1)
   }
 }

@@ -65,6 +65,7 @@ import ProductCard from '@/components/ProductCard.vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/user.js'
 import axios from 'axios'
+import Swal from 'sweetalert2'
 
 const router = useRouter()
 const userStore = useUserStore()
@@ -142,7 +143,12 @@ const fetchArticles = async ({
     hasMore.value.articles = response.data.hasMore
   } catch (error) {
     console.error('Fehler beim Laden der Artikel:', error)
-    alert('Fehler beim Laden der Artikel.')
+    await Swal.fire({
+      title: 'Fehler beim Laden der Artikel',
+      text: error.response?.data?.error || 'Ein unbekannter Fehler ist aufgetreten.',
+      icon: 'error',
+      confirmButtonText: 'OK',
+    })
   } finally {
     loading.value.articles = false
   }

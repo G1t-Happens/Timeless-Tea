@@ -2,6 +2,7 @@
 import { defineStore } from 'pinia'
 import axios from 'axios'
 import router from '@/router'
+import Swal from 'sweetalert2'
 
 export const useUserStore = defineStore('user', {
   state: () => ({
@@ -36,8 +37,15 @@ export const useUserStore = defineStore('user', {
           }
         })
         .catch((error) => {
-          window.alert('Falsches Password oder Username!')
-          console.error('Login failed:', error)
+          Swal.fire({
+            backdrop: false,
+            title: 'Login fehlgeschlagen',
+            text: error.response?.data?.error || 'Ein unbekannter Fehler ist aufgetreten.',
+            icon: 'error', // SVG-Icon
+            confirmButtonText: 'Okay',
+            iconColor: 'red',
+            confirmButtonColor: '#4a5043',
+          })
         })
     },
     async signUp(userData) {
@@ -65,7 +73,13 @@ export const useUserStore = defineStore('user', {
           router.push('/user')
         })
         .catch((error) => {
-          console.error('Registration failed:', error)
+          Swal.fire({
+            backdrop: false,
+            title: 'Registrierung fehlgeschlagen',
+            text: error.response.data.error || 'Ein unbekannter Fehler ist aufgetreten.',
+            icon: 'error',
+            confirmButtonText: 'Okay',
+          })
         })
     },
     async logout() {

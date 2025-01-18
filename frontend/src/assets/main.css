@@ -24,6 +24,33 @@ button:active {
   outline: none; /* Entfernt auch die Button-Fokusumrandung, falls vorhanden */
 }
 
+
+/* Setze den globalen Rand und die Farbe für alle Popups */
+.swal2-popup {
+    border: 2px solid #4a5043;
+    border-radius: 10px;
+    background-color: white;
+}
+
+/* Ändere die Farbe des Titels */
+.swal2-title {
+    color: #4a5043; /* Titel-Farbe */
+}
+
+/* Ändere die Farbe des Texts */
+.swal2-html-container {
+    color: #333; /* Textfarbe */
+}
+
+/* Style für die Buttons */
+.swal2-confirm, .swal2-cancel {
+    background-color: #4a5043;
+    color: white;
+    border-radius: 5px;
+    padding: 10px 20px;
+}
+
+
 /* Kann bis min-width: 320px alles ordnungsgemaess darstellen.*/
 @media (max-width: 600px) {
 

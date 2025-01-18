@@ -89,6 +89,7 @@
 import { ref, computed, reactive, onMounted } from 'vue'
 import axios from 'axios'
 import BackButton from '@/components/navigation/BackButton.vue'
+import Swal from 'sweetalert2'
 
 // Reaktive Daten
 const categories = ref([])
@@ -107,6 +108,12 @@ const fetchCategories = async () => {
     originalCategories.value = JSON.parse(JSON.stringify(data)) // Tiefenkopie für Vergleich
   } catch (error) {
     console.error('Fehler beim Laden der Kategorien:', error)
+    await Swal.fire({
+      title: 'Fehler beim Laden der Kategorien!',
+      text: error.response?.data?.error || 'Ein unbekannter Fehler ist aufgetreten.',
+      icon: 'error',
+      confirmButtonText: 'OK',
+    })
   } finally {
     loading.value = false
   }
@@ -114,12 +121,35 @@ const fetchCategories = async () => {
 
 // Kategorie löschen
 const deleteCategory = async (id) => {
-  try {
-    await axios.delete(`/api/category/${id}`)
-    categories.value = categories.value.filter((category) => category.id !== id)
-    originalCategories.value = originalCategories.value.filter((category) => category.id !== id)
-  } catch (error) {
-    console.error('Fehler beim Löschen der Kategorie:', error)
+  const result = await Swal.fire({
+    title: 'Kategorie löschen?',
+    text: 'Möchten Sie diesen Kategorie wirklich löschen? Dieser Vorgang kann nicht rückgängig gemacht werden.',
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonText: 'Ja, löschen',
+    cancelButtonText: 'Abbrechen',
+  })
+
+  if (result.isConfirmed) {
+    try {
+      await axios.delete(`/api/category/${id}`)
+      categories.value = categories.value.filter((category) => category.id !== id)
+      originalCategories.value = originalCategories.value.filter((category) => category.id !== id)
+      await Swal.fire({
+        title: 'Gelöscht',
+        text: 'Die ausgewählte Kategorie wurde erfolgreich gelöscht.',
+        icon: 'success',
+        confirmButtonText: 'OK',
+      })
+    } catch (error) {
+      console.error('Fehler beim Löschen der Kategorie:', error)
+      await Swal.fire({
+        title: 'Fehler beim Löschen der Kategorie!',
+        text: error.response?.data?.error || 'Ein unbekannter Fehler ist aufgetreten.',
+        icon: 'error',
+        confirmButtonText: 'OK',
+      })
+    }
   }
 }
 
@@ -205,9 +235,22 @@ const saveChanges = async () => {
       ),
     )
     pendingChanges.length = 0 // Liste leeren
+    await Swal.fire({
+      title: 'Kategorie(n) wurden erfolgreich geupdated!',
+      icon: 'success',
+      showConfirmButton: false,
+      timer: 2000,
+      timerProgressBar: true,
+    })
     await fetchCategories()
   } catch (error) {
-    console.error('Fehler beim Speichern der Änderungen:', error)
+    console.error('Fehler beim updaten der Änderungen:', error)
+    await Swal.fire({
+      title: 'Fehler beim updaten der Änderungen!',
+      text: error.response?.data?.error || 'Ein unbekannter Fehler ist aufgetreten.',
+      icon: 'error',
+      confirmButtonText: 'OK',
+    })
   }
 }
 

@@ -77,6 +77,7 @@ import ArticleInfoPanel from '@/components/ArticleInfoPanel.vue'
 import BackButton from '@/components/navigation/BackButton.vue'
 import { useCartStore } from '@/stores/shoppingCart.js'
 import { useWishlistStore } from '@/stores/wishlist.js'
+import Swal from 'sweetalert2'
 
 // Initialisieren der Stores und Router
 const cartStore = useCartStore()
@@ -119,7 +120,7 @@ const pricePerKg = computed(() => {
 })
 
 // Zustände für den Wunschzettel und Cart
-const isWished = computed(() => wishlistStore.isWished(productId))
+const isWished = computed(() => wishlistStore.isWished(parseInt(productId)))
 const isInCard = computed(() => cartStore.isWished(productId))
 
 // Funktion zum Abrufen der Produktdetails
@@ -129,7 +130,12 @@ const fetchProduct = async () => {
     product.value = data
   } catch (error) {
     console.error('Fehler beim Laden der Produktdetails:', error)
-    alert('Produktdetails konnten nicht geladen werden.')
+    await Swal.fire({
+      title: 'Fehler beim Laden der Produktdetails!',
+      text: error.response?.data?.error || 'Ein unbekannter Fehler ist aufgetreten.',
+      icon: 'error',
+      confirmButtonText: 'OK',
+    })
     await router.push({ name: 'LandingPage' })
   } finally {
     loading.value = false
@@ -150,11 +156,25 @@ const decreaseQuantity = () => {
 // Funktion zum Hinzufügen zum Warenkorb
 const addToCart = () => {
   if (quantity.value < 1 || !Number.isInteger(quantity.value)) {
-    alert('Bitte eine gültige Menge (mindestens 1 Einheit) eingeben.')
+    Swal.fire({
+      title: 'Ungültige Menge!',
+      text: 'Bitte eine gültige Menge (mindestens 1 Einheit) eingeben.',
+      icon: 'warning',
+      confirmButtonText: 'OK',
+    })
     return
   }
+
   cartStore.addToCart(product.value, quantity.value)
-  alert(`${quantity.value} Einheit(en) von ${product.value.name} in den Warenkorb gelegt.`)
+
+  Swal.fire({
+    title: 'Erfolgreich hinzugefügt!',
+    text: `${quantity.value} Einheit(en) von ${product.value.name} wurden in den Warenkorb gelegt.`,
+    icon: 'success',
+    showConfirmButton: false,
+    timer: 1500,
+    timerProgressBar: true,
+  })
 }
 
 // Funktionen zum Öffnen und Schließen des Modals
@@ -169,10 +189,25 @@ const closeImageModal = () => {
 // Funktionen zum Wunschzettel
 const toggleWishlist = () => {
   wishlistStore.toggleWishlist(product.value)
+
   if (wishlistStore.isWished(product.value.id)) {
-    alert(`${product.value.name} wurde zum Wunschzettel hinzugefügt.`)
+    Swal.fire({
+      title: 'Zum Wunschzettel hinzugefügt!',
+      text: `${product.value.name} wurde erfolgreich zum Wunschzettel hinzugefügt.`,
+      icon: 'success',
+      showConfirmButton: false,
+      timer: 1500,
+      timerProgressBar: true,
+    })
   } else {
-    alert(`${product.value.name} wurde vom Wunschzettel entfernt.`)
+    Swal.fire({
+      title: 'Vom Wunschzettel entfernt!',
+      text: `${product.value.name} wurde vom Wunschzettel entfernt.`,
+      icon: 'info',
+      showConfirmButton: false,
+      timer: 1500,
+      timerProgressBar: true,
+    })
   }
 }
 

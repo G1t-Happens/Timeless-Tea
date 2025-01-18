@@ -210,6 +210,7 @@
 import { ref, computed } from 'vue'
 import axios from 'axios'
 import BackButton from '@/components/navigation/BackButton.vue'
+import Swal from 'sweetalert2'
 
 const orders = ref([])
 const loading = ref(false)
@@ -225,7 +226,12 @@ const fetchOrders = async () => {
     orders.value = data
   } catch (error) {
     console.error('Error loading orders:', error)
-    alert('Failed to load orders.')
+    await Swal.fire({
+      title: 'Fehler',
+      text: error.response?.data?.error || 'Ein unbekannter Fehler ist aufgetreten.',
+      icon: 'error',
+      confirmButtonText: 'OK',
+    })
   } finally {
     loading.value = false
   }
@@ -294,22 +300,55 @@ const cancelOrder = async (orderId) => {
   try {
     const order = orders.value.find((o) => o.id === orderId)
     if (!order) {
-      alert('Bestellung nicht gefunden.')
+      Swal.fire({
+        title: 'Bestellung nicht gefunden',
+        text: 'Die angegebene Bestellung existiert nicht.',
+        icon: 'warning',
+        confirmButtonText: 'OK',
+      })
       return
     }
 
     if (!['open', 'processing'].includes(order.orderStatus)) {
-      alert('Nur offene oder in Bearbeitung befindliche Bestellungen können storniert werden.')
+      Swal.fire({
+        title: 'Stornierung nicht möglich',
+        text: 'Nur offene oder in Bearbeitung befindliche Bestellungen können storniert werden.',
+        icon: 'info',
+        confirmButtonText: 'OK',
+      })
+      return
+    }
+
+    const result = await Swal.fire({
+      title: 'Bestellung stornieren?',
+      text: 'Möchten Sie diese Bestellung wirklich stornieren? Dies kann nicht rückgängig gemacht werden.',
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonText: 'Ja, stornieren',
+      cancelButtonText: 'Abbrechen',
+    })
+
+    if (!result.isConfirmed) {
       return
     }
 
     await axios.patch(`/api/order/${orderId}/cancel`)
-
     order.orderStatus = 'canceled'
-    alert('Die Bestellung wurde erfolgreich storniert.')
+
+    await Swal.fire({
+      title: 'Erfolgreich storniert',
+      text: 'Die Bestellung wurde erfolgreich storniert.',
+      icon: 'success',
+      confirmButtonText: 'OK',
+    })
   } catch (error) {
     console.error('Fehler beim Stornieren der Bestellung:', error)
-    alert('Die Bestellung konnte nicht storniert werden.')
+    await Swal.fire({
+      title: 'Fehler',
+      text: error.response?.data?.error || 'Die Bestellung konnte nicht storniert werden.',
+      icon: 'error',
+      confirmButtonText: 'OK',
+    })
   }
 }
 

@@ -218,6 +218,7 @@ import { useRoute, useRouter } from 'vue-router'
 import axios from 'axios'
 import BackButton from '@/components/navigation/BackButton.vue'
 import PaymentModal from '@/components/PaymentModal.vue'
+import Swal from 'sweetalert2'
 
 const userStore = useUserStore()
 const currentUser = computed(() => userStore.user)
@@ -298,23 +299,44 @@ const fetchUser = async (id) => {
     originalUser.value = JSON.parse(JSON.stringify(user.value))
   } catch (error) {
     console.error('Fehler beim Laden des Benutzers:', error)
-    alert('Benutzer konnte nicht geladen werden.')
+    await Swal.fire({
+      title: 'Benutzer konnte nicht geladen werden.',
+      icon: 'error',
+      confirmButtonText: 'OK',
+    })
   } finally {
     loading.value = false
   }
 }
 
 const deleteUser = async (id) => {
-  const confirmed = window.confirm('Möchten Sie diesen User wirklich löschen?')
-  if (!confirmed) {
-    return
-  }
-  try {
-    await axios.delete(`/api/user/${id}`)
-    await router.push({ name: 'AdminDasboard' })
-  } catch (error) {
-    console.error('Fehler beim Löschen des Users:', error)
-    alert('Fehler beim Löschen des Users.')
+  const result = await Swal.fire({
+    title: 'User löschen?',
+    text: 'Möchten Sie diesen User wirklich löschen? Dieser Vorgang kann nicht rückgängig gemacht werden.',
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonText: 'Ja, löschen',
+    cancelButtonText: 'Abbrechen',
+  })
+
+  if (result.isConfirmed) {
+    try {
+      await axios.delete(`/api/user/${id}`)
+      await Swal.fire({
+        title: 'Gelöscht',
+        text: 'Der User wurde erfolgreich gelöscht.',
+        icon: 'success',
+        confirmButtonText: 'OK',
+      })
+      await router.push({ name: 'AdminDasboard' })
+    } catch (error) {
+      console.error('Fehler beim Löschen des Users:', error)
+      await Swal.fire({
+        title: 'Fehler beim Löschen des Users.',
+        icon: 'error',
+        confirmButtonText: 'OK',
+      })
+    }
   }
 }
 
@@ -323,7 +345,11 @@ const deleteUser = async (id) => {
  */
 const handleSave = async () => {
   if (passwordMismatch.value) {
-    alert('Passwörter stimmen nicht überein.')
+    await Swal.fire({
+      title: 'Passwörter stimmen nicht überein.',
+      icon: 'error',
+      confirmButtonText: 'OK',
+    })
     return
   }
 
@@ -338,11 +364,21 @@ const handleSave = async () => {
 
   try {
     await axios.patch(`/api/user/${user.value.id}`, updatedUserData)
-    alert('Benutzerdaten erfolgreich aktualisiert!')
+    await Swal.fire({
+      title: 'Benutzerdaten erfolgreich aktualisiert!',
+      icon: 'success',
+      showConfirmButton: false,
+      timer: 2000,
+      timerProgressBar: true,
+    })
     router.go()
   } catch (error) {
     console.error('Fehler beim Speichern des Benutzers:', error)
-    alert('Fehler beim Speichern der Benutzerdaten')
+    await Swal.fire({
+      title: 'Fehler beim Speichern der Benutzerdaten.',
+      icon: 'error',
+      confirmButtonText: 'OK',
+    })
   }
 }
 
@@ -354,10 +390,25 @@ const editPayment = (payment) => {
 
 // Zahlungsmethode löschen
 const deletePayment = async (paymentId) => {
-  const confirmed = window.confirm('Möchten Sie diese Zahlungsmethode wirklich löschen?')
-  if (!confirmed) return
-  await axios.delete(`/api/payment/${paymentId}`)
-  user.value.payments = user.value.payments.filter((payment) => payment.id !== paymentId)
+  const result = await Swal.fire({
+    title: 'Zahlungsmethode löschen?',
+    text: 'Möchten Sie diese Zahlungsmethode wirklich löschen? Dieser Vorgang kann nicht rückgängig gemacht werden.',
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonText: 'Ja, löschen',
+    cancelButtonText: 'Abbrechen',
+  })
+
+  if (result.isConfirmed) {
+    await axios.delete(`/api/payment/${paymentId}`)
+    user.value.payments = user.value.payments.filter((payment) => payment.id !== paymentId)
+    Swal.fire({
+      title: 'Gelöscht',
+      text: 'Die Zahlungsmethode wurde erfolgreich gelöscht.',
+      icon: 'success',
+      confirmButtonText: 'OK',
+    })
+  }
 }
 
 // Payment-Modal öffnen/schließen
@@ -392,10 +443,15 @@ const savePayment = async (newPayment) => {
       // Neue Zahlungsmethode hinzufügen
       user.value.payments.push(newPayment)
     }
-    await fetchUser(user.value.id)
     closePaymentModal()
   } catch (error) {
     console.error('Fehler beim Speichern der Zahlungsmethode:', error)
+    await Swal.fire({
+      title: 'Fehler beim Speichern der Zahlungsmethode!',
+      text: error.response?.data?.error || 'Ein unbekannter Fehler ist aufgetreten.',
+      icon: 'error',
+      confirmButtonText: 'OK',
+    })
   }
 }
 

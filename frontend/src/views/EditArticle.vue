@@ -129,7 +129,7 @@
             @click="deleteArticle(product.id)"
             class="btn btn-danger"
           >
-            Löschen
+            Entfernen
           </button>
         </div>
       </form>
@@ -142,6 +142,7 @@ import { ref, onMounted, onUnmounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import axios from 'axios'
 import BackButton from '@/components/navigation/BackButton.vue'
+import Swal from 'sweetalert2'
 
 // Reaktive Variablen
 const route = useRoute() // Holt die aktuellen Routenparameter
@@ -229,6 +230,12 @@ const fetchCategories = async () => {
     organizedCategories.value = organizeCategoriesByType(data) // Kategorien gruppieren
   } catch (error) {
     console.error('Fehler beim Laden der Kategorien:', error)
+    await Swal.fire({
+      title: 'Fehler beim Laden der Kategorien!',
+      text: error.response?.data?.error || 'Ein unbekannter Fehler ist aufgetreten.',
+      icon: 'error',
+      confirmButtonText: 'OK',
+    })
   }
 }
 
@@ -245,6 +252,12 @@ const fetchArticle = async (id) => {
     selectedCategories.value = data.productCategories.map((cat) => cat.id)
   } catch (error) {
     console.error('Fehler beim Laden des Artikels:', error)
+    await Swal.fire({
+      title: 'Fehler beim Laden des Artikel!',
+      text: error.response?.data?.error || 'Ein unbekannter Fehler ist aufgetreten.',
+      icon: 'error',
+      confirmButtonText: 'OK',
+    })
   } finally {
     loading.value = false // Ladeanzeige ausblenden
   }
@@ -270,28 +283,59 @@ const handleSave = async () => {
   try {
     // PATCH-Anfrage, um den Artikel zu aktualisieren
     await axios.patch(`/api/product/${product.value.id}`, formData)
-
-    // Nach dem Speichern auf das Admin-Dashboard weiterleiten
+    await Swal.fire({
+      title: 'Artikel geupdated!',
+      text: `Artikel: "${product.value.name}" wurde erfolgreich geupdated.`,
+      icon: 'success',
+      showConfirmButton: false,
+      timer: 2000,
+      timerProgressBar: true,
+    })
     await router.push({ name: 'AdminDasboard' })
   } catch (error) {
     console.error('Fehler beim Speichern des Artikels:', error)
+    await Swal.fire({
+      title: 'Fehler beim Speichern des Artikels!',
+      text: error.response?.data?.error || 'Ein unbekannter Fehler ist aufgetreten.',
+      icon: 'error',
+      confirmButtonText: 'OK',
+    })
   }
 }
 
 // Artikel löschen
 const deleteArticle = async (id) => {
-  const confirmed = window.confirm('Möchten Sie diesen Artikel wirklich löschen?')
-  if (!confirmed) {
-    return
-  }
+  const result = await Swal.fire({
+    title: 'Produkt entfernen?',
+    text:
+      'Möchten Sie dieses Produkt wirklich entfernen? Dieser Vorgang kann im' +
+      ' nachhinein über die Produkte Bearbeitungsseite rückgängig gemacht werden.',
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonText: 'Ja, entfernen',
+    cancelButtonText: 'Abbrechen',
+  })
 
-  try {
-    //Softdelete
-    await axios.delete(`/api/product/${id}`)
-    // Nach dem Löschen auf das Admin-Dashboard weiterleiten
-    await router.push({ name: 'AdminDasboard' })
-  } catch (error) {
-    console.error('Fehler beim Löschen des Artikels:', error)
+  if (result.isConfirmed) {
+    try {
+      //Softdelete
+      await axios.delete(`/api/product/${id}`)
+      await Swal.fire({
+        title: 'Gelöscht',
+        text: 'Der User wurde erfolgreich gelöscht.',
+        icon: 'success',
+        confirmButtonText: 'OK',
+      })
+      await router.push({ name: 'AdminDasboard' })
+    } catch (error) {
+      console.error('Fehler beim Löschen des Artikels:', error)
+      await Swal.fire({
+        title: 'Fehler beim Löschen des Artikels!',
+        text: error.response?.data?.error || 'Ein unbekannter Fehler ist aufgetreten.',
+        icon: 'error',
+        confirmButtonText: 'OK',
+      })
+    }
   }
 }
 

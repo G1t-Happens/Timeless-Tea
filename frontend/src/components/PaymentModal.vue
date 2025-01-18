@@ -91,6 +91,7 @@
 <script setup>
 import { computed, reactive, watch } from 'vue'
 import axios from 'axios'
+import Swal from 'sweetalert2'
 
 const emit = defineEmits(['close', 'save'])
 const localPayment = reactive({})
@@ -154,12 +155,36 @@ const handleConfirm = async () => {
       // Neue Zahlungsmethode erstellen
       result = await createPayment(paymentData)
     }
-
     emit('save', result.data) // Emit der neuen/aktualisierten Zahlungsmethode
-    resetPayment() // Eingabefelder zurücksetzen
     emit('close')
+    resetPayment()
+    if (localPayment.id) {
+      await Swal.fire({
+        title: 'Zahlungsmethode updated!',
+        text: `Zahlungsmethode wurde erfolgreich geupdated.`,
+        icon: 'success',
+        showConfirmButton: false,
+        timer: 1500,
+        timerProgressBar: true,
+      })
+    } else {
+      await Swal.fire({
+        title: 'Zahlungsmethode erstellt!',
+        text: `Zahlungsmethode wurde erfolgreich erstellt.`,
+        icon: 'success',
+        showConfirmButton: false,
+        timer: 1500,
+        timerProgressBar: true,
+      })
+    }
   } catch (error) {
     console.error('Fehler beim Speichern der Zahlungsmethode:', error)
+    await Swal.fire({
+      title: 'Fehler beim Speichern der Zahlungsmethode!',
+      text: error.response?.data?.error || 'Ein unbekannter Fehler ist aufgetreten.',
+      icon: 'error',
+      confirmButtonText: 'OK',
+    })
   }
 }
 
@@ -179,6 +204,12 @@ async function createPayment(paymentData) {
     return await axios.post(`/api/payment/create`, paymentData)
   } catch (error) {
     console.error('Fehler beim Erstellen der Zahlung:', error)
+    await Swal.fire({
+      title: 'Fehler beim Erstellen der Zahlung!',
+      text: error.response?.data?.error || 'Ein unbekannter Fehler ist aufgetreten.',
+      icon: 'error',
+      confirmButtonText: 'OK',
+    })
   }
 }
 
@@ -188,6 +219,12 @@ async function updatePayment(paymentId, paymentData) {
     return await axios.patch(`/api/payment/${paymentId}`, paymentData)
   } catch (error) {
     console.error('Fehler beim Aktualisieren der Zahlung:', error)
+    await Swal.fire({
+      title: 'Fehler beim Aktualisieren der Zahlung!',
+      text: error.response?.data?.error || 'Ein unbekannter Fehler ist aufgetreten.',
+      icon: 'error',
+      confirmButtonText: 'OK',
+    })
   }
 }
 </script>

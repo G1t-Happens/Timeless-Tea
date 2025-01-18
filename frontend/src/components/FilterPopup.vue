@@ -89,6 +89,7 @@
 <script setup>
 import { reactive, ref, watch, onMounted, computed } from 'vue'
 import axios from 'axios'
+import Swal from 'sweetalert2'
 
 // Define emits for close and applyFilters events
 const emit = defineEmits(['close', 'applyFilters'])
@@ -132,8 +133,14 @@ onMounted(async () => {
     const category = response.data
     tastes.value = category.filter((category) => category.type === 'Taste')
     effects.value = category.filter((category) => category.type === 'Effect')
-  } catch (err) {
-    console.error('Error fetching categories:', err)
+  } catch (error) {
+    console.error('Error fetching categories:', error)
+    await Swal.fire({
+      title: 'Fehler beim laden der Kategorien!',
+      text: error.response?.data?.error || 'Ein unbekannter Fehler ist aufgetreten.',
+      icon: 'error',
+      confirmButtonText: 'OK',
+    })
   }
 })
 

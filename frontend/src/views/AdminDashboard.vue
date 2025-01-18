@@ -153,7 +153,7 @@
             <!-- Buttons für Bearbeiten und Löschen -->
             <div class="text-center mb-5 cardset-admin-button">
               <button @click="editUser(user)" class="btn btn-warning">Bearbeiten</button>
-              <button @click="deleteUser(user.id)" class="btn btn-danger">Löschen</button>
+              <button @click="deleteUser(user.id)" class="btn btn-danger">Entfernen</button>
             </div>
           </div>
         </div>
@@ -229,6 +229,7 @@ import OrderCard from '@/components/OrderCard.vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/user.js'
 import axios from 'axios'
+import Swal from 'sweetalert2'
 
 const currentPanel = ref('articles')
 const router = useRouter()
@@ -319,7 +320,12 @@ const fetchArticles = async ({
     hasMore.value.articles = response.data.hasMore
   } catch (error) {
     console.error('Fehler beim Laden der Artikel:', error)
-    alert('Fehler beim Laden der Artikel.') // Optional: Ersetze durch eine bessere Fehleranzeige
+    await Swal.fire({
+      title: 'Fehler beim Laden der Artikel!',
+      text: error.response?.data?.error || 'Ein unbekannter Fehler ist aufgetreten.',
+      icon: 'error',
+      confirmButtonText: 'OK',
+    })
   } finally {
     loading.value.articles = false
   }
@@ -355,21 +361,40 @@ const editArticle = (article) => {
 
 // Artikel löschen
 const deleteArticle = async (id) => {
-  const confirmed = window.confirm('Möchten Sie dieses Produkt wirklich löschen?')
-  if (!confirmed) {
-    return
-  }
+  const result = await Swal.fire({
+    title: 'Produkt entfernen?',
+    text:
+      'Möchten Sie dieses Produkt wirklich entfernen? Dieser Vorgang kann im' +
+      ' nachhinein über die Produkte Bearbeitungsseite rückgängig gemacht werden.',
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonText: 'Ja, entfernen',
+    cancelButtonText: 'Abbrechen',
+  })
 
-  try {
-    // Simuliere das Setzen des Soft-Delete-Status über eine API
-    await axios.patch(`/api/product/${id}`, { isDeleted: true })
-    const product = articles.value.find((p) => p.id === id)
-    if (product) {
-      product.isDeleted = true
+  if (result.isConfirmed) {
+    try {
+      // Simuliere das Setzen des Soft-Delete-Status über eine API
+      await axios.patch(`/api/product/${id}`, { isDeleted: true })
+      const product = articles.value.find((p) => p.id === id)
+      if (product) {
+        product.isDeleted = true
+      }
+      await Swal.fire({
+        title: 'Gelöscht',
+        text: 'Das Produkt wurde erfolgreich entfernt.',
+        icon: 'success',
+        confirmButtonText: 'OK',
+      })
+    } catch (error) {
+      console.error('Fehler beim Löschen des Produkts:', error)
+      await Swal.fire({
+        title: 'Fehler beim Löschen des Produkts!',
+        text: error.response?.data?.error || 'Ein unbekannter Fehler ist aufgetreten.',
+        icon: 'error',
+        confirmButtonText: 'OK',
+      })
     }
-  } catch (error) {
-    console.error('Fehler beim Löschen des Produkts:', error)
-    alert('Fehler beim Löschen des Produkts.')
   }
 }
 
@@ -423,7 +448,12 @@ const fetchUsers = async ({
     hasMore.value.users = response.data.hasMore
   } catch (error) {
     console.error('Fehler beim Laden der User:', error)
-    alert('Fehler beim Laden der User.') // Optional: Ersetze durch eine bessere Fehleranzeige
+    await Swal.fire({
+      title: 'Fehler beim Laden der User!',
+      text: error.response?.data?.error || 'Ein unbekannter Fehler ist aufgetreten.',
+      icon: 'error',
+      confirmButtonText: 'OK',
+    })
   } finally {
     loading.value.users = false
   }
@@ -444,22 +474,38 @@ const editUser = (user) => {
 
 // User löschen
 const deleteUser = async (id) => {
-  const confirmed = window.confirm('Möchten Sie diesen User wirklich löschen?')
-  if (!confirmed) {
-    return
-  }
+  const result = await Swal.fire({
+    title: 'User löschen?',
+    text: 'Möchten Sie diesen User wirklich löschen? Dieser Vorgang kann nicht rückgängig gemacht werden.',
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonText: 'Ja, löschen',
+    cancelButtonText: 'Abbrechen',
+  })
 
-  try {
-    await axios.delete(`/api/user/${id}`)
-    const index = users.value.findIndex((user) => user.id === id)
-    if (index !== -1) {
-      users.value.splice(index, 1)
-      // Optional: Zeige eine Erfolgsmeldung
-      alert('User erfolgreich gelöscht.')
+  if (result.isConfirmed) {
+    try {
+      await axios.delete(`/api/user/${id}`)
+      const index = users.value.findIndex((user) => user.id === id)
+      if (index !== -1) {
+        users.value.splice(index, 1)
+        await Swal.fire({
+          title: 'User erfolgreich gelöscht!',
+          icon: 'success',
+          showConfirmButton: false,
+          timer: 2000,
+          timerProgressBar: true,
+        })
+      }
+    } catch (error) {
+      console.error('Fehler beim Löschen des Users:', error)
+      await Swal.fire({
+        title: 'Fehler beim Löschen des Users!',
+        text: error.response?.data?.error || 'Ein unbekannter Fehler ist aufgetreten.',
+        icon: 'error',
+        confirmButtonText: 'OK',
+      })
     }
-  } catch (error) {
-    console.error('Fehler beim Löschen des Users:', error)
-    alert('Fehler beim Löschen des Users.') // Optional: Ersetze durch eine bessere Fehleranzeige
   }
 }
 
@@ -513,7 +559,12 @@ const fetchOrders = async ({
     hasMore.value.orders = response.data.hasMore
   } catch (error) {
     console.error('Fehler beim Laden der Bestellungen:', error)
-    alert('Fehler beim Laden der Bestellungen.') // Optional: Ersetze durch eine bessere Fehleranzeige
+    await Swal.fire({
+      title: 'Fehler beim Laden der Bestellungen!',
+      text: error.response?.data?.error || 'Ein unbekannter Fehler ist aufgetreten.',
+      icon: 'error',
+      confirmButtonText: 'OK',
+    })
   } finally {
     loading.value.orders = false
   }
@@ -538,6 +589,12 @@ const fetchMetaData = async () => {
     articlesCount.value = productCountResponse.data
   } catch (error) {
     console.error('Fehler beim Abrufen der Artikel Metadaten:', error.message)
+    await Swal.fire({
+      title: 'Fehler beim Abrufen der Artikel Metadaten!',
+      text: error.response?.data?.error || 'Ein unbekannter Fehler ist aufgetreten.',
+      icon: 'error',
+      confirmButtonText: 'OK',
+    })
   }
 
   try {
@@ -545,13 +602,25 @@ const fetchMetaData = async () => {
     usersCount.value = userCountResponse.data
   } catch (error) {
     console.error('Fehler beim Abrufen der User Metadaten:', error.message)
+    await Swal.fire({
+      title: 'Fehler beim Abrufen der User Metadaten!',
+      text: error.response?.data?.error || 'Ein unbekannter Fehler ist aufgetreten.',
+      icon: 'error',
+      confirmButtonText: 'OK',
+    })
   }
 
   try {
     const orderCountResponse = await axios.get('/api/order/count')
     ordersCount.value = orderCountResponse.data
   } catch (error) {
-    console.error('Fehler beim Abrufen der User Metadaten:', error.message)
+    console.error('Fehler beim Abrufen der Bestellungs Metadaten:', error.message)
+    await Swal.fire({
+      title: 'Fehler beim Abrufen der Bestellungs Metadaten!',
+      text: error.response?.data?.error || 'Ein unbekannter Fehler ist aufgetreten.',
+      icon: 'error',
+      confirmButtonText: 'OK',
+    })
   }
 }
 

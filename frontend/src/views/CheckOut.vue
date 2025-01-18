@@ -193,6 +193,7 @@ import { useRouter } from 'vue-router'
 import axios from 'axios'
 import BackButton from '@/components/navigation/BackButton.vue'
 import OrderConfirmationModal from '@/components/OrderConfirmationModal.vue'
+import Swal from 'sweetalert2'
 
 const cartStore = useCartStore()
 const userStore = useUserStore()
@@ -282,7 +283,12 @@ const handleConfirmOrder = async () => {
 
 const submitOrder = async () => {
   if (!canCheckout.value) {
-    alert('Bitte stellen Sie sicher, dass alle erforderlichen Informationen ausgefüllt sind.')
+    await Swal.fire({
+      title: 'Erforderliche Informationen fehlen',
+      text: 'Bitte stellen Sie sicher, dass alle erforderlichen Informationen ausgefüllt sind.',
+      icon: 'warning',
+      confirmButtonText: 'OK',
+    })
     return
   }
 
@@ -302,7 +308,12 @@ const submitOrder = async () => {
     await router.push({ name: 'OrderSuccess', query: { id: response.data.id } })
   } catch (error) {
     console.error('Fehler beim Abschicken der Bestellung:', error)
-    alert('Fehler beim Abschicken der Bestellung.')
+    await Swal.fire({
+      title: 'Fehler beim Abschicken der Bestellung!',
+      text: error.response?.data?.error || 'Ein unbekannter Fehler ist aufgetreten.',
+      icon: 'error',
+      confirmButtonText: 'OK',
+    })
   }
 }
 

@@ -122,6 +122,7 @@ import { useCartStore } from '@/stores/shoppingCart.js' // Importieren des Cart 
 import accountIcon from '@/assets/icons/account.png'
 import accountLoggedInIcon from '@/assets/icons/accountLoggedIn.png'
 import { useWishlistStore } from '@/stores/wishlist.js'
+import Swal from 'sweetalert2'
 
 // Initialisieren der Stores und Router
 const userStore = useUserStore()
@@ -233,6 +234,12 @@ const logout = async () => {
     await router.push({ name: 'LandingPage' })
   } catch (error) {
     console.error('Fehler beim Logout:', error)
+    await Swal.fire({
+      title: 'Fehler beim Logout!',
+      text: error.response?.data?.error || 'Ein unbekannter Fehler ist aufgetreten.',
+      icon: 'error',
+      confirmButtonText: 'OK',
+    })
   }
 }
 </script>

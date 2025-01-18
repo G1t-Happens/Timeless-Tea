@@ -81,6 +81,7 @@
 import { computed } from 'vue'
 import { useCartStore } from '@/stores/shoppingCart.js'
 import { useWishlistStore } from '@/stores/wishlist.js'
+import Swal from 'sweetalert2'
 
 // Initialisieren der Stores
 const cartStore = useCartStore()
@@ -111,15 +112,38 @@ const truncatedDescription = computed(() => {
 // In den Warenkorb
 const addToCart = () => {
   cartStore.addToCart(props.product, 1)
-  alert(`${1} Einheit(en) von ${props.product.name} in den Warenkorb gelegt.`)
+  Swal.fire({
+    title: 'Artikel dem Warenkorb hinzugefügt!',
+    text: `1 Artikel: "${props.product.name}" wurde dem Warenkorb hinzugefügt.`,
+    icon: 'success',
+    showConfirmButton: false,
+    timer: 1500,
+    timerProgressBar: true,
+  })
 }
 
 // Wishlist togglen
 const toggleWishlist = () => {
   if (isWished.value) {
     wishlistStore.removeFromWishlist(props.product.id)
+    Swal.fire({
+      title: 'Artikel von der Wunschliste entfernt!',
+      text: `Artikel: "${props.product.name}" wurde von der Wunschliste entfernt.`,
+      icon: 'success',
+      showConfirmButton: false,
+      timer: 1500,
+      timerProgressBar: true,
+    })
   } else {
     wishlistStore.addToWishlist(props.product)
+    Swal.fire({
+      title: 'Artikel der Wunschliste hinzugefügt!',
+      text: `Artikel: "${props.product.name}" wurde der Wunschliste hinzugefügt.`,
+      icon: 'success',
+      showConfirmButton: false,
+      timer: 1500,
+      timerProgressBar: true,
+    })
   }
 }
 </script>

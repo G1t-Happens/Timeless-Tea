@@ -100,6 +100,7 @@ import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import axios from 'axios'
 import BackButton from '@/components/navigation/BackButton.vue'
+import Swal from 'sweetalert2'
 
 // Reaktive Variablen für Formulardaten
 const name = ref('')
@@ -177,11 +178,23 @@ const createArticle = async () => {
   try {
     // Anfrage zum Erstellen des Artikels auf dem Server
     await axios.post('/api/product', formData)
-
-    // Nach erfolgreicher Erstellung zur Admin-Seite navigieren
+    await Swal.fire({
+      title: 'Artikel erstellt!',
+      text: `Artikel: "${name.value}" wurde erfolgreich erstellt.`,
+      icon: 'success',
+      showConfirmButton: false,
+      timer: 2000,
+      timerProgressBar: true,
+    })
     await router.push({ name: 'AdminDasboard' })
   } catch (error) {
     console.error('Fehler beim Erstellen des Artikels:', error)
+    await Swal.fire({
+      title: 'Fehler beim Erstellen des Artikels!',
+      text: error.response?.data?.error || 'Ein unbekannter Fehler ist aufgetreten.',
+      icon: 'error',
+      confirmButtonText: 'OK',
+    })
   }
 }
 </script>

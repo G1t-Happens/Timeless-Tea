@@ -85,6 +85,7 @@
 <script setup>
 import { ref } from 'vue'
 import axios from 'axios'
+import Swal from 'sweetalert2'
 
 // Formulardaten
 const form = ref({
@@ -135,6 +136,14 @@ const submitForm = async () => {
     try {
       await axios.post('/api/message', form.value)
       successMessage.value = 'Vielen Dank! Ihre Nachricht wurde erfolgreich gesendet.'
+      await Swal.fire({
+        title: 'Nachricht gesendet!',
+        text: 'Vielen Dank, wir werden uns in Kürze bei Ihnen melden.',
+        icon: 'success',
+        showConfirmButton: false,
+        timer: 2000,
+        timerProgressBar: true,
+      })
       // Formular zurücksetzen
       form.value = {
         name: '',
@@ -148,6 +157,15 @@ const submitForm = async () => {
       console.error('Fehler beim Senden der Nachricht:', error.response?.data || error.message)
       errors.value.server =
         'Es gab ein Problem beim Senden Ihrer Nachricht. Bitte versuchen Sie es später erneut.'
+      await Swal.fire({
+        title: 'Fehler beim Senden der Nachricht!',
+        text:
+          error.response.data.error ||
+          'Es ist ein unbekannter Fehler aufgetreten. Bitte versuchen Sie es später erneut.',
+        icon: 'error',
+        showConfirmButton: true,
+        confirmButtonText: 'OK',
+      })
     }
   }
 }

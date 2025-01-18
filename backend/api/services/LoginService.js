@@ -38,7 +38,7 @@ module.exports = {
         .checkPassword(password, user.password)
         .intercept('incorrect', () => {
           // Falls das Passwort nicht stimmt, wird hier ein UnauthorizedError geworfen
-          throw new errors.UnauthorizedError('Incorrect password');
+          return new errors.UnauthorizedError('Incorrect password or username');
         });
 
     //Session resetten
@@ -97,7 +97,7 @@ module.exports = {
       addressAddition: params.address.addressAddition || ''
     })
       .intercept('UsageError', () => {
-        throw new errors.BadRequestError('Invalid address data');
+        return new errors.BadRequestError('Invalid address data');
       })
       .fetch();
 
@@ -111,10 +111,10 @@ module.exports = {
       address: newAddress.id
     })
       .intercept('E_UNIQUE', () => {
-        throw new errors.BadRequestError('Email already in use');
+        return new errors.BadRequestError('Email already in use');
       })
       .intercept('UsageError', () => {
-        throw new errors.BadRequestError('Invalid user data');
+        return new errors.BadRequestError('Invalid user data');
       })
       .fetch();
 

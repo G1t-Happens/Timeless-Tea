@@ -48,6 +48,7 @@ import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import axios from 'axios'
 import BackButton from '@/components/navigation/BackButton.vue'
+import Swal from 'sweetalert2'
 
 const name = ref('')
 const type = ref('')
@@ -63,10 +64,24 @@ const createCategory = async () => {
 
   try {
     // Anfrage zum Erstellen des Artikels auf dem Server
-    await axios.post('/api/category', formData, {})
+    await axios.post('/api/category', formData)
+    await Swal.fire({
+      title: 'Neue Kategorie hinzugefügt!',
+      text: `Kategorie mit dem Name: "${formData.name}" und Type: "${formData.type}" wurde hinzugefügt.`,
+      icon: 'success',
+      showConfirmButton: false,
+      timer: 2000,
+      timerProgressBar: true,
+    })
     await router.push({ name: 'AdminDasboard' })
   } catch (error) {
     console.error('Fehler beim Erstellen der Kategorie:', error)
+    await Swal.fire({
+      title: 'Fehler beim Erstellen der Kategorie!',
+      text: error.response?.data?.error || 'Ein unbekannter Fehler ist aufgetreten.',
+      icon: 'error',
+      confirmButtonText: 'OK',
+    })
   }
 }
 </script>
