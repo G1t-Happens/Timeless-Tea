@@ -45,6 +45,7 @@
       :message="selectedMessage"
       @close="closeModal"
       @reply="sendReply"
+      @delete="deleteMessage"
     />
   </div>
 </template>
@@ -53,6 +54,7 @@
 import { ref, computed, onMounted } from 'vue'
 import axios from 'axios'
 import MessageModal from '@/components/MessageModal.vue'
+import Swal from 'sweetalert2'
 
 const messages = ref([])
 const loading = ref(false)
@@ -110,9 +112,40 @@ const closeModal = () => {
 }
 
 const sendReply = (replyText) => {
-  // Hier könnte man die Antwort an die API senden
+  Swal.fire({
+    backdrop: false,
+    title: 'Antwort gesendet!',
+    icon: 'success',
+    showConfirmButton: false,
+    timer: 2000,
+    timerProgressBar: true,
+  })
   console.log('Antwort gesendet:', replyText)
   closeModal()
+}
+
+const deleteMessage = async (id) => {
+  try {
+    await axios.delete(`/api/message/${id}`)
+    messages.value = messages.value.filter((msg) => msg.id !== id)
+    await Swal.fire({
+      backdrop: false,
+      title: 'Nachricht erfolgreich gelöschen!',
+      icon: 'success',
+      showConfirmButton: false,
+      timer: 2000,
+      timerProgressBar: true,
+    })
+  } catch (error) {
+    console.error('Fehler beim Löschen der Nachricht:', error)
+    await Swal.fire({
+      backdrop: false,
+      title: 'ehler beim Löschen der Nachricht!',
+      text: error.response?.data?.error || 'Ein unbekannter Fehler ist aufgetreten.',
+      icon: 'error',
+      confirmButtonText: 'OK',
+    })
+  }
 }
 
 onMounted(() => {

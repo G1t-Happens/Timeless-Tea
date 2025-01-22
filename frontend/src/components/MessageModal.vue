@@ -13,6 +13,7 @@
       <div class="actions">
         <button class="btn btn-exit" @click="closeModal">Schließen</button>
         <button class="btn btn-reply" @click="toggleReply">Antworten</button>
+        <button class="btn btn-delete" @click="emitDelete(message.id)">Löschen</button>
       </div>
 
       <!-- Reply Section -->
@@ -32,6 +33,7 @@
 
 <script setup>
 import { ref } from 'vue'
+import Swal from 'sweetalert2'
 
 defineProps({
   message: {
@@ -40,7 +42,7 @@ defineProps({
   },
 })
 
-const emits = defineEmits(['close', 'reply'])
+const emits = defineEmits(['close', 'reply', 'delete'])
 const isReplying = ref(false)
 const replyText = ref('')
 
@@ -57,6 +59,25 @@ const sendReply = () => {
   replyText.value = ''
   isReplying.value = false
   emits('close')
+}
+
+const emitDelete = async (id) => {
+  const result = await Swal.fire({
+    backdrop: false,
+    title: 'Nachricht löschen?',
+    text:
+      'Möchten Sie dieses Nachricht wirklich löschen? Dieser Vorgang kann im' +
+      ' nachhinein nicht mehr rückgängig gemacht werden!',
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonText: 'Ja, löschen',
+    cancelButtonText: 'Abbrechen',
+  })
+
+  if (result.isConfirmed) {
+    emits('delete', id)
+    emits('close')
+  }
 }
 </script>
 
@@ -122,6 +143,17 @@ const sendReply = () => {
 
 .btn-reply:hover {
   background-color: #9fa86d;
+  transform: scale(1.05);
+}
+
+.btn-delete {
+  background-color: #ff4d4d;
+  color: white;
+  border: none;
+}
+
+.btn-delete:hover {
+  background-color: #ff1a1a;
   transform: scale(1.05);
 }
 

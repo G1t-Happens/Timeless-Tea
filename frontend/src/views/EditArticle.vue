@@ -326,7 +326,7 @@ const deleteArticle = async (id) => {
         icon: 'success',
         confirmButtonText: 'OK',
       })
-      await router.push({ name: 'AdminDasboard' })
+      await router.push({ name: 'AdminDashboard' })
     } catch (error) {
       console.error('Fehler beim Löschen des Artikels:', error)
       await Swal.fire({

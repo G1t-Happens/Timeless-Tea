@@ -1,100 +1,87 @@
 // api/controllers/ContactMessageController.js
 
+const errors = require('../utils/errors');
 module.exports = {
 
   // Daten speichern
   create: async function (req, res) {
+    const { name, email, subject, message, privacy } = req.body;
     try {
-      const { name, email, subject, message, privacy } = req.body;
-
-      // Daten validieren und speichern
-      const newMessage = await ContactMessage.create({
+      // Service aufrufen und Message erstellen
+      const newMessage = await ContactMessageService.createMessage({
         name,
         email,
         subject,
         message,
-        privacy
-      }).fetch();
-
-      return res.status(201).json({
-        message: 'Nachricht erfolgreich gespeichert.',
-        data: newMessage
+        privacy,
       });
 
-    } catch (error) {
-      return res.status(400).json({
-        message: 'Fehler beim Speichern der Nachricht.',
-        error: error.message
-      });
+      return res.status(201).json({ data: newMessage });
+
+    } catch (err) {
+      sails.log.error('Error:', err.message);
+
+      if (err instanceof errors.CustomError) {
+        return res.status(err.status).json({ error: err.message });
+      }
+
+      return res.serverError('An unexpected error occurred.');
     }
   },
 
   // Alle Daten ausgeben
   find: async function (req, res) {
     try {
-      const messages = await ContactMessage.find();
-      return res.status(200).json({
-        message: 'Nachrichten erfolgreich abgerufen.',
-        data: messages
-      });
+      // Service aufrufen und alle Nachrichten finden
+      const messages = await ContactMessageService.findMessage();
+      return res.status(200).json({ data: messages });
 
-    } catch (error) {
-      return res.status(500).json({
-        message: 'Fehler beim Abrufen der Nachrichten.',
-        error: error.message
-      });
+    } catch (err) {
+      sails.log.error('Error:', err.message);
+
+      if (err instanceof errors.CustomError) {
+        return res.status(err.status).json({ error: err.message });
+      }
+
+      return res.serverError('An unexpected error occurred.');
     }
   },
 
   // Einzelnes Formular nach ID abrufen
   findOne: async function (req, res) {
+    const { id } = req.params;
     try {
-      const { id } = req.params;
+      // Service aufrufen und eine Nachrichten anhand der id finden
+      const message = await ContactMessageService.findOneMessage({ id });
+      return res.status(200).json({ data: message });
 
-      const message = await ContactMessage.findOne({ id });
+    } catch (err) {
+      sails.log.error('Error:', err.message);
 
-      if (!message) {
-        return res.status(404).json({
-          message: 'Nachricht nicht gefunden.'
-        });
+      if (err instanceof errors.CustomError) {
+        return res.status(err.status).json({ error: err.message });
       }
 
-      return res.status(200).json({
-        message: 'Nachricht erfolgreich abgerufen.',
-        data: message
-      });
-
-    } catch (error) {
-      return res.status(500).json({
-        message: 'Fehler beim Abrufen der Nachricht.',
-        error: error.message
-      });
+      return res.serverError('An unexpected error occurred.');
     }
   },
 
   // Nachricht löschen
   destroy: async function (req, res) {
+    const { id } = req.params;
     try {
-      const { id } = req.params;
+      // Service aufrufen und eine Nachrichten anhand der id loeschen
+      await ContactMessageService.destroyOneMessage({ id });
+      return res.ok();
 
-      const deletedMessage = await ContactMessage.destroyOne({ id });
+    } catch (err) {
+      sails.log.error('Error:', err.message);
 
-      if (!deletedMessage) {
-        return res.status(404).json({
-          message: 'Nachricht nicht gefunden.'
-        });
+      if (err instanceof errors.CustomError) {
+        return res.status(err.status).json({ error: err.message });
       }
 
-      return res.status(200).json({
-        message: 'Nachricht erfolgreich gelöscht.'
-      });
-
-    } catch (error) {
-      return res.status(500).json({
-        message: 'Fehler beim Löschen der Nachricht.',
-        error: error.message
-      });
+      return res.serverError('An unexpected error occurred.');
     }
   }
-
 };
