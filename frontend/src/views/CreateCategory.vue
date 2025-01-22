@@ -73,7 +73,7 @@ const createCategory = async () => {
       timer: 2000,
       timerProgressBar: true,
     })
-    await router.push({ name: 'AdminDasboard' })
+    await router.push({ name: 'AdminDashboard' })
   } catch (error) {
     console.error('Fehler beim Erstellen der Kategorie:', error)
     await Swal.fire({

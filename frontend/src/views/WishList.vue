@@ -102,6 +102,7 @@ const wishlistItems = computed(() => wishlistStore.items)
 const removeFromWishlist = (productId) => {
   wishlistStore.removeFromWishlist(productId)
   Swal.fire({
+    backdrop:false,
     title: 'Artikel von der Wunschliste entfernt!',
     text: `Artikel wurde von der Wunschliste entfernt.`,
     icon: 'success',
@@ -116,6 +117,7 @@ const moveToCart = (product) => {
   cartStore.addToCart(product, 1)
   wishlistStore.removeFromWishlist(product.id)
   Swal.fire({
+    backdrop:false,
     title: 'Artikel dem Warenkorb hinzugefügt!',
     text: `1 Artikel: "${product.name}" wurde dem Warenkorb hinzugefügt.`,
     icon: 'success',

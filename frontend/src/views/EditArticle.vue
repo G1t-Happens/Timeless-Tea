@@ -291,7 +291,7 @@ const handleSave = async () => {
       timer: 2000,
       timerProgressBar: true,
     })
-    await router.push({ name: 'AdminDasboard' })
+    await router.push({ name: 'AdminDashboard' })
   } catch (error) {
     console.error('Fehler beim Speichern des Artikels:', error)
     await Swal.fire({

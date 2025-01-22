@@ -328,7 +328,7 @@ const deleteUser = async (id) => {
         icon: 'success',
         confirmButtonText: 'OK',
       })
-      await router.push({ name: 'AdminDasboard' })
+      await router.push({ name: 'AdminDashboard' })
     } catch (error) {
       console.error('Fehler beim Löschen des Users:', error)
       await Swal.fire({
