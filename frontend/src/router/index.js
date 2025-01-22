@@ -202,6 +202,12 @@ const routes = [
     component: () => import('@/views/PrivacyPolicy.vue'),
     meta: { breadcrumb: 'privacy policy' },
   },
+  // Catch-All-Route für nicht gefundene Routen
+  {
+    path: '/:pathMatch(.*)*',
+    name: 'NotFound',
+    component: () => import('@/views/NotFound.vue'),
+  },
 ]
 
 const router = createRouter({

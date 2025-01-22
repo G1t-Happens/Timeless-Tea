@@ -3,21 +3,22 @@
     <BackButton />
     <h2 class="page-title form-label">Benutzer bearbeiten</h2>
 
+    <!-- Ladezustand oder fehlende Benutzerinformationen -->
     <div v-if="loading || !user" class="text-center">
       <p>Lade Benutzer...</p>
     </div>
 
-    <div v-else>
-      <!-- Hauptformular -->
+    <!-- Hauptinhalt wird nur gerendert, wenn User verfügbar ist -->
+    <div v-else-if="currentUser">
       <form @submit.prevent="handleSave" class="form-container" autocomplete="off">
         <!-- USER-ID -->
-        <div class="form-group">
+        <div v-if="user?.id" class="form-group">
           <label for="userId" class="form-label">User ID</label>
           <div id="userId" class="form-control static-field">{{ user.id }}</div>
         </div>
 
         <!-- E-Mail -->
-        <div class="form-group">
+        <div v-if="user?.emailAddress" class="form-group">
           <label for="email" class="form-label">E-Mail-Adresse</label>
           <input
             v-model="user.emailAddress"
@@ -29,7 +30,7 @@
         </div>
 
         <!-- Vorname -->
-        <div class="form-group">
+        <div v-if="user?.firstName" class="form-group">
           <label for="firstName" class="form-label">Vorname</label>
           <input
             v-model="user.firstName"
@@ -41,13 +42,13 @@
         </div>
 
         <!-- Nachname -->
-        <div class="form-group">
+        <div v-if="user?.lastName" class="form-group">
           <label for="lastName" class="form-label">Nachname</label>
           <input v-model="user.lastName" type="text" id="lastName" class="form-control" required />
         </div>
 
         <!-- Admin Toggle (nur für Admins) -->
-        <div v-if="currentUser.isAdmin" class="form-group toggle-switch">
+        <div v-if="currentUser?.isAdmin" class="form-group toggle-switch">
           <label class="form-label" for="isAdmin">Admin</label>
           <label class="switch" aria-labelledby="isAdmin">
             <input v-model="user.isAdmin" type="checkbox" id="isAdmin" />
@@ -111,7 +112,7 @@
 
         <!-- Adressfelder -->
         <h3 class="mt-4 form-label">Adressenangabe</h3>
-        <div class="form-group address-fields">
+        <div v-if="user?.address" class="form-group address-fields">
           <label for="street" class="form-label">Straße*</label>
           <input v-model="user.address.street" type="text" id="street" class="form-control" />
           <label for="houseNumber" class="form-label">Hausnummer*</label>
@@ -141,7 +142,7 @@
           <input v-model="user.address.country" type="text" id="country" class="form-control" />
         </div>
 
-        <!-- Zahlungsmethoden: Alle Methoden anzeigen und bearbeiten -->
+        <!-- Zahlungsmethoden -->
         <div class="form-group">
           <h3 class="form-label">Zahlungsmethoden</h3>
 
@@ -195,7 +196,7 @@
             Speichern
           </button>
           <button
-            v-if="currentUser.isAdmin"
+            v-if="currentUser?.isAdmin && user?.id"
             type="button"
             @click="deleteUser(user.id)"
             class="btn btn-danger"
@@ -204,17 +205,22 @@
           </button>
         </div>
       </form>
+
+      <!-- PaymentModal für Bearbeitung/Erstellung von Zahlungsmethoden -->
+      <PaymentModal
+        v-if="showPaymentModal"
+        :show="showPaymentModal"
+        :payment="editingPayment"
+        :userId="user.id"
+        @close="closePaymentModal"
+        @save="savePayment"
+      />
     </div>
 
-    <!-- PaymentModal für Bearbeitung/Erstellung -->
-    <PaymentModal
-      v-if="showPaymentModal"
-      :show="showPaymentModal"
-      :payment="editingPayment"
-      :userId="user.id"
-      @close="closePaymentModal"
-      @save="savePayment"
-    />
+    <!-- Fallback bei fehlendem currentUser -->
+    <div v-else class="text-center">
+      <p>Fehler: Benutzerinformationen konnten nicht geladen werden.</p>
+    </div>
   </div>
 </template>
 
@@ -287,9 +293,7 @@ onMounted(async () => {
   await fetchUser(userId)
 })
 
-/**
- * User-Daten laden
- */
+//Userdaten laden anhand der id
 const fetchUser = async (id) => {
   loading.value = true
   try {
@@ -316,6 +320,7 @@ const fetchUser = async (id) => {
   }
 }
 
+//User loeschen
 const deleteUser = async (id) => {
   const result = await Swal.fire({
     title: 'User löschen?',
