@@ -11,7 +11,7 @@
     <form @submit.prevent="createCategory" class="form-container" method="post">
       <!-- Eingabefeld für den kategorietype -->
       <div class="form-group">
-        <label for="description" class="form-label">Kategorietype (z.B. Geschmack, Effekt)</label>
+        <label for="description" class="form-label">Kategorietype (z.B. Taste, Effect)</label>
         <input
           type="text"
           v-model="type"

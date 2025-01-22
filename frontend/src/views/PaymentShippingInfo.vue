@@ -9,15 +9,15 @@
 
       <div class="shipping-info">
         <h2>Versandkosten</h2>
-        <ul>
-          <li>Standardversand (innerhalb Deutschlands): 3,99 €</li>
-          <li>Kostenloser Versand ab einem Bestellwert von 30 €</li>
-          <li>Expressversand (innerhalb Deutschlands): 9,99 €</li>
-          <li>
-            Versand ins Ausland: Versandkosten variieren je nach Land und werden im Bestellprozess
-            angezeigt
-          </li>
-        </ul>
+        <p>
+          Aktuell profitieren Sie von einer <strong>kostenlosen Lieferung</strong> für alle
+          Bestellungen – unabhängig vom Bestellwert oder Versandziel! 🎉
+        </p>
+        <p>
+          Dieser Sondervorteil gilt für <strong>Standardversand</strong>,
+          <strong>Expressversand</strong> und <strong>internationale Bestellungen</strong>. Nutzen
+          Sie die Gelegenheit, denn dieses Angebot ist nur für begrenzte Zeit verfügbar.
+        </p>
       </div>
 
       <div class="delivery-times">

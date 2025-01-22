@@ -64,7 +64,7 @@
         <SearchField
           v-model="searchQuery"
           @search="fetchArticles"
-          placeholder="Artikel suchen..."
+          placeholder="Suche nach Artikelname..."
           :showFilter="true"
         />
       </div>
@@ -130,7 +130,7 @@
         <SearchField
           v-model="userSearchQuery"
           @search="fetchUsers"
-          placeholder="User suchen..."
+          placeholder="Suche nach Username..."
           :showFilter="false"
         />
       </div>
@@ -177,7 +177,7 @@
         <SearchField
           v-model="orderSearchQuery"
           @search="fetchOrders"
-          placeholder="Suche nach ID, Status oder Name"
+          placeholder="Suche nach ID, Status oder Username..."
           :showFilter="false"
         />
       </div>
