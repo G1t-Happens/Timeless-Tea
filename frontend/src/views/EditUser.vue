@@ -186,7 +186,14 @@
 
         <!-- Speichern/Löschen -->
         <div class="button-group">
-          <button type="submit" class="btn save-btn" :disabled="!isFormChanged">Speichern</button>
+          <button
+            type="submit"
+            class="save-btn btn"
+            style="background-color: #4a5043; color: white"
+            :disabled="!isFormChanged"
+          >
+            Speichern
+          </button>
           <button
             v-if="currentUser.isAdmin"
             type="button"
