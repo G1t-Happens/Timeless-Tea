@@ -65,9 +65,9 @@ module.exports.routes = {
 
   // PaymentController.js
   [`POST ${API_BASE}/payment/create`]: 'PaymentController.create',
-  [`GET ${API_BASE}/payment/:userId`]: 'PaymentController.findPaymentsByUser',
+  [`GET ${API_BASE}/payment/:userId`]: 'PaymentController.find',
   [`DELETE ${API_BASE}/payment/:id`]: 'PaymentController.destroy',
-  [`PATCH ${API_BASE}/payment/:id`]: 'PaymentController.updatePayment',
+  [`PATCH ${API_BASE}/payment/:id`]: 'PaymentController.patch',
 
   // Catch-All-Route für Vue SPA
   '/*': {

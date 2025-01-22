@@ -1,126 +1,180 @@
+/**
+ * PaymentController
+ *
+ * @description :: Server-side actions for handling incoming requests related to payments.
+ *                 Dieser Controller kümmert sich um das Routing und verwendet den Service,
+ *                 um die Zahlungsmethoden aus der Datenbank abzurufen.
+ *
+ * @help        :: Siehe Sails.js-Dokumentation unter https://sailsjs.com/docs/concepts/actions
+ */
+const errors = require('../utils/errors');
+
 module.exports = {
 
   /**
-   * Erstellen einer neuen Zahlungsmethode für einen Benutzer und Verknüpfen
+   * `PaymentController.create()`
+   *
+   * @description
+   * Erstellt eine neue Zahlungsmethode über den Service und gibt sie zurück.
+   *
+   * @param {Request} req - Der eingehende HTTP-Request.
+   * @param {Response} res - Die HTTP-Response, um die Zahlungsmethode und Antwort zurückzugeben.
+   * @returns {Response} Die erstellte Zahlungsmethode oder ein Serverfehler.
    */
   create: async function(req, res) {
+    const { paymentOption, iban, creditCardNumber, expiryDate, cvc, paypalEmail, user } = req.body;
+    const sessionUserId = req.session.userId;
+
+    //Man darf nur fuer sich selbst Payments adden, ausser man ist ein Admin
+    if (Number(sessionUserId) !== Number(user) && !req.session.user.isAdmin) {
+      return errors.ForbiddenError('Not allowed to add payment for this user.');
+    }
+
     try {
-      // Die übergebenen Daten aus dem Request-Body
-      const { paymentOption, iban, creditCardNumber, expiryDate, cvc, paypalEmail, user } = req.body;
-
-      // Validierung der erforderlichen Felder
-      if (!paymentOption || !user) {
-        return res.badRequest({ error: 'Payment option and user ID are required.' });
-      }
-
-      // Optional: Validierung der Zahlungsmethoden-spezifischen Felder
-      if (paymentOption === 'bank transfer' && !iban) {
-        return res.badRequest({ error: 'IBAN is required for bank transfers.' });
-      }
-      if (paymentOption === 'credit card' && (!creditCardNumber || !expiryDate || !cvc)) {
-        return res.badRequest({ error: 'Credit card details (number, expiry date, and CVC) are required.' });
-      }
-      if (paymentOption === 'paypal' && !paypalEmail) {
-        return res.badRequest({ error: 'PayPal email is required for PayPal payments.' });
-      }
-
-      // Erstelle das Payment-Objekt
-      const newPayment = await Payment.create({
+      // Erstelle das Payment-Objekt per PaymentService
+      const newPayment = await PaymentService.createPayment({
         paymentOption,
-        iban: paymentOption === 'bank transfer' ? iban : null,
-        creditCardNumber: paymentOption === 'credit card' ? creditCardNumber : null,
-        expiryDate: paymentOption === 'credit card' ? expiryDate : null,
-        cvc: paymentOption === 'credit card' ? cvc : null,
-        paypalEmail: paymentOption === 'paypal' ? paypalEmail : null,
-        isForOrder: false,
-        user: user
-      }).fetch();
+        iban,
+        creditCardNumber,
+        expiryDate,
+        cvc,
+        paypalEmail,
+        user
+      });
+      return res.status(201).json(newPayment);
 
-      // Optional: Aktualisiere die aktuelle Zahlungsmethode des Benutzers
-      // Wenn du sicherstellen möchtest, dass immer die aktuelle Zahlungsmethode genutzt wird
-      await User.addToCollection(user, 'payments', newPayment.id);
-      return res.ok(newPayment);
+    } catch (err) {
+      sails.log.error('Error:', err.message);
 
-    } catch (error) {
-      sails.log.error('Error creating payment:', error);
-      return res.serverError({ error: 'An error occurred while creating the payment.' });
+      if (err instanceof errors.CustomError) {
+        return res.status(err.status).json({ error: err.message });
+      }
+
+      return res.serverError('An unexpected error occurred.');
     }
   },
 
   /**
-   * Alle Zahlungsmethoden für einen Benutzer anzeigen
+   * `PaymentController.find()`
+   *
+   * @description
+   * Findet Zahlungsmethoden anhand der userId über den Service und gibt sie zurück.
+   *
+   * @param {Request} req - Der eingehende HTTP-Request.
+   * @param {Response} res - Die HTTP-Response, um die Zahlungsmethoden zurückzugeben.
+   * @returns {Response} Die gefundend Zahlungsmethode oder ein Serverfehler.
    */
-  findPaymentsByUser: async function(req, res) {
+  find: async function(req, res) {
+    const userId = req.params.userId;
+    const sessionUserId = req.session.userId;
+
+    // Autorisierung: Gehört das gesuchte Payment dem eingeloggten User oder ist er Admin?
+    if (Number(sessionUserId) !== Number(userId) && !req.session.user.isAdmin) {
+      return errors.ForbiddenError('Not allowed to find payment for this user.');
+    }
+
     try {
-      const userId = req.params.userId;
-
-      // Finde alle Zahlungen, die mit diesem Benutzer verknüpft sind
-      const payments = await Payment.find({ user: userId });
-
-      if (!payments || payments.length === 0) {
-        return res.notFound({ error: 'No payments found for this user.' });
-      }
-
+      // Finde alle Zahlungen, die mit diesem Benutzer verknüpft sind per PaymentService
+      const payments = await PaymentService.findByUserId({ userId });
       return res.ok(payments);
 
-    } catch (error) {
-      sails.log.error('Error fetching payments for user:', error);
-      return res.serverError({ error: 'An error occurred while fetching payments.' });
+    } catch (err) {
+      sails.log.error('Error:', err.message);
+
+      if (err instanceof errors.CustomError) {
+        return res.status(err.status).json({ error: err.message });
+      }
+
+      return res.serverError('An unexpected error occurred.');
     }
   },
 
   /**
-   * Aktualisieren einer Zahlungsmethode (falls notwendig)
+   * `PaymentController.updatePayment()`
+   *
+   * @description
+   * Aktualisiert eine vorhandene Zahlungsmethode.
+   *
+   * @param {Request} req - Eingehender HTTP-Request
+   * @param {Response} res - HTTP-Response
+   * @returns {Response} Die aktualisierte Zahlungsmethode oder ein passender Fehler
    */
-  updatePayment: async function(req, res) {
+  patch: async function (req, res) {
+    const id = req.params.id;
+    const sessionUserId = req.session.userId;
+    const { paymentOption, iban, creditCardNumber, expiryDate, cvc, paypalEmail } = req.body;
+
     try {
-      const { id } = req.params;
-      const userId = req.session.userId;
-      const { paymentOption, iban, creditCardNumber, expiryDate, cvc, paypalEmail } = req.body;
-
-      // // Finde das Payment mit der ID
+      // Lade die vorhandene Payment-Entität
       const payment = await Payment.findOne({ id });
-
       if (!payment) {
+        // Falls es die Payment-ID nicht gibt, direkt 404 liefern ohne weitere Verarbeitungsschritte
         return res.notFound({ error: 'Payment not found.' });
       }
 
-      if (Number(payment.user) !== Number(userId) && !req.session.user.isAdmin) {
-        return res.notFound({ error: 'Not my payment.' });
+      // Autorisierung: Gehört das Payment dem eingeloggten User oder ist er Admin?
+      if (Number(payment.user) !== Number(sessionUserId) && !req.session.user.isAdmin) {
+        // Falls nicht, 403 direkt liefern ohne weitere Verarbeitungsschritte
+        return res.forbidden({ error: 'Not allowed to update this payment.' });
       }
 
-      // Aktualisiere die Zahlungsmethoden-spezifischen Felder, je nach `paymentOption`
-      const updatedPayment = await Payment.updateOne({ id }).set({
+      // Falls alles ok, Daten an den Service übergeben und dort weiter bearbeiten
+      const updatedPayment = await PaymentService.updatePayment({
+        oldPayment: payment,
         paymentOption,
-        iban: paymentOption === 'bank transfer' ? iban : payment.iban,
-        creditCardNumber: paymentOption === 'credit card' ? creditCardNumber : payment.creditCardNumber,
-        expiryDate: paymentOption === 'credit card' ? expiryDate : payment.expiryDate,
-        cvc: paymentOption === 'credit card' ? cvc : payment.cvc,
-        paypalEmail: paymentOption === 'paypal' ? paypalEmail : payment.paypalEmail
+        iban,
+        creditCardNumber,
+        expiryDate,
+        cvc,
+        paypalEmail
       });
-
       return res.ok(updatedPayment);
 
-    } catch (error) {
-      sails.log.error('Error updating payment:', error);
-      return res.serverError({ error: 'An error occurred while updating the payment.' });
+    } catch (err) {
+      sails.log.error('Error:', err.message);
+
+      if (err instanceof errors.CustomError) {
+        return res.status(err.status).json({ error: err.message });
+      }
+
+      return res.serverError('An unexpected error occurred.');
     }
   },
 
-
+  /**
+   * `PaymentController.destroy()`
+   *
+   * @description
+   * Loescht eine vorhandene Zahlungsmethode anhand der id.
+   *
+   * @param {Request} req - Eingehender HTTP-Request
+   * @param {Response} res - HTTP-Response
+   * @returns {Response} Status 200 oder ein passender Fehler
+   */
   destroy: async function(req, res) {
-    const { id } = req.params; // Payment ID aus der URL
-    const userId = req.session.userId; // Die ID des angemeldeten Users aus der Session
+    const id = req.params.id;
+    const sessionUserId = req.session.userId;
 
-    // 1. Finde das Payment-Objekt
-    const payment = await Payment.findOne({ id });
+    try {
+      // Finde das Payment-Objekt
+      const payment = await Payment.findOne({ id });
 
-    if (Number(payment.user) !== Number(userId) && !req.session.user.isAdmin) {
-      return res.status(401).json({ error: 'Unauthorized' });
+      // Autorisierung: Gehört das Payment dem eingeloggten User oder ist er Admin?
+      if (Number(payment.user) !== Number(sessionUserId) && !req.session.user.isAdmin) {
+        return res.forbidden({ error: 'Not allowed to delete this payment.' });
+      }
+
+      const deletedPayment = await PaymentService.deletePayment({ id });
+      return res.ok(deletedPayment);
+
+    } catch (err) {
+      sails.log.error('Error:', err.message);
+
+      if (err instanceof errors.CustomError) {
+        return res.status(err.status).json({ error: err.message });
+      }
+
+      return res.serverError('An unexpected error occurred.');
     }
-
-    await Payment.destroy({ id });
-    return res.ok();
   }
-
 };
