@@ -13,24 +13,12 @@
 
         <!-- Filter Button nur anzeigen, wenn showFilter true ist -->
         <button v-if="showFilter" class="btn btn-image" type="button" @click="toggleFilter">
-          <img
-            src="../../src/assets/icons/filter.webp"
-            width="96"
-            height="61"
-            class="oval-icon-responsive"
-            alt="Filter Icon"
-          />
+          <img :src="currentFilterIcon" class="oval-icon-responsive" alt="Filter Icon" />
         </button>
 
         <!-- Such-Button -->
         <button class="btn btn-image" type="submit">
-          <img
-            src="../../src/assets/icons/search.webp"
-            width="97"
-            height="61"
-            class="oval-icon-responsive"
-            alt="Search Icon"
-          />
+          <img :src="currentSearchIcon" class="oval-icon-responsive" alt="Search Icon" />
         </button>
       </form>
     </div>
@@ -46,8 +34,12 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { computed, ref, watch, onMounted } from 'vue'
 import FilterPopup from './FilterPopup.vue'
+import searchIcon from '../../src/assets/icons/search.webp'
+import searchSelectedIcon from '../../src/assets/icons/searchSelected.webp'
+import filterIcon from '../../src/assets/icons/filter.webp'
+import filterSelectedIcon from '../../src/assets/icons/filterSelected.webp'
 
 // Definiere Props
 const props = defineProps({
@@ -73,12 +65,35 @@ const filters = ref({
   effect: [],
   rating: null,
   price: 0,
+  // Weitere dynamische Filtertypen können hier hinzugefügt werden
 })
+
+// Lade gespeicherte Filter aus localStorage beim Mounten
+onMounted(() => {
+  const savedFilters = localStorage.getItem('savedFilters')
+  if (savedFilters) {
+    try {
+      // Mische Standardwerte mit gespeicherten Werten
+      filters.value = { ...filters.value, ...JSON.parse(savedFilters) }
+      handleSearch()
+    } catch (e) {
+      console.error('Fehler beim Parsen gespeicherter Filter:', e)
+    }
+  }
+})
+
+// Beobachte Änderungen am filters-Objekt und speichere sie im localStorage
+watch(
+  filters,
+  (newFilters) => {
+    localStorage.setItem('savedFilters', JSON.stringify(newFilters))
+  },
+  { deep: true },
+)
 
 // Emit für das Senden der Suchanfrage
 const emit = defineEmits(['update:modelValue', 'search'])
 
-// Handle search mit den übergebenen Filterdaten
 const handleSearch = () => {
   const trimmedQuery = searchQuery.value.trim()
   // Emit 'search' Event mit der Suchanfrage und den Filtern
@@ -100,6 +115,31 @@ const applyFilters = (newFilters) => {
   filters.value = newFilters
   handleSearch()
 }
+
+// Computed Property für das dynamische Search-Icon
+const currentSearchIcon = computed(() => {
+  return searchQuery.value.trim() ? searchSelectedIcon : searchIcon
+})
+
+// Prüfe, ob Filter aktiv sind für dynamische Anzeige des Filter-Icons
+const filtersActive = computed(() => {
+  const currentFilters = filters.value
+  return Object.values(currentFilters).some((value) => {
+    if (Array.isArray(value)) {
+      return value.length > 0
+    }
+    if (typeof value === 'number') {
+      // Betrachte 0 als "nicht aktiv" für Zahlen
+      return value !== 0
+    }
+    return value !== null && value !== undefined && value !== ''
+  })
+})
+
+// Computed Property für das dynamische Filter-Icon
+const currentFilterIcon = computed(() => {
+  return filtersActive.value ? filterSelectedIcon : filterIcon
+})
 </script>
 
 <style scoped>
@@ -112,7 +152,7 @@ const applyFilters = (newFilters) => {
   border-style: solid;
   padding: 10px;
   font-size: 16px;
-  transition: width 0.5s ease; /* Sanfter Übergang für Breitenänderungen */
+  transition: width 0.5s ease;
 }
 
 /* Oval-Icon-Stil mit sanftem Übergang */
