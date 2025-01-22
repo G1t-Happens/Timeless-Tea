@@ -1,7 +1,7 @@
 <template>
   <router-link :to="{ name: 'ProductDetail', params: { id: product.id } }" class="product-card">
     <div :class="['product-card', { 'product-card-deleted': product.isDeleted }]">
-      <div class="card mb-4 shadow-sm">
+      <div class="card mb-1 shadow-sm">
         <!-- Produktbild -->
         <img :src="product.image" class="card-img-top" alt="Produktbild" />
         <div class="card-body">

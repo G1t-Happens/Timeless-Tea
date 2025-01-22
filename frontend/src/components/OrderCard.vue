@@ -1,5 +1,5 @@
 <template>
-  <div class="order-card">
+  <div class="order-card mb-1 shadow-sm">
     <div class="order-header">
       <h5>Bestellung ID: {{ order.id }}</h5>
       <span :class="['status', order.orderStatus]">{{ order.orderStatus }}</span>
@@ -59,7 +59,6 @@ export default {
   border: 1px solid #e5e5e5;
   border-radius: 12px;
   padding: 20px;
-  margin-bottom: 20px;
   background-color: #ffffff;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
   transition:

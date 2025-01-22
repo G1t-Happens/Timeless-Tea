@@ -729,7 +729,6 @@ onMounted(() => {
   display: flex; /* Buttons nebeneinander anordnen */
   gap: 2px; /* Abstand zwischen den Buttons */
   position: relative; /* Buttons bleiben in ihrem Bereich */
-  top: -20px; /* Buttons nach oben verschieben */
   z-index: 1; /* Sicherstellen, dass die Buttons anklickbar bleiben */
 }
 

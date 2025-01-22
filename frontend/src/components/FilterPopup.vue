@@ -43,7 +43,7 @@
 
       <div class="filter-item">
         <h3>Preis</h3>
-        <input class="price-input" type="range" v-model="localFilters.price" min="0" max="200" />
+        <input class="price-input" type="range" v-model="localFilters.price" min="0" max="100" />
         <span v-if="localFilters.price > 0">{{ localFilters.price }} €</span>
         <span v-else class="infinity-symbol">∞</span>
       </div>
