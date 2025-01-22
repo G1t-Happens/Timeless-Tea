@@ -5,7 +5,7 @@
 
     <div v-if="cartStore.items.length === 0" class="empty-cart">
       <p>Ihr Warenkorb ist leer.</p>
-      <router-link :to="{ name: 'LandingPage' }" class="btn btn-primary"
+      <router-link :to="{ name: 'LandingPage' }" class="btn btn-success"
         >Zurück zum Shop
       </router-link>
     </div>
@@ -87,9 +87,26 @@ const handleQuantityChange = (item) => {
   }
 }
 
-const clearCart = () => {
-  if (confirm('Möchten Sie wirklich Ihren gesamten Warenkorb leeren?')) {
+const clearCart = async () => {
+  const result = await Swal.fire({
+    backdrop: false,
+    title: 'Warenkorb leeren?',
+    text: 'Möchten Sie wirklich alle Artikel entfernen? Dieser Vorgang kann nicht rückgängig gemacht werden.',
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonText: 'Ja, entfernen',
+    cancelButtonText: 'Abbrechen',
+  })
+
+  if (result.isConfirmed) {
     cartStore.clearCart()
+    await Swal.fire({
+      backdrop: false,
+      title: 'Warenkorb geleert',
+      text: 'Der Warenkorb wurde erfolgreich geleert.',
+      icon: 'success',
+      confirmButtonText: 'OK',
+    })
   }
 }
 </script>
