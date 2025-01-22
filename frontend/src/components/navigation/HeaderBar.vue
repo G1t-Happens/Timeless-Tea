@@ -68,7 +68,7 @@
           <!-- Router-Link, der zur WishlistView führt -->
           <router-link :to="{ name: 'WishList' }" class="wishlist-link">
             <img
-              src="@/assets/icons/wishlist.webp"
+              :src="currentWishlistIcon"
               width="63"
               height="63"
               alt="Wishlist Icon"
@@ -84,7 +84,7 @@
         <!-- Shopping Cart -->
         <div class="position-relative icon-wrapper" @click="toggleCart">
           <img
-            src="@/assets/icons/shopingcart.webp"
+            :src="currentCartIcon"
             width="63"
             height="63"
             alt="ShoppingCart"
@@ -128,10 +128,14 @@
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/user.js'
-import { useCartStore } from '@/stores/shoppingCart.js' // Importieren des Cart Stores
+import { useCartStore } from '@/stores/shoppingCart.js'
+import { useWishlistStore } from '@/stores/wishlist.js'
 import accountIcon from '@/assets/icons/account.webp'
 import accountLoggedInIcon from '@/assets/icons/accountLoggedIn.webp'
-import { useWishlistStore } from '@/stores/wishlist.js'
+import wishlistIcon from '@/assets/icons/wishlist.webp'
+import wishlistIconFull from '@/assets/icons/wishListFull.webp'
+import shopingcartIcon from '@/assets/icons/shopingcart.webp'
+import shoppingCartFullIcon from '@/assets/icons/shoppingCartFull.webp'
 import Swal from 'sweetalert2'
 
 // Initialisieren der Stores und Router
@@ -181,6 +185,16 @@ const filteredLinks = computed(() => {
 // Account-Icon dynamisch auswählen
 const currentAccountIcon = computed(() => {
   return user.value ? accountLoggedInIcon : accountIcon
+})
+
+// Wishlist-Icon dynamisch auswählen
+const currentWishlistIcon = computed(() => {
+  return wishlistStore.itemCount > 0 ? wishlistIconFull : wishlistIcon
+})
+
+// Cart-Icon dynamisch auswählen
+const currentCartIcon = computed(() => {
+  return cartStore.totalItems > 0 ? shoppingCartFullIcon : shopingcartIcon
 })
 
 // Toggle Warenkorb Popup
@@ -260,7 +274,7 @@ const logout = async () => {
 </script>
 
 <style scoped>
-/* Header */
+/* Allgemeine Header-Stile */
 header {
   background-image: url('@/assets/images/banner.webp');
   background-size: cover;
@@ -269,29 +283,56 @@ header {
   box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
 }
 
+/* Flexibles Container-Layout für den Header ohne Umbrechen */
 .header-container {
   display: flex;
+  flex-wrap: nowrap; /* Kein Umbrechen */
   align-items: center;
   justify-content: space-between;
   width: 100%;
   padding: 0 15px;
 }
 
+/* Icon-Wrapper für Abstände und Ausrichtung */
 .icon-wrapper {
-  margin: 0 10px;
+  margin: 0 5px;
   display: inline-flex;
   align-items: center;
   cursor: pointer;
   position: relative;
+  flex-shrink: 1; /* Ermöglicht Schrumpfen */
 }
 
-/* Logo */
+/* Bilder mit festen Standardgrößen */
+.round-icon-responsive {
+  width: 63px; /* Standardbreite für Icons */
+  height: auto;
+  display: block;
+  transition: width 0.5s ease; /* Sanfter Übergang für Breitenänderungen */
+}
+
+.banner-logo-responsive {
+  width: 324px;
+  height: auto;
+  display: block;
+  transition: width 0.5s ease; /* Sanfter Übergang für Breitenänderungen */
+}
+
+/* Hover-Effekt für Icons */
+.icon-wrapper:hover .round-icon-responsive,
+.round-icon-responsive:hover {
+  transform: scale(1.05);
+  transition: transform 0.2s ease-in-out;
+}
+
+/* Zentrierung des Logos */
 .logo-center {
-  flex: 1;
+  flex: 1 1 auto;
   text-align: center;
+  margin: 10px 0;
 }
 
-/* Settings-Popup */
+/* Popup-Stile bleiben unverändert */
 .settings-popup {
   position: absolute;
   top: 60px;
@@ -324,8 +365,8 @@ header {
 
 .logout-popup {
   position: absolute;
-  top: 100%; /* Direkt unter dem Button */
-  right: 40%; /* Rechtsbündig zum Button */
+  top: 100%;
+  right: 40%;
   background: white;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   border-radius: 8px;
@@ -350,10 +391,8 @@ header {
   background-color: #8f4c37;
 }
 
-/* Warenkorb Popup */
 .cart-popup {
   position: absolute;
-  flex: 1;
   top: 70px;
   right: 10px;
   background: white;
@@ -375,7 +414,6 @@ header {
   font-size: 12px;
 }
 
-/* Cart Item Styles */
 .cart-item {
   display: flex;
   align-items: center;
@@ -415,17 +453,77 @@ header {
   background-color: #9fa86d;
 }
 
-/* Cart Total */
 .cart-total {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-top: 10px;
-  flex-wrap: wrap; /* Ermöglicht das Umfließen der Elemente */
+  flex-wrap: wrap;
 }
 
-/* Empty Cart */
 .empty-cart {
   text-align: center;
+}
+
+/* Medienabfragen für Skalierung der Bilder */
+@media (max-width: 1200px) {
+  .round-icon-responsive {
+    width: 55px;
+  }
+
+  .banner-logo-responsive {
+    width: 280px;
+  }
+}
+
+@media (max-width: 1000px) {
+  .round-icon-responsive {
+    width: 50px;
+  }
+
+  .banner-logo-responsive {
+    width: 240px;
+  }
+}
+
+@media (max-width: 800px) {
+  .round-icon-responsive {
+    width: 45px;
+  }
+
+  .banner-logo-responsive {
+    width: 200px;
+  }
+}
+
+@media (max-width: 600px) {
+  .round-icon-responsive {
+    width: 40px;
+  }
+
+  .banner-logo-responsive {
+    width: 180px;
+  }
+}
+
+@media (max-width: 420px) {
+  .round-icon-responsive {
+    width: 35px;
+  }
+
+  .banner-logo-responsive {
+    width: 140px;
+  }
+
+  /* Margin vom banner logo zu anderen Icons kleiner skalieren */
+  .logo-center {
+    margin-left: -10px;
+    margin-right: -20px;
+  }
+
+  /* Abstände der Icons anpassen kleiner skalieren */
+  .icon-wrapper {
+    margin: 0 3px;
+  }
 }
 </style>

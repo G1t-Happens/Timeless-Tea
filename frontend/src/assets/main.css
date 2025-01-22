@@ -8,22 +8,19 @@ html, body {
 }
 
 #app {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
 }
 
 main {
     flex: 1;
 }
 
-
-
 button:active {
-  border: none; /* Entfernt den Button-Rahmen beim Klicken */
-  outline: none; /* Entfernt auch die Button-Fokusumrandung, falls vorhanden */
+    border: none;
+    outline: none;
 }
-
 
 /* Setze den globalen Rand und die Farbe für alle Popups */
 .swal2-popup {
@@ -48,32 +45,6 @@ button:active {
     color: white;
     border-radius: 5px;
     padding: 10px 20px;
-}
-
-
-/* Kann bis min-width: 320px alles ordnungsgemaess darstellen.*/
-@media (max-width: 600px) {
-
-  .round-icon-responsive {
-    width: 35px;
-    height: 35px;
-  }
-
-  .oval-icon-responsive {
-    width: 49px;
-    height: 30px;
-  }
-
-  .banner-logo-responsive {
-    width: 162px;
-    height: 62px;
-  }
-
-  .search-input {
-    width: 100%; /* Die Suchleiste nimmt jetzt die gesamte Breite ein */
-    max-width: 400px; /* Maximalgröße der Suchleiste */
-  }
-
 }
 
 

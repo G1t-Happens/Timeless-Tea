@@ -19,6 +19,7 @@ module.exports = {
    *
    * @param {string} emailAddress - Die E-Mail-Adresse des Users
    * @param {string} password - Das eingegebene Passwort
+   * @param {Object} req - Das request object
    * @returns {Object} Der gefundene User (ohne Passwort)
    * @throws {NotFoundError|UnauthorizedError} Wirft entsprechende Fehler, falls Benutzer nicht existiert oder das Passwort nicht stimmt
    */

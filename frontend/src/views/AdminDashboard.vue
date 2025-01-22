@@ -107,7 +107,7 @@
                 @click="deleteArticle(product.id)"
                 class="btn btn-danger"
               >
-                Löschen
+                Entfernen
               </button>
             </div>
           </div>

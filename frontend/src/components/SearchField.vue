@@ -112,11 +112,63 @@ const applyFilters = (newFilters) => {
   border-style: solid;
   padding: 10px;
   font-size: 16px;
+  transition: width 0.5s ease; /* Sanfter Übergang für Breitenänderungen */
 }
 
+/* Oval-Icon-Stil mit sanftem Übergang */
+.oval-icon-responsive {
+  height: auto;
+  display: block;
+  transition: width 0.5s ease;
+}
+
+.oval-icon-responsive:hover {
+  transform: scale(1.05);
+  transition: transform 0.2s ease-in-out;
+}
+
+/* Responsive Anpassungen des Suchfelds */
 @media (max-width: 768px) {
   .search-input {
     width: 100%;
+  }
+}
+
+@media (max-width: 694px) {
+  .search-input {
+    width: 100%;
+    max-width: 400px;
+  }
+}
+
+/* Medienabfragen für Skalierung der Bilder */
+@media (max-width: 1200px) {
+  .oval-icon-responsive {
+    width: 85px;
+  }
+}
+
+@media (max-width: 1000px) {
+  .oval-icon-responsive {
+    width: 75px;
+  }
+}
+
+@media (max-width: 800px) {
+  .oval-icon-responsive {
+    width: 65px;
+  }
+}
+
+@media (max-width: 600px) {
+  .oval-icon-responsive {
+    width: 55px;
+  }
+}
+
+@media (max-width: 420px) {
+  .oval-icon-responsive {
+    width: 45px;
   }
 }
 </style>
