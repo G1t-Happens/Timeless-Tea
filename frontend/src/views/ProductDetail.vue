@@ -38,6 +38,9 @@
         </p>
         <p class="content-info">Inhalt: {{ product.quantity }}g ({{ pricePerKg }}€ / kg)</p>
         <p v-if="product.description">{{ product.description }}</p>
+
+        <hr class="section-divider" />
+
         <div class="actions">
           <label for="quantity" class="point-out-info">Menge:</label>
           <div class="quantity-selector">
@@ -324,17 +327,17 @@ onMounted(fetchProduct)
 .quantity-selector {
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: 17%;
 }
 
 .quantity-button {
-  width: 70px;
+  width: 100%;
   height: 50px;
   background-color: #9fa86d;
   color: #fff;
   border: none;
   border-radius: 4px;
-  font-size: 20px;
+  font-size: 30px;
   cursor: pointer;
   transition: background-color 0.3s ease;
 }
@@ -349,9 +352,9 @@ onMounted(fetchProduct)
 }
 
 .quantity-display {
-  font-size: 16px;
-  min-width: 20px;
+  font-size: 20px;
   text-align: center;
+  font-weight: bold;
 }
 
 /* Modal für das Bild */
