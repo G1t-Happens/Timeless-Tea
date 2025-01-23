@@ -13,12 +13,24 @@
 
         <!-- Filter Button nur anzeigen, wenn showFilter true ist -->
         <button v-if="showFilter" class="btn btn-image" type="button" @click="toggleFilter">
-          <img :src="currentFilterIcon" class="oval-icon-responsive" alt="Filter Icon" />
+          <img
+            :src="currentFilterIcon"
+            width="96"
+            height="61"
+            class="oval-icon-responsive"
+            alt="Filter Icon"
+          />
         </button>
 
         <!-- Such-Button -->
         <button class="btn btn-image" type="submit">
-          <img :src="currentSearchIcon" class="oval-icon-responsive" alt="Search Icon" />
+          <img
+            :src="currentSearchIcon"
+            width="97"
+            height="61"
+            class="oval-icon-responsive"
+            alt="Search Icon"
+          />
         </button>
       </form>
     </div>
@@ -121,6 +133,11 @@ const currentSearchIcon = computed(() => {
   return searchQuery.value.trim() ? searchSelectedIcon : searchIcon
 })
 
+// Computed Property für das dynamische Filter-Icon
+const currentFilterIcon = computed(() => {
+  return filtersActive.value ? filterSelectedIcon : filterIcon
+})
+
 // Prüfe, ob Filter aktiv sind für dynamische Anzeige des Filter-Icons
 const filtersActive = computed(() => {
   const currentFilters = filters.value
@@ -134,11 +151,6 @@ const filtersActive = computed(() => {
     }
     return value !== null && value !== undefined && value !== ''
   })
-})
-
-// Computed Property für das dynamische Filter-Icon
-const currentFilterIcon = computed(() => {
-  return filtersActive.value ? filterSelectedIcon : filterIcon
 })
 </script>
 
