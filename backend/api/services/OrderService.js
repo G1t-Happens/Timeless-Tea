@@ -457,4 +457,199 @@ module.exports = {
     return { total, finished, active };
   },
 
+
+  /**
+   * Aktualisiert den Status einer Bestellung.
+   *
+   * @description
+   * Diese Methode aktualisiert den Status einer Bestellung anhand der übergebenen Bestell-ID (`id`)
+   * und des neuen Bestellstatus (`orderStatus`). Sie prüft zunächst, ob die erforderlichen Parameter
+   * vorhanden sind, validiert die Bestellung und aktualisiert anschließend den Status.
+   *
+   * @param {Request} req - Der eingehende HTTP-Request.
+   *                        Enthält die Bestell-ID in `req.params.id` und den neuen Status in `req.body.orderStatus`.
+   *
+   * @throws {BadRequestError} Wenn keine Bestell-ID oder kein Bestellstatus angegeben ist.
+   * @throws {NotFoundError} Wenn keine Bestellung mit der angegebenen ID gefunden wird.
+   *
+   * @returns {Object} Die aktualisierte Bestellung mit dem neuen Status.
+   */
+  updateOrderStatus: async function (req) {
+    const { orderStatus } = req.body;
+    const { id } = req.params;
+
+    // Überprüfen, ob eine Bestell-ID übergeben wurde
+    if (!id) {
+      throw new errors.BadRequestError('Order ID is required.');
+    }
+
+    // Überprüfen, ob ein neuer OrderStatus übergeben wurde
+    if (!orderStatus) {
+      throw new errors.BadRequestError('OrderStatus is required.');
+    }
+
+    // Suche die Bestellung in der Datenbank
+    const order = await Order.findOne({ id });
+
+    // Überprüfen, ob eine Bestell gefunden wurde, ansonsten 404
+    if (!order) {
+      throw new errors.NotFoundError('Order not found.');
+    }
+
+    //OrderStatus updaten
+    return await Order.updateOne({ id }).set({
+      orderStatus: orderStatus,
+    });
+
+  },
+
+  /**
+   * Aktualisiert die Versandinformationen einer Bestellung.
+   *
+   * @description
+   * Diese Methode aktualisiert die Versanddetails einer Bestellung, einschließlich des Versandunternehmens
+   * (`carrier`), des Lieferstatus (`deliveryStatus`), des geschätzten Lieferdatums (`estimatedDeliveryDate`)
+   * und des Versanddatums (`shippingDate`). Falls ein Feld nicht im Request-Body angegeben ist, wird der
+   * bestehende Wert beibehalten.
+   *
+   * @param {Request} req - Der eingehende HTTP-Request.
+   *                        Enthält die Bestell-ID in `req.params.id` und die neuen Versandinformationen
+   *                        im Request-Body.
+   *
+   * @throws {BadRequestError} Wenn keine Bestell-ID angegeben ist.
+   * @throws {NotFoundError} Wenn keine Bestellung mit der angegebenen ID gefunden wird.
+   *
+   * @returns {Object} Die aktualisierten Versandinformationen.
+   */
+  updateOrderShipping: async function (req) {
+    const { carrier, deliveryStatus, estimatedDeliveryDate, shippingDate } = req.body;
+    const { id } = req.params;
+
+    // Überprüfen, ob eine Bestell-ID übergeben wurde
+    if (!id) {
+      throw new errors.BadRequestError('Order ID is required.');
+    }
+
+    // Suche die Bestellung in der Datenbank
+    const order = await Order.findOne({ id });
+
+    // Überprüfen, ob eine Bestell gefunden wurde, ansonsten 404
+    if (!order) {
+      throw new errors.NotFoundError('Order not found.');
+    }
+
+    //Shippinginformationen updaten
+    return await Shipping.updateOne({ id: order.shipping }).set({
+      carrier: carrier || order.carrier,
+      deliveryStatus: deliveryStatus || order.deliveryStatus,
+      estimatedDeliveryDate: estimatedDeliveryDate || order.estimatedDeliveryDate,
+      shippingDate: shippingDate || order.shipping,
+    });
+  },
+
+  /**
+   * Aktualisiert die Versandaddresse einer Bestellung.
+   *
+   * @description
+   * Diese Methode aktualisiert die Lieferadresse einer Bestellung basierend auf der Bestell-ID (`id`)
+   * und den neuen Adressdaten, die im Request-Body übergeben werden. Felder, die nicht im Request-Body
+   * enthalten sind, behalten ihre bestehenden Werte.
+   *
+   * @param {Request} req - Der eingehende HTTP-Request.
+   *                        Enthält die Bestell-ID in `req.params.id` und die neuen Adressinformationen
+   *                        im Request-Body.
+   *
+   * @throws {BadRequestError} Wenn keine Bestell-ID angegeben ist.
+   * @throws {NotFoundError} Wenn die Bestellung oder die zugehörige Lieferadresse nicht gefunden wird.
+   *
+   * @returns {Object} Die aktualisierte Lieferadresse.
+   */
+  updateOrderDeliveryAddress: async function (req) {
+    const { country, state, city, postalCode, street, houseNumber, addressAddition } = req.body;
+    const { id } = req.params;
+
+    // Überprüfen, ob eine Bestell-ID übergeben wurde
+    if (!id) {
+      throw new errors.BadRequestError('Order ID is required.');
+    }
+
+    // Suche die Bestellung in der Datenbank
+    const order = await Order.findOne({ id }).populate('shipping');
+
+    // Überprüfen, ob eine Bestellung gefunden wurde, ansonsten 404
+    if (!order?.shipping?.address) {
+      throw new errors.NotFoundError('Order or shipping address not found.');
+    }
+
+    // Shippinginformationen updaten
+    return await Address.updateOne({ id: order.shipping.address }).set({
+      country: country || order.shipping.address.country,
+      state: state || order.shipping.address.state,
+      city: city || order.shipping.address.city,
+      postalCode: postalCode || order.shipping.address.postalCode,
+      street: street || order.shipping.address.street,
+      houseNumber: houseNumber || order.shipping.address.houseNumber,
+      addressAddition: addressAddition || order.shipping.address.addressAddition,
+    });
+  },
+
+  /**
+   * Aktualisiert die Zahlungsinformationen einer Bestellung.
+   *
+   * @description
+   * Diese Methode aktualisiert die Zahlungsinformationen einer Bestellung basierend auf der Bestell-ID (`id`)
+   * und den im Request-Body übergebenen Zahlungsdetails. Sie validiert die angegebene Zahlungsoption und
+   * überschreibt nur die relevanten Felder, abhängig von der gewählten Zahlungsart.
+   *
+   * @param {Request} req - Der eingehende HTTP-Request.
+   *                        Enthält die Bestell-ID in `req.params.id` und die neuen Zahlungsdetails
+   *                        im Request-Body.
+   *
+   * @throws {BadRequestError} Wenn keine Bestell-ID oder keine gültige Zahlungsoption angegeben ist.
+   * @throws {NotFoundError} Wenn keine Bestellung mit der angegebenen ID gefunden wird.
+   * @throws {ConflictError} Wenn die Aktualisierung der Zahlungsinformationen fehlschlägt.
+   *
+   * @returns {Object} Die aktualisierten Zahlungsinformationen.
+   */
+  updateOrderPayment: async function (req) {
+    const { paymentOption, creditCardNumber, expiryDate, paypalEmail, iban } = req.body;
+    const { id } = req.params;
+
+    // Überprüfen, ob eine Bestell-ID übergeben wurde
+    if (!id) {
+      throw new errors.BadRequestError('Order ID is required.');
+    }
+
+    // Suche die Bestellung in der Datenbank
+    const order = await Order.findOne({ id });
+
+    // Überprüfen, ob die Bestellung gefunden wurde, ansonsten 404
+    if (!order) {
+      throw new errors.NotFoundError('Order not found.');
+    }
+
+    // Überprüfen, ob die Zahlungsoption gültig ist
+    if (!['credit card', 'paypal', 'bank transfer'].includes(paymentOption)) {
+      throw new errors.BadRequestError('Invalid payment option provided.');
+    }
+
+    // Aufbau der neuen Zahlungsdaten basierend auf der Zahlungsoption
+    const updatedPaymentInfo = {
+      paymentOption,
+      creditCardNumber: paymentOption === 'credit card' ? creditCardNumber : null,
+      expiryDate: paymentOption === 'credit card' && expiryDate ? new Date(expiryDate).toISOString() : null,
+      paypalEmail: paymentOption === 'paypal' ? paypalEmail : null,
+      iban: paymentOption === 'bank transfer' ? iban : null,
+    };
+
+    // Update der Zahlungsinformationen in der Datenbank
+    const updatedPayment = await Payment.updateOne({ id: order.payment }).set(updatedPaymentInfo);
+
+    if (!updatedPayment) {
+      throw new errors.ConflictError('Failed to update payment information.');
+    }
+
+    return updatedPayment;
+  },
+
 };

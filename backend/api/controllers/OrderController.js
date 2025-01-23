@@ -108,7 +108,7 @@ module.exports = {
   },
 
   /**
-   * Storniert eine Bestellung
+   * Storniert eine Bestellung - User Aktion
    *
    * @description
    * Diese Aktion ruft den entsprechenden Service auf, um eine Bestellung des aktuell
@@ -152,6 +152,102 @@ module.exports = {
         return res.status(error.status).json({ error: error.message });
       }
       return res.serverError({ error: 'An error occurred while fetching order counts.' });
+    }
+  },
+
+  /**
+   * Updated den Status eine Bestellung
+   *
+   * @description
+   * Diese Aktion ruft den entsprechenden Service auf, um den Status eine Bestellung per Admin
+   * zu aendern.
+   *
+   * @param {Request} req - Der eingehende HTTP-Request mit der Bestell-ID in `req.params.id`.
+   * @param {Response} res - Der HTTP-Response mit der aktualisierten Bestellung.
+   * @returns {Response} 200 OK mit der aktualisierten Bestellung oder ein Fehlerstatus.
+   */
+  patchStatus: async function (req, res) {
+    try {
+      const updatedOrder = await OrderService.updateOrderStatus(req);
+      return res.json(updatedOrder);
+    } catch (error) {
+      sails.log.error('Error updating order:', error);
+      if (error instanceof errors.CustomError) {
+        return res.status(error.status).json({ error: error.message });
+      }
+      return res.serverError({ error: 'An error occurred while updating the order.' });
+    }
+  },
+
+  /**
+   * Updated die Versandinformationen eine Bestellung
+   *
+   * @description
+   * Diese Aktion ruft den entsprechenden Service auf, um die Versandinfos eine Bestellung per Admin
+   * zu aendern.
+   *
+   * @param {Request} req - Der eingehende HTTP-Request mit der Bestell-ID in `req.params.id`.
+   * @param {Response} res - Der HTTP-Response mit der aktualisierten Bestellung.
+   * @returns {Response} 200 OK mit der aktualisierten Bestellung oder ein Fehlerstatus.
+   */
+  patchShipping: async function (req, res) {
+    try {
+      const updatedOrder = await OrderService.updateOrderShipping(req);
+      return res.json(updatedOrder);
+    } catch (error) {
+      sails.log.error('Error updating order:', error);
+      if (error instanceof errors.CustomError) {
+        return res.status(error.status).json({ error: error.message });
+      }
+      return res.serverError({ error: 'An error occurred while updating the order.' });
+    }
+  },
+
+  /**
+   * Updated die Versandadresse eine Bestellung
+   *
+   * @description
+   * Diese Aktion ruft den entsprechenden Service auf, um die Adresse eine Bestellung per Admin
+   * zu aendern.
+   *
+   * @param {Request} req - Der eingehende HTTP-Request mit der Bestell-ID in `req.params.id`.
+   * @param {Response} res - Der HTTP-Response mit der aktualisierten Bestellung.
+   * @returns {Response} 200 OK mit der aktualisierten Bestellung oder ein Fehlerstatus.
+   */
+  patchDeliveryAddress: async function (req, res) {
+    try {
+      const updatedOrder = await OrderService.updateOrderDeliveryAddress(req);
+      return res.json(updatedOrder);
+    } catch (error) {
+      sails.log.error('Error updating order:', error);
+      if (error instanceof errors.CustomError) {
+        return res.status(error.status).json({ error: error.message });
+      }
+      return res.serverError({ error: 'An error occurred while updating the order.' });
+    }
+  },
+
+  /**
+   * Updated die Zahlungsmethode eine Bestellung
+   *
+   * @description
+   * Diese Aktion ruft den entsprechenden Service auf, um die Zahlungsmethode eine Bestellung per Admin
+   * zu aendern.
+   *
+   * @param {Request} req - Der eingehende HTTP-Request mit der Bestell-ID in `req.params.id`.
+   * @param {Response} res - Der HTTP-Response mit der aktualisierten Bestellung.
+   * @returns {Response} 200 OK mit der aktualisierten Bestellung oder ein Fehlerstatus.
+   */
+  patchPayment: async function (req, res) {
+    try {
+      const updatedOrder = await OrderService.updateOrderPayment(req);
+      return res.json(updatedOrder);
+    } catch (error) {
+      sails.log.error('Error updating order:', error);
+      if (error instanceof errors.CustomError) {
+        return res.status(error.status).json({ error: error.message });
+      }
+      return res.serverError({ error: 'An error occurred while updating the order.' });
     }
   }
 

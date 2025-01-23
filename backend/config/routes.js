@@ -56,6 +56,10 @@ module.exports.routes = {
   [`GET ${API_BASE}/order/detail`]: 'OrderController.findOrdersByUser',
   [`PATCH ${API_BASE}/order/:id/cancel`]: 'OrderController.cancelOrder',
   [`GET ${API_BASE}/order/count`]: 'OrderController.count',
+  [`PATCH ${API_BASE}/order/:id/status`]: 'OrderController.patchStatus',
+  [`PATCH ${API_BASE}/order/:id/shipping`]: 'OrderController.patchShipping',
+  [`PATCH ${API_BASE}/order/:id/address`]: 'OrderController.patchDeliveryAddress',
+  [`PATCH ${API_BASE}/order/:id/payment`]: 'OrderController.patchPayment',
 
   // ContactMessageController.js
   [`POST ${API_BASE}/message`]: { controller: 'ContactMessageController', action: 'create' },

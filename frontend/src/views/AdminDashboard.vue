@@ -201,7 +201,7 @@
 
             <!-- Buttons für Details und Löschen -->
             <div class="text-center mb-5 cardset-admin-button">
-              <button @click="viewOrder(order.id)" class="btn btn-warning">Details</button>
+              <button @click="viewOrder(order.id)" class="btn btn-warning">Details/Bearbeiten</button>
             </div>
           </div>
         </div>

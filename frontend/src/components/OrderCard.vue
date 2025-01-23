@@ -99,8 +99,20 @@ export default {
   background-color: #f7b731;
 }
 
+.status.processing {
+  background-color: #3498db;
+}
+
 .status.successful {
   background-color: #20bf6b;
+}
+
+.status.failed {
+  background-color: #e74c3c;
+}
+
+.status.refunded {
+  background-color: #8e44ad; /* Beispiel: Lila Farbe für 'Erstattet' */
 }
 
 .status.canceled {

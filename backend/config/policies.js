@@ -48,6 +48,10 @@ module.exports.policies = {
     find: 'isAdmin',
     findOne: 'isAdmin',
     count: 'isAdmin',
+    patchStatus: 'isAdmin',
+    patchShipping: 'isAdmin',
+    patchDeliveryAddress: 'isAdmin',
+    patchPayment: 'isAdmin',
   },
 
   ContactMessageController: {
