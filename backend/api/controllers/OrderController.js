@@ -1,460 +1,158 @@
+/**
+ * OrderController
+ *
+ * @description :: Server-side actions for handling incoming requests related to Orders.
+ *                 Dieser Controller kümmert sich um das Routing und verwendet den Service,
+ *                 um Bestellungen zu verwalten.
+ *
+ * @help        :: Siehe Sails.js-Dokumentation unter https://sailsjs.com/docs/concepts/actions
+ */
+const errors = require('../utils/errors');
+
 module.exports = {
+
+  /**
+   * Erstellt eine neue Bestellung
+   *
+   * @description
+   * Diese Aktion ruft den entsprechenden Service auf, um eine neue Bestellung zu erstellen.
+   * Bei Erfolg wird die ID der neu erstellten Bestellung zurückgegeben.
+   *
+   * @param {Request} req - Der eingehende HTTP-Request mit den Bestelldaten im Body.
+   * @param {Response} res - Der HTTP-Response mit dem Ergebnis der Operation.
+   * @returns {Response} 201 Created mit der Bestell-ID oder ein Fehlerstatus.
+   */
   create: async function (req, res) {
     try {
-      const { totalAmount, payment, orderProducts, newShippingAddress } = req.body;
-      const user = req.session.userId;
-
-      // Pruefen ob User vorhanden
-      if(!user) {
-        return res.badRequest({ error: 'Kein User vorhanden' });
-      }
-
-      // Validierung der Pflichtfelder
-      if (!totalAmount || !user || !payment || !Array.isArray(orderProducts) || orderProducts.length === 0) {
-        return res.badRequest({ error: 'Invalid request data. Please provide all required fields.' });
-      }
-
-      // Validierung der Produkte und Extraktion der Produkt-IDs
-      const productIds = [];
-      const invalidProducts = orderProducts.some(op => {
-        if (!op.product || !op.quantity || op.quantity <= 0) {
-          return true;
-        }
-        productIds.push(op.product);
-        return false;
-      });
-
-      if (invalidProducts) {
-        return res.badRequest({ error: 'Invalid product data. Each product must have a valid ID and quantity > 0.' });
-      }
-
-      // Hole Produkte und prüfe Existenz in einer Abfrage
-      const existingProducts = await Product.find({ id: productIds }).select(['id', 'price']);
-      if (existingProducts.length !== productIds.length) {
-        return res.badRequest({ error: 'One or more products do not exist.' });
-      }
-
-      // Berechne den Gesamtbetrag basierend auf den Produkten und Mengen
-      const calculatedTotal = orderProducts.reduce((sum, op) => {
-        const product = existingProducts.find(p => p.id === op.product);
-        return sum + (product.price * op.quantity);
-      }, 0);
-
-      if (Math.abs(calculatedTotal - totalAmount) > 0.01) {
-        return res.badRequest({
-          error: 'The total amount does not match the sum of the products and quantities.',
-          calculatedTotal,
-          providedTotal: totalAmount
-        });
-      }
-
-      // Lade Benutzer- und Zahlungsdaten parallel
-      const [orderUser, originalPayment] = await Promise.all([
-        User.findOne({ id: user }).populate('address'),
-        Payment.findOne({ id: payment, user })
-      ]);
-
-      if (!orderUser) {
-        return res.badRequest({ error: 'No user found.' });
-      }
-
-      if (!originalPayment) {
-        return res.badRequest({ error: 'The specified payment method does not exist or does not belong to the user.' });
-      }
-
-      const formatDateForDateColumn = (date) => date.toISOString().split('T')[0];
-      let createdOrder;
-
-      // Transaktion
-      await sails.getDatastore().transaction(async (db) => {
-        // Adresse erstellen oder nutzen
-        let shippingAddressId;
-        if (newShippingAddress) {
-          const newAddress = await Address.create(newShippingAddress).fetch().usingConnection(db);
-          shippingAddressId = newAddress.id;
-        } else {
-          const { address } = orderUser;
-          const newAddress = await Address.create({
-            country: address.country,
-            state: address.state || '',
-            city: address.city,
-            postalCode: address.postalCode,
-            street: address.street,
-            houseNumber: address.houseNumber,
-            addressAddition: address.addressAddition || ''
-          }).fetch().usingConnection(db);
-          shippingAddressId = newAddress.id;
-        }
-
-        // Bestellung erstellen
-        createdOrder = await Order.create({
-          totalAmount: calculatedTotal,
-          orderStatus: 'open',
-          user,
-          payment: null,
-          shipping: null
-        }).fetch().usingConnection(db);
-
-        // Versanddaten erstellen
-        const estimatedDeliveryDate = formatDateForDateColumn(new Date(new Date().setDate(new Date().getDate() + 5)));
-        const shippingDate = formatDateForDateColumn(new Date());
-
-        await Shipping.create({
-          carrier: 'Default Carrier',
-          deliveryStatus: 'not shipped',
-          estimatedDeliveryDate: estimatedDeliveryDate,
-          shippingDate: shippingDate,
-          address: shippingAddressId,
-          order: createdOrder.id
-        }).fetch().usingConnection(db);
-
-        // Zahlung erstellen
-        const orderPayment = await Payment.create({
-          paymentOption: originalPayment.paymentOption,
-          iban: originalPayment.iban,
-          creditCardNumber: originalPayment.creditCardNumber,
-          expiryDate: originalPayment.expiryDate,
-          cvc: originalPayment.cvc,
-          paypalEmail: originalPayment.paypalEmail,
-          isForOrder: true,
-          user,
-          order: createdOrder.id
-        }).fetch().usingConnection(db);
-
-        // Bestellung aktualisieren nachdem payment und shipping erstellt wurden
-        await Order.updateOne({ id: createdOrder.id }).set({
-          payment: orderPayment.id,
-          shipping: createdOrder.id
-        }).usingConnection(db);
-
-        // Produkte zur Bestellung hinzufügen
-        const orderProductRecords = orderProducts.map(op => ({
-          order: createdOrder.id,
-          product: op.product,
-          quantity: op.quantity,
-        }));
-        await OrderProduct.createEach(orderProductRecords).usingConnection(db);
-      });
-      // Rückgabe der Bestell-ID mit Status 201
-      return res.status(201).json({ id: createdOrder.id });
+      const createdOrder = await OrderService.createOrder(req);
+      return res.status(201).json(createdOrder);
     } catch (error) {
       sails.log.error('Error creating order:', error);
+      if (error instanceof errors.CustomError) {
+        return res.status(error.status).json({ error: error.message });
+      }
       return res.serverError({ error: 'An error occurred while creating the order.' });
     }
   },
 
+  /**
+   * Ruft eine Liste von Bestellungen ab
+   *
+   * @description
+   * Diese Aktion ruft den entsprechenden Service auf, um Bestellungen basierend auf
+   * optionalen Such- und Pagination-Parametern zu laden.
+   *
+   * @param {Request} req - Der eingehende HTTP-Request mit den Query-Parametern für die Suche.
+   * @param {Response} res - Der HTTP-Response mit der Liste der gefundenen Bestellungen.
+   * @returns {Response} 200 OK mit der Liste der Bestellungen oder ein Fehlerstatus.
+   */
   find: async function (req, res) {
     try {
-      const { page = 1, size = 10, search, productId, userName } = req.query;
-
-      // Pagination
-      const limit = parseInt(size);
-      const skip = (parseInt(page) - 1) * limit;
-
-      // Query-Filter
-      let query = {};
-
-      // Suche nach Status, ID oder Benutzername
-      if (search) {
-        const numericSearch = !isNaN(search) ? parseInt(search) : null;
-
-        // Benutzer anhand des Namens finden
-        const userMatches = await User.find({
-          where: {
-            or: [
-              { firstName: { contains: search } },
-              { lastName: { contains: search } },
-            ],
-          },
-          select: ['id'],
-        });
-        const userIds = userMatches.map((user) => user.id);
-
-        query.or = [
-          { orderStatus: search }, // Exakter Vergleich für Status
-          ...(numericSearch ? [{ id: numericSearch }] : []), // Suche nach numerischer ID
-          ...(userIds.length > 0 ? [{ user: { in: userIds } }] : []), // Suche nach Benutzer
-        ];
-      }
-
-      // Suche nach Produkt-ID
-      if (productId) {
-        query['orderProducts'] = { some: { product: productId } };
-      }
-
-      // Suche nach Benutzername (falls nicht über `search` abgedeckt)
-      if (userName) {
-        const users = await User.find({
-          where: { fullName: { contains: userName } },
-          select: ['id'],
-        });
-        const userIds = users.map((user) => user.id);
-        if (userIds.length > 0) {
-          query['user'] = { in: userIds };
-        }
-      }
-
-      // Fetch orders
-      const orders = await Order.find(query)
-        .sort('createdAt DESC')
-        .limit(limit)
-        .skip(skip);
-
-      // Fetch associated user data for each order
-      const enrichedOrders = await Promise.all(
-        orders.map(async (order) => {
-          const user = await User.findOne({ id: order.user }).select([
-            'id',
-            'firstName',
-            'lastName',
-          ]);
-          return {
-            ...order,
-            user, // Benutzerinformationen hinzufügen
-          };
-        })
-      );
-
-      // Total count for pagination
-      const totalOrders = await Order.count(query);
-
-      return res.json({
-        total: totalOrders,
-        orders: enrichedOrders,
-      });
+      const orders = await OrderService.findOrders(req);
+      return res.json(orders);
     } catch (error) {
       sails.log.error('Error fetching orders:', error);
+      if (error instanceof errors.CustomError) {
+        return res.status(error.status).json({ error: error.message });
+      }
       return res.serverError({ error: 'An error occurred while fetching orders.' });
     }
   },
 
+  /**
+   * Ruft eine einzelne Bestellung anhand ihrer ID ab
+   *
+   * @description
+   * Diese Aktion ruft den entsprechenden Service auf, um eine spezifische Bestellung
+   * und deren Details basierend auf der übergebenen ID zu laden.
+   *
+   * @param {Request} req - Der eingehende HTTP-Request mit der Bestell-ID in `req.params.id`.
+   * @param {Response} res - Der HTTP-Response mit den Bestelldetails.
+   * @returns {Response} 200 OK mit den Bestelldetails oder ein Fehlerstatus.
+   */
   findOne: async function (req, res) {
     try {
-      const { id } = req.params;
-
-      if (!id) {
-        return res.badRequest({ error: 'Order ID is required.' });
-      }
-
-      // Finde die Bestellung ohne Subkriterien in populate
-      const order = await Order.findOne({ id })
-        .populate('user') // Holen der gesamten User-Daten (ohne Subkriterien)
-        .populate('shipping') // Holen der gesamten Versanddaten
-        .populate('payment') // Holen der gesamten Zahlungsdaten
-        .populate('orderProducts'); // Holen der Bestellprodukte
-
-      if (!order) {
-        return res.notFound({ error: 'Order not found.' });
-      }
-
-      // Filtere die Felder manuell für `user`, `shipping`, und `payment`
-      const filteredUser = order.user
-        ? {
-          id: order.user.id,
-          firstName: order.user.firstName,
-          lastName: order.user.lastName,
-          emailAddress: order.user.emailAddress,
-        }
-        : null;
-
-      // Adressdaten aus der `shipping`-Tabelle extrahieren
-      let shippingAddress = null;
-      if (order.shipping && order.shipping.address) {
-        const address = await Address.findOne({ id: order.shipping.address });
-        if (address) {
-          shippingAddress = {
-            country: address.country,
-            state: address.state || '',
-            city: address.city,
-            postalCode: address.postalCode,
-            street: address.street,
-            houseNumber: address.houseNumber,
-            addressAddition: address.addressAddition || '',
-          };
-        }
-      }
-
-      const filteredShipping = order.shipping
-        ? {
-          carrier: order.shipping.carrier,
-          deliveryStatus: order.shipping.deliveryStatus,
-          estimatedDeliveryDate: order.shipping.estimatedDeliveryDate,
-          shippingDate: order.shipping.shippingDate,
-          address: shippingAddress, // Integrierte Adressdaten
-        }
-        : null;
-
-      const filteredPayment = order.payment
-        ? {
-          paymentOption: order.payment.paymentOption,
-          iban: order.payment.iban,
-          paypalEmail: order.payment.paypalEmail,
-          creditCardNumber: order.payment.creditCardNumber,
-          expiryDate: order.payment.expiryDate,
-          cvc: order.payment.cvc,
-        }
-        : null;
-
-      // Hole die vollständigen Produktinformationen für jedes OrderProduct
-      const orderProductsWithDetails = await Promise.all(
-        order.orderProducts.map(async (orderProduct) => {
-          const product = await Product.findOne({ id: orderProduct.product });
-          return {
-            ...orderProduct,
-            product: product
-              ? {
-                id: product.id,
-                name: product.name,
-                description: product.description,
-                price: product.price,
-                quantity: product.quantity,
-                image: product.image,
-              }
-              : null,
-          };
-        })
-      );
-
-      // Bereite die vollständigen Daten für die Antwort vor
-      const detailedOrder = {
-        ...order,
-        user: filteredUser,
-        shipping: filteredShipping,
-        payment: filteredPayment,
-        orderProducts: orderProductsWithDetails,
-      };
-
-      return res.json(detailedOrder);
+      const order = await OrderService.findOrderById(req);
+      return res.json(order);
     } catch (error) {
       sails.log.error('Error fetching order details:', error);
+      if (error instanceof errors.CustomError) {
+        return res.status(error.status).json({ error: error.message });
+      }
       return res.serverError({ error: 'An error occurred while fetching order details.' });
     }
   },
 
+  /**
+   * Ruft alle Bestellungen eines Benutzers ab
+   *
+   * @description
+   * Diese Aktion ruft den entsprechenden Service auf, um alle Bestellungen des aktuell
+   * authentifizierten session Users zu laden.
+   *
+   * @param {Request} req - Der eingehende HTTP-Request mit der Benutzer-ID in der Session.
+   * @param {Response} res - Der HTTP-Response mit der Liste der Bestellungen des Benutzers.
+   * @returns {Response} 200 OK mit den Benutzerbestellungen oder ein Fehlerstatus.
+   */
   findOrdersByUser: async function (req, res) {
-    const userId = req.session.userId;
-
     try {
-      const orders = await Order.find({ user: userId })
-        .populate('payment')
-        .populate('shipping')
-        .populate('orderProducts');
-
-      // Fetch product and address details for each order
-      const detailedOrders = await Promise.all(
-        orders.map(async (order) => {
-          // Populate products in orderProducts
-          const populatedOrderProducts = await Promise.all(
-            order.orderProducts.map(async (orderProduct) => {
-              const product = await Product.findOne({ id: orderProduct.product });
-              return {
-                ...orderProduct,
-                product,
-              };
-            })
-          );
-
-          // Populate address details from shipping
-          let shippingAddress = null;
-          if (order.shipping && order.shipping.address) {
-            shippingAddress = await Address.findOne({ id: order.shipping.address });
-          }
-
-          return {
-            ...order,
-            orderProducts: populatedOrderProducts,
-            shipping: {
-              ...order.shipping,
-              address: shippingAddress,
-            },
-          };
-        })
-      );
-
-      return res.ok(detailedOrders);
+      const orders = await OrderService.findOrdersByUser(req);
+      return res.ok(orders);
     } catch (error) {
-      sails.log.error('Error fetching orders with details:', error);
-      return res.serverError({ error: 'An error occurred while fetching orders.' });
+      sails.log.error('Error fetching user orders:', error);
+      if (error instanceof errors.CustomError) {
+        return res.status(error.status).json({ error: error.message });
+      }
+      return res.serverError({ error: 'An error occurred while fetching user orders.' });
     }
   },
 
+  /**
+   * Storniert eine Bestellung
+   *
+   * @description
+   * Diese Aktion ruft den entsprechenden Service auf, um eine Bestellung des aktuell
+   * authentifizierten Benutzers zu stornieren, sofern dies zulässig ist.
+   *
+   * @param {Request} req - Der eingehende HTTP-Request mit der Bestell-ID in `req.params.id`.
+   * @param {Response} res - Der HTTP-Response mit der aktualisierten Bestellung.
+   * @returns {Response} 200 OK mit der aktualisierten Bestellung oder ein Fehlerstatus.
+   */
   cancelOrder: async function (req, res) {
     try {
-      const orderId = req.params.id;
-      const userId = req.session.userId;
-
-      // Check if the order ID is provided
-      if (!orderId) {
-        return res.badRequest({ error: 'Order ID is required.' });
-      }
-
-      // Fetch the order
-      const order = await Order.findOne({ id: orderId });
-
-      // Check if the order exists
-      if (!order) {
-        return res.notFound({ error: 'Order not found.' });
-      }
-
-      // Check if my order
-      if(order.user !== userId) {
-        return res.badRequest({ error: 'NOT MY ORDER' });
-      }
-
-      // Check if the order can be canceled (only "open" and "processing" allowed)
-      if (!['open', 'processing'].includes(order.orderStatus)) {
-        return res.badRequest({
-          error: 'Order cannot be canceled. Only orders with status "open" or "processing" can be canceled.',
-        });
-      }
-
-      // Update the order status to "cancel"
-      const updatedOrder = await Order.updateOne({ id: orderId }).set({ orderStatus: 'canceled' });
-
-      // Return the updated order
+      const updatedOrder = await OrderService.cancelOrder(req);
       return res.ok(updatedOrder);
     } catch (error) {
       sails.log.error('Error canceling order:', error);
+      if (error instanceof errors.CustomError) {
+        return res.status(error.status).json({ error: error.message });
+      }
       return res.serverError({ error: 'An error occurred while canceling the order.' });
     }
   },
 
+  /**
+   * Zählt alle Bestellungen und kategorisiert sie nach ihrem Status (Metadaten fuer Dashboard)
+   *
+   * @description
+   * Diese Aktion ruft den entsprechenden Service auf, um die Gesamtzahl der Bestellungen
+   * sowie die Anzahl abgeschlossener und aktiver Bestellungen zu berechnen.
+   *
+   * @param {Request} req - Der eingehende HTTP-Request.
+   * @param {Response} res - Der HTTP-Response mit den Bestellstatistiken.
+   * @returns {Response} 200 OK mit den Bestellstatistiken oder ein Fehlerstatus.
+   */
   count: async function (req, res) {
     try {
-
-      // Abrufen aller Bestellungen mit ihren Statuswerten
-      const orders = await Order.find({
-        select: ['orderStatus']
-      });
-
-      // Initialisiere Zähler
-      let total = orders.length;
-      let finished = 0;
-      let active = 0;
-
-      // Kategorien zuordnen
-      orders.forEach(order => {
-        if (['successful', 'refunded', 'canceled'].includes(order.orderStatus)) {
-          finished++;
-        } else if (['processing', 'open'].includes(order.orderStatus)) {
-          active++;
-        }
-      });
-
-      return res.json({
-        total,
-        finished,
-        active
-      });
-    } catch (err) {
-      sails.log.error('Error fetching order counts:', err);
-      if (err instanceof errors.CustomError) {
-        return res.status(err.status).json({ error: err.message });
+      const counts = await OrderService.countOrders();
+      return res.json(counts);
+    } catch (error) {
+      sails.log.error('Error fetching order counts:', error);
+      if (error instanceof errors.CustomError) {
+        return res.status(error.status).json({ error: error.message });
       }
-
-      return res.serverError('An unexpected error occurred.');
+      return res.serverError({ error: 'An error occurred while fetching order counts.' });
     }
   }
 
-  //TODO: Soft Delete fuer Orders implementieren bzw ueberhaupt noetig ? Canceln und fertig ?
 };

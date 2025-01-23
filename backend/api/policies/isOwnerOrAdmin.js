@@ -2,6 +2,11 @@
  * isOwnerOrAdmin
  *
  * Erlaubt Zugriff, wenn der Benutzer entweder ein Admin ist oder seine eigenen Daten bearbeitet.
+ *
+ * For more about how to use policies, see:
+ *   https://sailsjs.com/config/policies
+ *   https://sailsjs.com/docs/concepts/policies
+ *   https://sailsjs.com/docs/concepts/policies/access-control-and-permissions
  */
 module.exports = async function (req, res, proceed) {
   const userId = req.session.userId;

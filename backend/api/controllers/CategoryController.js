@@ -3,7 +3,7 @@
  *
  * @description :: Server-side actions for handling incoming requests related to categories.
  *                 Dieser Controller kümmert sich um das Routing und verwendet den Service,
- *                 um die Kategorien aus der Datenbank abzurufen.
+ *                 um die Kategorien zu verwalten.
  *
  * @help        :: Siehe Sails.js-Dokumentation unter https://sailsjs.com/docs/concepts/actions
  */
@@ -23,16 +23,13 @@ module.exports = {
    */
   create: async function(req, res) {
     try {
-      const { name, type } = req.body;
-      const category = await CategoryService.createCategory({ name, type });
+      const category = await CategoryService.createCategory(req);
       return res.json(category);
     } catch (err) {
       sails.log.error('Error:', err.message);
-
       if (err instanceof errors.CustomError) {
         return res.status(err.status).json({ error: err.message });
       }
-
       return res.serverError('An unexpected error occurred.');
     }
   },
@@ -53,11 +50,9 @@ module.exports = {
       return res.json(categories);
     } catch (err) {
       sails.log.error('Error:', err.message);
-
       if (err instanceof errors.CustomError) {
         return res.status(err.status).json({ error: err.message });
       }
-
       return res.serverError('An unexpected error occurred.');
     }
   },
@@ -78,11 +73,9 @@ module.exports = {
       return res.json(category);
     } catch (err) {
       sails.log.error('Error:', err.message);
-
       if (err instanceof errors.CustomError) {
         return res.status(err.status).json({ error: err.message });
       }
-
       return res.serverError('An unexpected error occurred.');
     }
   },
@@ -103,11 +96,9 @@ module.exports = {
       return res.ok();
     } catch (err) {
       sails.log.error('Error:', err.message);
-
       if (err instanceof errors.CustomError) {
         return res.status(err.status).json({ error: err.message });
       }
-
       return res.serverError('An unexpected error occurred.');
     }
   }

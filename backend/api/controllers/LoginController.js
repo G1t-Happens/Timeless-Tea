@@ -2,7 +2,9 @@
  * LoginController
  *
  * @description :: Server-side actions for handling incoming requests.
- *                 Hier wird nur noch die Request/Response-Logik definiert.
+ *                 Dieser Controller kümmert sich um das Routing und verwendet den Service,
+ *                 um die Logins/Registrierungen etc. zu verwalten.
+ *
  * @help        :: See https://sailsjs.com/docs/concepts/actions
  */
 const errors = require('../utils/errors');
@@ -17,17 +19,14 @@ module.exports = {
    */
   login: async function (req, res) {
     try {
-      const { emailAddress, password } = req.body;
       // Benutzer über den Service einloggen
-      const user = await LoginService.loginUser(emailAddress, password, req);
+      const user = await LoginService.loginUser(req);
       return res.json(user);
     } catch (err) {
       sails.log.error('Error:', err.message);
-
       if (err instanceof errors.CustomError) {
         return res.status(err.status).json({ error: err.message });
       }
-
       return res.serverError('An unexpected error occurred.');
     }
   },
@@ -44,11 +43,9 @@ module.exports = {
       return res.json(user);
     } catch (err) {
       sails.log.error('Error:', err.message);
-
       if (err instanceof errors.CustomError) {
         return res.status(err.status).json({ error: err.message });
       }
-
       return res.serverError('An unexpected error occurred.');
     }
   },
@@ -65,11 +62,9 @@ module.exports = {
       return res.json(user);
     } catch (err) {
       sails.log.error('Error:', err.message);
-
       if (err instanceof errors.CustomError) {
         return res.status(err.status).json({ error: err.message });
       }
-
       return res.serverError('An unexpected error occurred.');
     }
   },
@@ -86,11 +81,9 @@ module.exports = {
       return res.ok();
     } catch (err) {
       sails.log.error('Error:', err.message);
-
       if (err instanceof errors.CustomError) {
         return res.status(err.status).json({ error: err.message });
       }
-
       return res.serverError('An unexpected error occurred.');
     }
   },

@@ -17,20 +17,20 @@ module.exports = {
    * @description
    * Erstellt eine neue Zahlungsmethode in der Datenbank.
    *
-   * @param {Object} params - Die Parameter zum Erstellen einer neuen Zahlungsmethode.
-   * @param {string} params.paymentOption - Die Art der Zahlungsmethode.
-   * @param {string} params.iban - Die IBAN, falls Zahlungsmethode = bank transfer.
-   * @param {string} params.creditCardNumber - Die Kreditkartennummer, falls Zahlungsmethode = credit card.
-   * @param {string} params.expiryDate - Das Ablaufdatum, falls Zahlungsmethode = credit card.
-   * @param {boolean} params.cvc - Das CVC, falls Zahlungsmethode = credit card.
-   * @param {boolean} params.paypalEmail - Die Email, falls Zahlungsmethode = paypal.
-   * @param {boolean} params.user - Der user, fuer den diese Zahlungsmethode gedacht ist.
+   * @param {object} req - Das Sails.js-Request-Objekt
    *
    * @throws {BadRequestError} Wenn eines der Pflichtfelder fehlt.
    *
    * @returns {Promise<Object>} Die neu erstellte Nachricht als Datensatz.
    */
-  createPayment: async function ({ paymentOption, iban, creditCardNumber, expiryDate, cvc, paypalEmail, user }) {
+  createPayment: async function (req) {
+    const { paymentOption, iban, creditCardNumber, expiryDate, cvc, paypalEmail, user } = req.body;
+    const sessionUserId = req.session.userId;
+
+    //Man darf nur fuer sich selbst Payments adden, ausser man ist ein Admin
+    if (Number(sessionUserId) !== Number(user) && !req.session.user.isAdmin) {
+      return errors.ForbiddenError('Not allowed to add payment for this user.');
+    }
 
     // Validierung der erforderlichen Felder
     if (!paymentOption || !user) {
@@ -71,11 +71,18 @@ module.exports = {
    * @description
    * Sucht nach den Zahlungsmethode Zahlungsmethoden des jeweiligen Nutzers.
    *
-   * @param {Object} id - Die id der Users fuer welche wir alle Payments anzeigen lassen wollen.
+   * @param {object} req - Das Sails.js-Request-Objekt
    *
    * @returns {Promise<Object>} Alle Userspezifischen Payment-Objekt aus der DB.
    */
-  findByUserId: async function ({ id }) {
+  findByUserId: async function (req) {
+    const userId = req.params.userId;
+    const sessionUserId = req.session.userId;
+
+    // Autorisierung: Gehört das gesuchte Payment dem eingeloggten User oder ist er Admin?
+    if (Number(sessionUserId) !== Number(userId) && !req.session.user.isAdmin) {
+      return errors.ForbiddenError('Not allowed to find payment for this user.');
+    }
 
     // In der Daten nach allen Payments anhand des Users suchen
     const payments = await Payment.find({ user: id });
@@ -94,29 +101,36 @@ module.exports = {
    * Aktualisiert eine vorhandene Zahlungsmethode.
    * Setzt Felder nur dann neu, wenn eine bestimmte `paymentOption` dies erfordert.
    *
-   * @param {Object} params - Objekt mit allen Parametern.
-   * @param {Object} params.oldPayment - Das vorhandene Payment-Objekt (bereits aus DB geladen).
-   * @param {string} params.paymentOption - Neue Zahlungsoption (z.B. bank transfer, credit card, paypal).
-   * @param {string} [params.iban] - Neue IBAN, falls Banküberweisung.
-   * @param {string} [params.creditCardNumber] - Neue Kreditkartennummer, falls Kreditkarte.
-   * @param {string} [params.expiryDate] - Neues Ablaufdatum, falls Kreditkarte.
-   * @param {string} [params.cvc] - Neuer CVC, falls Kreditkarte.
-   * @param {string} [params.paypalEmail] - Neue PayPal-E-Mail-Adresse, falls PayPal.
+   * @param {object} req - Das Sails.js-Request-Objekt
    *
    * @returns {Promise<Object>} Das aktualisierte Payment-Objekt aus der DB.
    */
-  updatePayment: async function ({ oldPayment, paymentOption, iban, creditCardNumber, expiryDate, cvc, paypalEmail }) {
-    // Die ID, die aktualisiert werden soll
-    const { id } = oldPayment;
+  updatePayment: async function (req) {
+    const id = req.params.id;
+    const sessionUserId = req.session.userId;
+    const { paymentOption, iban, creditCardNumber, expiryDate, cvc, paypalEmail } = req.body;
+
+    // Lade die vorhandene Payment-Entität
+    const payment = await Payment.findOne({ id });
+    if (!payment) {
+      // Falls es die Payment-ID nicht gibt, direkt 404 liefern ohne weitere Verarbeitungsschritte
+      return errors.NotFoundError('Payment not found.' );
+    }
+
+    // Autorisierung: Gehört das Payment dem eingeloggten User oder ist er Admin?
+    if (Number(payment.user) !== Number(sessionUserId) && !req.session.user.isAdmin) {
+      // Falls nicht, 403 direkt liefern ohne weitere Verarbeitungsschritte
+      return errors.ForbiddenError('Not allowed to update this payment.');
+    }
 
     // Business Logik zur Ausführung des Updates
     const updatedPayment = await Payment.updateOne({ id }).set({
       paymentOption,
-      iban: paymentOption === 'bank transfer' ? iban : oldPayment.iban,
-      creditCardNumber: paymentOption === 'credit card' ? creditCardNumber : oldPayment.creditCardNumber,
-      expiryDate: paymentOption === 'credit card' ? expiryDate : oldPayment.expiryDate,
-      cvc: paymentOption === 'credit card' ? cvc : oldPayment.cvc,
-      paypalEmail: paymentOption === 'paypal' ? paypalEmail : oldPayment.paypalEmail
+      iban: paymentOption === 'bank transfer' ? iban : payment.iban,
+      creditCardNumber: paymentOption === 'credit card' ? creditCardNumber : payment.creditCardNumber,
+      expiryDate: paymentOption === 'credit card' ? expiryDate : payment.expiryDate,
+      cvc: paymentOption === 'credit card' ? cvc : payment.cvc,
+      paypalEmail: paymentOption === 'paypal' ? paypalEmail : payment.paypalEmail
     });
 
     if (!updatedPayment) {
@@ -133,11 +147,21 @@ module.exports = {
    * @description
    * Loescht eine Zahlungsmethode anhand der Payment id.
    *
-   * @param {Object} id - Die id des zu loeschenden Payment Objects.
+   * @param {object} req - Das Sails.js-Request-Objekt
    *
    * @returns {Promise<Object>} Das aktualisierte Payment-Objekt aus der DB.
    */
-  deletePayment: async function ({ id }) {
+  deletePayment: async function (req) {
+    const id = req.params.id;
+    const sessionUserId = req.session.userId;
+
+    // Finde das Payment-Objekt
+    const payment = await Payment.findOne({ id });
+
+    // Autorisierung: Gehört das Payment dem eingeloggten User oder ist er Admin?
+    if (Number(payment.user) !== Number(sessionUserId) && !req.session.user.isAdmin) {
+      return errors.ForbiddenError('Not allowed to delete this payment.');
+    }
 
     // Business Logik zur Ausführung des Updates
     const deletedPayment = await Payment.destroy({ id }).fetch();

@@ -17,13 +17,14 @@ module.exports = {
    * Findet einen User per E-Mail-Adresse, überprüft das Passwort mithilfe von Sails-Helper,
    * wirft Fehler, wenn der User nicht gefunden wird oder das Passwort falsch ist.
    *
-   * @param {string} emailAddress - Die E-Mail-Adresse des Users
-   * @param {string} password - Das eingegebene Passwort
-   * @param {Object} req - Das request object
+   * @param {object} req - Das Sails.js-Request-Objekt
    * @returns {Object} Der gefundene User (ohne Passwort)
    * @throws {NotFoundError|UnauthorizedError} Wirft entsprechende Fehler, falls Benutzer nicht existiert oder das Passwort nicht stimmt
    */
-  loginUser: async function (emailAddress, password, req) {
+  loginUser: async function (req) {
+
+    const { emailAddress, password } = req.body;
+
     // User anhand der E-Mail-Adresse suchen
     let user = await User.findOne({
       emailAddress: emailAddress.toLowerCase(),
@@ -82,7 +83,7 @@ module.exports = {
   registerUser: async function (params, session) {
     const newEmailAddress = params.emailAddress.toLowerCase();
 
-    // --- Prüfe Adress-Objekt ---
+    // Prüfe Adress-Objekt
     if (!params.address) {
       throw new errors.BadRequestError('Missing address object');
     }

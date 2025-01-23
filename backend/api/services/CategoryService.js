@@ -10,12 +10,13 @@ module.exports = {
   /**
    * Erstellt eine neue Kategorie in der Datenbank.
    *
-   * @param {string} name - Der Name der Kategorie.
-   * @param {string} type - Der Typ der Kategorie.
+   * @param {object} req - Das Sails.js-Request-Objekt
    * @returns  Die erstellte Kategorie.
    * @throws {BadRequestError} Wenn die Kategorie nicht erstellt werden konnte.
    */
-  createCategory: async function ({ name, type }) {
+  createCategory: async function (req) {
+
+    const { name, type } = req.body;
 
     if (!name || !type) {
       throw new errors.BadRequestError('Category name and type are required.');

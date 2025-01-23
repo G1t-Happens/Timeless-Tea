@@ -17,19 +17,17 @@ module.exports = {
    * @description
    * Erstellt eine neue Kontakt-Nachricht in der Datenbank.
    *
-   * @param {Object} params - Die Parameter zum Erstellen einer neuen Nachricht.
-   * @param {string} params.name - Der Name der Person, die die Nachricht sendet.
-   * @param {string} params.email - Die Email-Adresse der Person.
-   * @param {string} params.subject - Der Betreff der Nachricht.
-   * @param {string} params.message - Der eigentliche Nachrichteninhalt.
-   * @param {boolean} params.privacy - Einverständnis für den Datenschutz.
+   * @param {object} req - Das Sails.js-Request-Objekt
    *
    * @throws {BadRequestError} Wenn eines der Pflichtfelder fehlt.
    *
    * @returns {Promise<Object>} Die neu erstellte Nachricht als Datensatz.
    */
-  createMessage: async function ({ name, email, subject, message, privacy }) {
+  createMessage: async function (req) {
+    // Extrahiere Messagedaten aus dem Request Body
+    const { name, email, subject, message, privacy } = req.body;
 
+    //Inputvalidation
     if (!name) {
       throw new errors.BadRequestError('Name is required.');
     }
@@ -50,6 +48,7 @@ module.exports = {
       throw new errors.BadRequestError('Privacy agreement is required.');
     }
 
+    //Erstellen einer neuen Nachricht
     return await ContactMessage.create({
       name,
       email,
@@ -68,6 +67,7 @@ module.exports = {
    * @returns {Promise<Array>} Eine Liste aller gefundenen Nachrichten.
    */
   findMessage: async function () {
+    //Suche nach allen Nachrichten in der DB
     return await ContactMessage.find();
   },
 
@@ -77,15 +77,18 @@ module.exports = {
    * @description
    * Lädt eine einzelne Kontakt-Nachricht anhand ihrer ID.
    *
-   * @param {Object} params - Das Parameter-Objekt.
-   * @param {string} params.id - Die eindeutige ID der Nachricht.
+   * @param {object} req - Das Sails.js-Request-Objekt
    *
    * @throws {NotFoundError} Wenn keine Nachricht mit der übergebenen ID gefunden wird.
    *
    * @returns {Promise<Object>} Die gefundene Nachricht.
    */
-  findOneMessage: async function ({ id }) {
+  findOneMessage: async function (req) {
+    // Extrahiere die Messge id aus dem Request
+    const { id } = req.params;
+    // Message anhand der id suchen
     const message = await ContactMessage.findOne({ id });
+    // Falls keine gefunden -> 404
     if(!message) {
       throw new errors.NotFoundError('Message not found.');
     }
@@ -98,15 +101,18 @@ module.exports = {
    * @description
    * Löscht eine Kontakt-Nachricht anhand ihrer ID aus der Datenbank.
    *
-   * @param {Object} params - Das Parameter-Objekt.
-   * @param {string} params.id - Die eindeutige ID der Nachricht.
+   * @param {object} req - Das Sails.js-Request-Objekt
    *
    * @throws {NotFoundError} Wenn keine Nachricht mit der übergebenen ID gefunden wird.
    *
    * @returns {Promise<void>} Kein Rückgabewert bei erfolgreicher Löschung.
    */
-  destroyOneMessage: async function ({ id }) {
+  destroyOneMessage: async function (req) {
+    // Extrahiere die Messge id aus dem Request
+    const { id } = req.params;
+    // Message anhand der id loeschen
     const message = await ContactMessage.destroyOne({ id });
+    // Falls keine gefunden -> 404
     if(!message) {
       throw new errors.NotFoundError('Message not found.');
     }

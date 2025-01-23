@@ -7,8 +7,8 @@
  *
  * @help        :: Siehe Sails.js-Dokumentation unter https://sailsjs.com/docs/concepts/actions
  */
-
 const errors = require('../utils/errors');
+
 module.exports = {
 
   /**
@@ -22,26 +22,16 @@ module.exports = {
    * @returns {Response} Die erstellte Kontakt-Nachricht oder ein Serverfehler.
    */
   create: async function (req, res) {
-    const { name, email, subject, message, privacy } = req.body;
     try {
       // Service aufrufen und Message erstellen
-      const newMessage = await ContactMessageService.createMessage({
-        name,
-        email,
-        subject,
-        message,
-        privacy,
-      });
-
+      const newMessage = await ContactMessageService.createMessage(req);
       return res.status(201).json({ data: newMessage });
 
     } catch (err) {
       sails.log.error('Error:', err.message);
-
       if (err instanceof errors.CustomError) {
         return res.status(err.status).json({ error: err.message });
       }
-
       return res.serverError('An unexpected error occurred.');
     }
   },
@@ -64,11 +54,9 @@ module.exports = {
 
     } catch (err) {
       sails.log.error('Error:', err.message);
-
       if (err instanceof errors.CustomError) {
         return res.status(err.status).json({ error: err.message });
       }
-
       return res.serverError('An unexpected error occurred.');
     }
   },
@@ -84,19 +72,16 @@ module.exports = {
    * @returns {Response} Die gefundene Kontakt-Nachricht oder ein Serverfehler.
    */
   findOne: async function (req, res) {
-    const { id } = req.params;
     try {
       // Service aufrufen und eine Nachrichten anhand der id finden
-      const message = await ContactMessageService.findOneMessage({ id });
+      const message = await ContactMessageService.findOneMessage(req);
       return res.status(200).json({ data: message });
 
     } catch (err) {
       sails.log.error('Error:', err.message);
-
       if (err instanceof errors.CustomError) {
         return res.status(err.status).json({ error: err.message });
       }
-
       return res.serverError('An unexpected error occurred.');
     }
   },
@@ -112,19 +97,16 @@ module.exports = {
    * @returns {Response} Status 200, falls erfolgreich gelöscht, oder ein Serverfehler.
    */
   destroy: async function (req, res) {
-    const { id } = req.params;
     try {
       // Service aufrufen und eine Nachrichten anhand der id loeschen
-      await ContactMessageService.destroyOneMessage({ id });
+      await ContactMessageService.destroyOneMessage(req);
       return res.ok();
 
     } catch (err) {
       sails.log.error('Error:', err.message);
-
       if (err instanceof errors.CustomError) {
         return res.status(err.status).json({ error: err.message });
       }
-
       return res.serverError('An unexpected error occurred.');
     }
   }

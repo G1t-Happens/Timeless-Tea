@@ -2,6 +2,10 @@
  * ProductController
  *
  * @description :: Server-side actions for handling incoming requests related to Products.
+ *                 Dieser Controller kümmert sich um das Routing und verwendet den Service,
+ *                 um die Produkte zu verwalten.
+ *
+ * @help        :: Siehe Sails.js-Dokumentation unter https://sailsjs.com/docs/concepts/actions
  */
 const errors = require('../utils/errors');
 
@@ -54,11 +58,9 @@ module.exports = {
       return res.json(product);
     } catch (err) {
       sails.log.error('Error:', err.message);
-
       if (err instanceof errors.CustomError) {
         return res.status(err.status).json({ error: err.message });
       }
-
       return res.serverError('An unexpected error occurred.');
     }
   },
@@ -82,11 +84,9 @@ module.exports = {
       return res.json(result);
     } catch (err) {
       sails.log.error('Error:', err.message);
-
       if (err instanceof errors.CustomError) {
         return res.status(err.status).json({ error: err.message });
       }
-
       return res.serverError('An unexpected error occurred.');
     }
   },
@@ -109,11 +109,9 @@ module.exports = {
       return res.ok();
     } catch (err) {
       sails.log.error('Error:', err.message);
-
       if (err instanceof errors.CustomError) {
         return res.status(err.status).json({ error: err.message });
       }
-
       return res.serverError('An unexpected error occurred.');
     }
   },
@@ -136,11 +134,9 @@ module.exports = {
       return res.json(updatedProduct);
     } catch (err) {
       sails.log.error('Error:', err.message);
-
       if (err instanceof errors.CustomError) {
         return res.status(err.status).json({ error: err.message });
       }
-
       return res.serverError('An unexpected error occurred.');
     }
   },
@@ -162,11 +158,9 @@ module.exports = {
       return res.json(articleCount);
     } catch (err) {
       sails.log.error('Error:', err.message);
-
       if (err instanceof errors.CustomError) {
         return res.status(err.status).json({ error: err.message });
       }
-
       return res.serverError('An unexpected error occurred.');
     }
   }

@@ -2,6 +2,10 @@
  * UserController
  *
  * @description :: Server-side actions for handling incoming requests related to Users.
+ *                 Dieser Controller kümmert sich um das Routing und verwendet den Service,
+ *                 um die Benutzer zu verwalten.
+ *
+ * @help        :: Siehe Sails.js-Dokumentation unter https://sailsjs.com/docs/concepts/actions
  */
 const errors = require('../utils/errors');
 
@@ -23,11 +27,9 @@ module.exports = {
       return res.json(user);
     } catch (err) {
       sails.log.error('Error in UserController.findOne:', err);
-
       if (err instanceof errors.CustomError) {
         return res.status(err.status).json({ error: err.message });
       }
-
       return res.serverError('Ein unerwarteter Fehler ist aufgetreten.');
     }
   },
@@ -50,11 +52,9 @@ module.exports = {
       return res.json(result);
     } catch (err) {
       sails.log.error('Error in UserController.find:', err);
-
       if (err instanceof errors.CustomError) {
         return res.status(err.status).json({ error: err.message });
       }
-
       return res.serverError('Ein unerwarteter Fehler ist aufgetreten.');
     }
   },
@@ -76,11 +76,9 @@ module.exports = {
       return res.json(updatedUser);
     } catch (err) {
       sails.log.error('Error in UserController.patch:', err);
-
       if (err instanceof errors.CustomError) {
         return res.status(err.status).json({ error: err.message });
       }
-
       return res.serverError('Ein unerwarteter Fehler ist aufgetreten.');
     }
   },
@@ -102,11 +100,9 @@ module.exports = {
       return res.ok();
     } catch (err) {
       sails.log.error('Error in UserController.destroy:', err);
-
       if (err instanceof errors.CustomError) {
         return res.status(err.status).json({ error: err.message });
       }
-
       return res.serverError('Ein unerwarteter Fehler ist aufgetreten.');
     }
   },
@@ -128,11 +124,9 @@ module.exports = {
       return res.json(userCount);
     } catch (err) {
       sails.log.error('Error:', err.message);
-
       if (err instanceof errors.CustomError) {
         return res.status(err.status).json({ error: err.message });
       }
-
       return res.serverError('An unexpected error occurred.');
     }
   }
