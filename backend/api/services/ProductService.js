@@ -72,44 +72,54 @@ module.exports = {
    */
   findProductById: async function (req) {
     const productId = req.params.id;
+    // Prüfen, ob der Benutzer Admin ist
+    const isAdmin = checkIsAdmin(req);
 
     // Produkt-ID muss vorhanden sein, ansonsten BadRequestError
     if (!productId) {
       throw new errors.BadRequestError('Product ID is required.');
     }
 
+    // Normale User duerfen keine "soft-deleted"-Produkte angeboten bekommen, nur Admins sollen alles sehen
+    let deleteFilter = '';
+    if (!isAdmin) {
+      deleteFilter = 'AND p.isDeleted = false';
+    }
+
     // Query zum Laden des Produktes, inkl. Kategorien und Durchschnittsbewertung
+    // Hier hängen wir den Filter für isDeleted an die WHERE-Klausel an
     const query = `
-      SELECT p.id,
-             p.name,
-             p.description,
-             p.price,
-             p.quantity,
-             p.image,
-             p.isDeleted,
-             COUNT(pr.rating) AS "reviews",
-             COALESCE(AVG(r.stars), 0) AS "averageRating",
-             (
-               SELECT JSON_ARRAYAGG(
-                        JSON_OBJECT(
-                          'id', unique_categories.id,
-                          'name', unique_categories.name,
-                          'type', unique_categories.type
-                        )
+    SELECT p.id,
+           p.name,
+           p.description,
+           p.price,
+           p.quantity,
+           p.image,
+           p.isDeleted,
+           COUNT(pr.rating) AS "reviews",
+           COALESCE(AVG(r.stars), 0) AS "averageRating",
+           (
+             SELECT JSON_ARRAYAGG(
+                      JSON_OBJECT(
+                        'id', unique_categories.id,
+                        'name', unique_categories.name,
+                        'type', unique_categories.type
                       )
-               FROM (
-                      SELECT DISTINCT c.id, c.name, c.type
-                      FROM productcategory pc
-                             JOIN category c ON pc.category = c.id
-                      WHERE pc.product = p.id
-                    ) AS unique_categories
-             ) AS "productCategories"
-      FROM product p
-             LEFT JOIN productrating pr ON p.id = pr.product
-             LEFT JOIN rating r ON pr.rating = r.id
-      WHERE p.id = $1
-      GROUP BY p.id
-    `;
+                    )
+             FROM (
+                    SELECT DISTINCT c.id, c.name, c.type
+                    FROM productcategory pc
+                           JOIN category c ON pc.category = c.id
+                    WHERE pc.product = p.id
+                  ) AS unique_categories
+           ) AS "productCategories"
+    FROM product p
+           LEFT JOIN productrating pr ON p.id = pr.product
+           LEFT JOIN rating r ON pr.rating = r.id
+    WHERE p.id = $1
+      ${deleteFilter}
+    GROUP BY p.id
+  `;
 
     const result = await sails.sendNativeQuery(query, [productId]);
     const product = result.rows[0];
