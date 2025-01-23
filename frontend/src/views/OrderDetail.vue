@@ -217,7 +217,7 @@ const loading = ref(false)
 const searchQuery = ref('')
 const activePage = ref(1)
 const historyPage = ref(1)
-const itemsPerPage = 5
+const itemsPerPage = 3
 
 const fetchOrders = async () => {
   loading.value = true
@@ -394,10 +394,20 @@ fetchOrders()
   color: #555;
 }
 
+/* Container that holds both sections side by side (on larger screens) and wraps on smaller screens */
 .orders-container {
   display: flex;
-  justify-content: space-between;
+  flex-wrap: wrap;
   gap: 20px;
+}
+
+/* Each section is allowed to take up to 50% of the width on wider screens
+   and automatically stacks on smaller screens due to flex-wrap */
+.active-orders,
+.order-history {
+  flex: 1 1 calc(50% - 20px);
+  box-sizing: border-box;
+  min-width: 300px; /* Ensures they don't get too narrow */
 }
 
 .order-list {
@@ -408,12 +418,16 @@ fetchOrders()
 }
 
 .order-item {
+  display: flex;
+  flex-direction: column;
   border: 1px solid #ddd;
   border-radius: 8px;
   padding: 20px;
   background-color: #fff;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
   transition: transform 0.2s;
+  height: 630px;
+  overflow-y: auto;
 }
 
 .order-item:hover {
@@ -507,7 +521,7 @@ fetchOrders()
 }
 
 .order-actions {
-  margin-top: 20px;
+  margin-top: auto;
   text-align: right;
 }
 
@@ -539,6 +553,7 @@ fetchOrders()
   font-size: 16px;
 }
 
+/* Pagination */
 .pagination {
   display: flex;
   justify-content: center;
