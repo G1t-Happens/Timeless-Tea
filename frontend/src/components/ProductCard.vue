@@ -64,9 +64,13 @@
           </button>
 
           <!-- In den Warenkorb legen -->
-          <button @click.stop.prevent="addToCart" class="btn btn-image" type="button">
+          <button @click.stop.prevent="toggleCart" class="btn btn-image" type="button">
             <img
-              src="../../src/assets/icons/shopingcart.webp"
+              :src="
+                isInShoppingCart
+                  ? '../../src/assets/icons/shoppingCartFull.webp'
+                  : '../../src/assets/icons/shopingcart.webp'
+              "
               alt="Zum Einkaufswagen hinzufügen"
               class="card-button"
             />
@@ -95,8 +99,9 @@ const props = defineProps({
   },
 })
 
-// Computed: Produkt in Wishlist?
+// Computed: Produkt in Wishlist/Cart?
 const isWished = computed(() => wishlistStore.isWished(props.product.id))
+const isInShoppingCart = computed(() => cartStore.isInShoppingCart(props.product.id))
 
 // Computed: Sterne
 const fullStars = computed(() => Math.floor(props.product.averageRating))
@@ -110,16 +115,28 @@ const truncatedDescription = computed(() => {
 })
 
 // In den Warenkorb
-const addToCart = () => {
-  cartStore.addToCart(props.product, 1)
-  Swal.fire({
-    title: 'Artikel dem Warenkorb hinzugefügt!',
-    text: `1 Artikel: "${props.product.name}" wurde dem Warenkorb hinzugefügt.`,
-    icon: 'success',
-    showConfirmButton: false,
-    timer: 1500,
-    timerProgressBar: true,
-  })
+const toggleCart = () => {
+  if (isInShoppingCart.value) {
+    cartStore.removeFromCart(props.product.id)
+    Swal.fire({
+      title: 'Artikel dem Warenkorb entfernt!',
+      text: `1 Artikel: "${props.product.name}" wurde aus dem Warenkorb entfernt.`,
+      icon: 'success',
+      showConfirmButton: false,
+      timer: 1500,
+      timerProgressBar: true,
+    })
+  } else {
+    cartStore.addToCart(props.product, 1)
+    Swal.fire({
+      title: 'Artikel dem Warenkorb hinzugefügt!',
+      text: `1 Artikel: "${props.product.name}" wurde dem Warenkorb hinzugefügt.`,
+      icon: 'success',
+      showConfirmButton: false,
+      timer: 1500,
+      timerProgressBar: true,
+    })
+  }
 }
 
 // Wishlist togglen

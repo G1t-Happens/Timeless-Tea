@@ -51,8 +51,8 @@
             <button @click="increaseQuantity" class="quantity-button">+</button>
           </div>
           <!-- Warenkorb Button mit Icon -->
-          <button @click="addToCart" class="btn">
-            <i :class="isInCard ? 'bi bi-cart-fill' : 'bi bi-cart'"></i> In den Warenkorb
+          <button @click="toggleCart" class="btn">
+            <i :class="isInCart ? 'bi bi-cart-fill' : 'bi bi-cart'"></i> In den Warenkorb
           </button>
         </div>
         <!-- Wunschzettel Button mit Herz-Icon -->
@@ -122,9 +122,9 @@ const pricePerKg = computed(() => {
   return 0.0
 })
 
-// Zustände für den Wunschzettel und Cart
+// Zustände für den Wunschzettel und Cart berechnen
 const isWished = computed(() => wishlistStore.isWished(parseInt(productId)))
-const isInCard = computed(() => cartStore.isWished(productId))
+const isInCart = computed(() => cartStore.isInShoppingCart(parseInt(productId)))
 
 // Funktion zum Abrufen der Produktdetails
 const fetchProduct = async () => {
@@ -157,27 +157,38 @@ const decreaseQuantity = () => {
 }
 
 // Funktion zum Hinzufügen zum Warenkorb
-const addToCart = () => {
-  if (quantity.value < 1 || !Number.isInteger(quantity.value)) {
+const toggleCart = () => {
+  if (cartStore.isInShoppingCart(product.value.id)) {
+    cartStore.removeFromCart(product.value.id)
     Swal.fire({
-      title: 'Ungültige Menge!',
-      text: 'Bitte eine gültige Menge (mindestens 1 Einheit) eingeben.',
-      icon: 'warning',
-      confirmButtonText: 'OK',
+      title: 'Erfolgreich entfernt!',
+      text: `Artikel: ${product.value.name} wurden aus dem Warenkorb entfernt.`,
+      icon: 'success',
+      showConfirmButton: false,
+      timer: 1500,
+      timerProgressBar: true,
     })
-    return
+  } else {
+    //Input validation und falls quantity ok -> in den Warenkorb legen
+    if (quantity.value < 1 || !Number.isInteger(quantity.value)) {
+      Swal.fire({
+        title: 'Ungültige Menge!',
+        text: 'Bitte eine gültige Menge (mindestens 1 Einheit) eingeben.',
+        icon: 'warning',
+        confirmButtonText: 'OK',
+      })
+      return
+    }
+    cartStore.addToCart(product.value, quantity.value)
+    Swal.fire({
+      title: 'Erfolgreich hinzugefügt!',
+      text: `${quantity.value} Einheit(en) von ${product.value.name} wurden in den Warenkorb gelegt.`,
+      icon: 'success',
+      showConfirmButton: false,
+      timer: 1500,
+      timerProgressBar: true,
+    })
   }
-
-  cartStore.addToCart(product.value, quantity.value)
-
-  Swal.fire({
-    title: 'Erfolgreich hinzugefügt!',
-    text: `${quantity.value} Einheit(en) von ${product.value.name} wurden in den Warenkorb gelegt.`,
-    icon: 'success',
-    showConfirmButton: false,
-    timer: 1500,
-    timerProgressBar: true,
-  })
 }
 
 // Funktionen zum Öffnen und Schließen des Modals

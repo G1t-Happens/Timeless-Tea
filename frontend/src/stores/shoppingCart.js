@@ -15,7 +15,7 @@ export const useCartStore = defineStore('cart', {
     totalItems: (state) => {
       return state.items.reduce((total, item) => total + item.productQuantity, 0)
     },
-    isWished: (state) => (productId) => {
+    isInShoppingCart: (state) => (productId) => {
       return state.items.some((item) => item.id === productId)
     },
   },
