@@ -167,8 +167,9 @@ module.exports = {
     const { page = 1, size = 10, search, productId, userName } = req.query;
 
     // Pagination-Parameter
+    const currentPage = parseInt(page);
     const limit = parseInt(size);
-    const skip = (parseInt(page) - 1) * limit;
+    const skip = (currentPage - 1) * limit;
 
     let query = {};
 
@@ -230,10 +231,24 @@ module.exports = {
     // Gesamte Anzahl der Bestellungen
     const totalOrders = await Order.count(query);
 
-    return {
-      total: totalOrders,
-      orders: enrichedOrders,
-    };
+    // Berechnung für Pagination
+    const totalPages = Math.ceil(totalOrders / limit);
+    const hasMore = currentPage < totalPages;
+
+    if (page !== null && size !== null) {
+      return {
+        orders: enrichedOrders,
+        total: totalOrders,
+        totalPages,
+        currentPage,
+        hasMore
+      };
+    } else {
+      return {
+        orders: enrichedOrders,
+        total: totalOrders,
+      }
+    }
   },
 
   /**
