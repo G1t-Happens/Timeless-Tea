@@ -553,7 +553,7 @@ async function uploadFileToCloudinary(req, fieldName, productImage = '') {
  */
 function checkIsAdmin(req) {
   // Sicherheitsprüfung: Ist der Benutzer eingeloggt und hat eine gültige Session?
-  if (!req.session || !req.session.user) {
+  if (!req?.session?.user) {
     return false;
   }
 
