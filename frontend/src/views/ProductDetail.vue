@@ -134,6 +134,7 @@ const fetchProduct = async () => {
   } catch (error) {
     console.error('Fehler beim Laden der Produktdetails:', error)
     await Swal.fire({
+      backdrop: false,
       title: 'Fehler beim Laden der Produktdetails!',
       text: error.response?.data?.error || 'Ein unbekannter Fehler ist aufgetreten.',
       icon: 'error',
@@ -161,9 +162,10 @@ const toggleCart = () => {
   if (cartStore.isInShoppingCart(product.value.id)) {
     cartStore.removeFromCart(product.value.id)
     Swal.fire({
+      backdrop: false,
       title: 'Erfolgreich entfernt!',
       text: `Artikel: ${product.value.name} wurden aus dem Warenkorb entfernt.`,
-      icon: 'success',
+      icon: 'info',
       showConfirmButton: false,
       timer: 1500,
       timerProgressBar: true,
@@ -172,6 +174,7 @@ const toggleCart = () => {
     //Input validation und falls quantity ok -> in den Warenkorb legen
     if (quantity.value < 1 || !Number.isInteger(quantity.value)) {
       Swal.fire({
+        backdrop: false,
         title: 'Ungültige Menge!',
         text: 'Bitte eine gültige Menge (mindestens 1 Einheit) eingeben.',
         icon: 'warning',
@@ -181,6 +184,7 @@ const toggleCart = () => {
     }
     cartStore.addToCart(product.value, quantity.value)
     Swal.fire({
+      backdrop: false,
       title: 'Erfolgreich hinzugefügt!',
       text: `${quantity.value} Einheit(en) von ${product.value.name} wurden in den Warenkorb gelegt.`,
       icon: 'success',
@@ -206,6 +210,7 @@ const toggleWishlist = () => {
 
   if (wishlistStore.isWished(product.value.id)) {
     Swal.fire({
+      backdrop: false,
       title: 'Zum Wunschzettel hinzugefügt!',
       text: `${product.value.name} wurde erfolgreich zum Wunschzettel hinzugefügt.`,
       icon: 'success',
@@ -215,6 +220,7 @@ const toggleWishlist = () => {
     })
   } else {
     Swal.fire({
+      backdrop: false,
       title: 'Vom Wunschzettel entfernt!',
       text: `${product.value.name} wurde vom Wunschzettel entfernt.`,
       icon: 'info',
