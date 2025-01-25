@@ -101,7 +101,12 @@
 
         <!-- Modal-Aktionen -->
         <div class="modal-actions">
-          <button class="btn btn-primary" @click="handleConfirm" :disabled="isConfirmDisabled">
+          <button
+            class="btn btn-primary"
+            style="background-color: #4a5043"
+            @click="handleConfirm"
+            :disabled="isConfirmDisabled"
+          >
             Übernehmen
           </button>
           <button class="btn btn-danger" @click="closeModal">Abbrechen</button>
@@ -475,20 +480,20 @@ async function updatePayment(paymentId, paymentData) {
 }
 
 .btn-primary {
-  background-color: #4a5043;
+  background-color: #4a5043 !important;
   color: white;
 }
 
 .btn-primary:hover {
-  background-color: #9fa86d;
+  background-color: #9fa86d !important;
 }
 
 .btn-danger {
-  background-color: #c06e52;
+  background-color: #c06e52 !important;
   color: white;
 }
 
 .btn-danger:hover {
-  background-color: #c0392b;
+  background-color: #c0392b !important;
 }
 </style>
