@@ -11,6 +11,7 @@
           v-model="searchQuery"
           type="text"
           placeholder="Suche nach Bestellungen..."
+          maxlength="50"
           class="search-input"
         />
       </div>
