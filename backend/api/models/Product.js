@@ -24,8 +24,8 @@ module.exports = {
      */
     description: {
       type: 'string',
-      columnType: 'varchar(1024)',
-      maxLength: 1024,
+      columnType: 'varchar(512)',
+      maxLength: 512,
     },
 
     /**
@@ -57,10 +57,11 @@ module.exports = {
      */
     quantity: {
       type: 'number',
-      columnType: 'decimal(10,2)',
-      min: 0,
+      required: true,
+      min: 1,
       max: 100000,
-      required: false
+      custom: (value) => Number.isInteger(value), // Akzeptiert nur Ganzzahlen
+      description: 'Menge, nur Ganzzahlen erlaubt',
     },
 
     /**
