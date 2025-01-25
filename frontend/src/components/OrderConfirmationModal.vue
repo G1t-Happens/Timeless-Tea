@@ -117,7 +117,7 @@ const confirmOrder = () => emit('confirm')
   background: #ffffff;
   padding: 30px;
   border-radius: 8px;
-  width: 600px;
+  width: 800px;
   max-width: 90%;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   display: flex;
