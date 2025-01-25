@@ -60,7 +60,7 @@
         <div v-if="currentUser?.isAdmin" class="form-group toggle-switch">
           <label class="form-label" for="isAdmin">Admin</label>
           <label class="switch" aria-labelledby="isAdmin">
-            <input v-model="user.isAdmin" type="checkbox" id="isAdmin" required />
+            <input v-model="user.isAdmin" type="checkbox" id="isAdmin" />
             <span class="slider round"></span>
           </label>
         </div>
