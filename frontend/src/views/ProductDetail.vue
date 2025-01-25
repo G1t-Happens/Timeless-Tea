@@ -48,10 +48,12 @@
               -
             </button>
             <span class="quantity-display">{{ quantity }}</span>
-            <button @click="increaseQuantity" class="quantity-button">+</button>
+            <button @click="increaseQuantity" :disabled="quantity >= 1000" class="quantity-button">
+              +
+            </button>
           </div>
           <!-- Warenkorb Button mit Icon -->
-          <button @click="toggleCart" class="btn">
+          <button @click="toggleCart" :disabled="quantity > 1000 || quantity < 1" class="btn">
             <i :class="isInCart ? 'bi bi-cart-fill' : 'bi bi-cart'"></i> In den Warenkorb
           </button>
         </div>
@@ -172,7 +174,7 @@ const toggleCart = () => {
     })
   } else {
     //Input validation und falls quantity ok -> in den Warenkorb legen
-    if (quantity.value < 1 || !Number.isInteger(quantity.value)) {
+    if (quantity.value < 1 || quantity.value > 1000 || !Number.isInteger(quantity.value)) {
       Swal.fire({
         backdrop: false,
         title: 'Ungültige Menge!',
