@@ -17,9 +17,14 @@ main {
     flex: 1;
 }
 
+button {
+    border: none !important;
+    outline: none !important;
+}
+
 button:active {
-    border: none;
-    outline: none;
+    border: none !important;
+    outline: none !important;
 }
 
 /* Setze den globalen Rand und die Farbe für alle Popups */
