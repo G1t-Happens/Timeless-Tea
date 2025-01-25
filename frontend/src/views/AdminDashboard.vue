@@ -2,9 +2,7 @@
   <div class="admin-dashboard">
     <div class="header">
       <h1 class="text-center admin-title">Admin Dashboard</h1>
-      <h2 v-if="currentUserName" class="welcome-message">
-        Willkommen zurück, {{ currentUserName }}!
-      </h2>
+      <h2 v-if="currentUserName" class="welcome-message">Willkommen, {{ currentUserName }}!</h2>
       <div class="stats-row">
         <div class="stat-card">
           <h3>Artikel</h3>
@@ -201,7 +199,9 @@
 
             <!-- Buttons für Details und Löschen -->
             <div class="text-center mb-5 cardset-admin-button">
-              <button @click="viewOrder(order.id)" class="btn btn-warning">Details/Bearbeiten</button>
+              <button @click="viewOrder(order.id)" class="btn btn-warning">
+                Details/Bearbeiten
+              </button>
             </div>
           </div>
         </div>

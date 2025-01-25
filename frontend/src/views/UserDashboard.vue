@@ -2,9 +2,7 @@
   <div class="user-dashboard">
     <div class="header">
       <h1 class="text-center user-title">User Dashboard</h1>
-      <h2 v-if="currentUserName" class="welcome-message">
-        Willkommen zurück, {{ currentUserName }}!
-      </h2>
+      <h2 v-if="currentUserName" class="welcome-message">Willkommen, {{ currentUserName }}!</h2>
     </div>
 
     <!-- Navigation Buttons -->
