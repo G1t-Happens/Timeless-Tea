@@ -47,6 +47,7 @@ const goBack = () => {
     color 0.3s; /* Übergangseffekte */
 }
 
+/* Hover Color */
 .btn-back:hover {
   background-color: #4a5043; /* Hintergrundfarbe beim Hover */
   color: white; /* Textfarbe beim Hover */

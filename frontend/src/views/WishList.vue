@@ -328,38 +328,40 @@ const truncatedDescription = (description = '') => {
 
 /* Hauptbutton-Farben */
 .btn-primary {
-  background-color: #c06e52;
+  background-color: #4a5043;
   border: none;
   color: #fff;
   padding: 8px 16px;
 }
 
 .btn-primary:hover {
-  background-color: #a65d44;
+  background-color: #9fa86d;
 }
 
 /* Outline-Buttons */
 .btn-outline-primary {
-  background-color: #fff;
-  border: 2px solid #c06e52;
-  color: #c06e52;
+  background-color: #4a5043;
+  border: none;
+  border-radius: 4px;
+  color: white;
   padding: 6px 12px;
 }
 
 .btn-outline-primary:hover {
-  background-color: #c06e52;
+  background-color: #9fa86d;
   color: #fff;
 }
 
 .btn-outline-danger {
-  background-color: #fff;
-  border: 2px solid #dc3545;
-  color: #dc3545;
+  background-color: #c06e52;
+  border: none;
+  border-radius: 4px;
+  color: white;
   padding: 6px 12px;
 }
 
 .btn-outline-danger:hover {
-  background-color: #dc3545;
+  background-color: #8f4c37;
   color: #fff;
 }
 
