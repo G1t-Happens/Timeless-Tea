@@ -16,7 +16,7 @@ module.exports = {
     carrier: {
       type: 'string',
       required: true,
-      maxLength: 200,
+      maxLength: 50,
       example: 'DHL'
     },
 

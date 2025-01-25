@@ -70,7 +70,13 @@
         <form @submit.prevent="saveShippingInfo">
           <div class="form-group">
             <label for="carrier">Versanddienst*:</label>
-            <input type="text" id="carrier" v-model="editableShipping.carrier" required />
+            <input
+              type="text"
+              id="carrier"
+              v-model="editableShipping.carrier"
+              maxlength="50"
+              required
+            />
           </div>
           <div class="form-group">
             <label for="deliveryStatus">Lieferstatus*:</label>
@@ -107,31 +113,60 @@
         <form @submit.prevent="saveDeliveryAddress">
           <div class="form-group">
             <label for="country">Land*:</label>
-            <input type="text" id="country" v-model="editableAddress.country" required />
+            <input
+              type="text"
+              id="country"
+              v-model="editableAddress.country"
+              maxlength="60"
+              required
+            />
           </div>
           <div class="form-group">
             <label for="state">Bundesland(optional):</label>
-            <input type="text" id="state" v-model="editableAddress.state" />
+            <input type="text" id="state" v-model="editableAddress.state" maxlength="50" />
           </div>
           <div class="form-group">
             <label for="city">Stadt*:</label>
-            <input type="text" id="city" v-model="editableAddress.city" required />
+            <input type="text" id="city" v-model="editableAddress.city" maxlength="50" required />
           </div>
           <div class="form-group">
             <label for="postalCode">Postleitzahl*:</label>
-            <input type="text" id="postalCode" v-model="editableAddress.postalCode" required />
+            <input
+              type="text"
+              id="postalCode"
+              v-model="editableAddress.postalCode"
+              maxlength="10"
+              required
+            />
           </div>
           <div class="form-group">
             <label for="street">Straße*:</label>
-            <input type="text" id="street" v-model="editableAddress.street" required />
+            <input
+              type="text"
+              id="street"
+              v-model="editableAddress.street"
+              maxlength="30"
+              required
+            />
           </div>
           <div class="form-group">
             <label for="houseNumber">Hausnummer*:</label>
-            <input type="text" id="houseNumber" v-model="editableAddress.houseNumber" required />
+            <input
+              type="text"
+              id="houseNumber"
+              v-model="editableAddress.houseNumber"
+              maxlength="8"
+              required
+            />
           </div>
           <div class="form-group">
             <label for="addressAddition">Zusatz(optional):</label>
-            <input type="text" id="addressAddition" v-model="editableAddress.addressAddition" />
+            <input
+              type="text"
+              id="addressAddition"
+              v-model="editableAddress.addressAddition"
+              maxlength="150"
+            />
           </div>
           <button
             type="submit"
@@ -158,36 +193,90 @@
           </div>
 
           <div v-if="editablePayment.paymentOption === 'credit card'">
-            <div class="form-group">
+            <div class="form-group" :class="{ 'has-error': errors.creditCardNumber }">
               <label for="creditCardNumber">Kreditkartennummer*:</label>
               <input
                 type="text"
                 id="creditCardNumber"
                 v-model="editablePayment.creditCardNumber"
+                placeholder="z.B. 1234567890123456"
+                minlength="13"
+                maxlength="19"
+                @input="validateCreditCardNumber"
                 required
               />
+              <!-- Fehlermeldung direkt anzeigen -->
+              <span v-if="errors.creditCardNumber" class="error">
+                {{ errors.creditCardNumber }}
+              </span>
             </div>
-            <div class="form-group">
+            <div class="form-group" :class="{ 'has-error': errors.expiryDate }">
               <label for="expiryDate">Ablaufdatum*:</label>
-              <input type="date" id="expiryDate" v-model="editablePayment.expiryDate" required />
+              <input
+                type="date"
+                id="expiryDate"
+                v-model="editablePayment.expiryDate"
+                placeholder="YYYY-MM-DD"
+                @blur="validateExpiryDate"
+                required
+              />
+              <span v-if="errors.expiryDate" class="error">
+                {{ errors.expiryDate }}
+              </span>
             </div>
-            <div class="form-group">
+            <div class="form-group" :class="{ 'has-error': errors.cvc }">
               <label for="cvc">Kartenprüfnummer(CVC)*:</label>
-              <input type="text" id="cvc" v-model="editablePayment.cvc" required />
+              <input
+                type="text"
+                id="cvc"
+                v-model="editablePayment.cvc"
+                placeholder="z.B. 123"
+                minlength="3"
+                maxlength="4"
+                @input="validateCVC"
+                required
+              />
+              <span v-if="errors.cvc" class="error">
+                {{ errors.cvc }}
+              </span>
             </div>
           </div>
 
           <div v-if="editablePayment.paymentOption === 'paypal'">
-            <div class="form-group">
+            <div class="form-group" :class="{ 'has-error': errors.paypalEmail }">
               <label for="paypalEmail">PayPal Email*:</label>
-              <input type="email" id="paypalEmail" v-model="editablePayment.paypalEmail" required />
+              <input
+                type="email"
+                id="paypalEmail"
+                v-model="editablePayment.paypalEmail"
+                placeholder="z.B. user@mail.com"
+                minlength="1"
+                maxlength="100"
+                @input="validatePayPalEmail"
+                required
+              />
+              <span v-if="errors.paypalEmail" class="error">
+                {{ errors.paypalEmail }}
+              </span>
             </div>
           </div>
 
           <div v-if="editablePayment.paymentOption === 'bank transfer'">
-            <div class="form-group">
+            <div class="form-group" :class="{ 'has-error': errors.iban }">
               <label for="iban">IBAN*:</label>
-              <input type="text" id="iban" v-model="editablePayment.iban" required />
+              <input
+                type="text"
+                id="iban"
+                v-model="editablePayment.iban"
+                placeholder="z.B. DE89370400440532013000"
+                minlength="15"
+                maxlength="34"
+                @input="validateIBAN"
+                required
+              />
+              <span v-if="errors.iban" class="error">
+                {{ errors.iban }}
+              </span>
             </div>
           </div>
 
@@ -269,6 +358,15 @@ const editablePayment = reactive({
   cvc: '',
 })
 
+// Fehlerobjekt für Inline-Validierung
+const errors = reactive({
+  creditCardNumber: '',
+  expiryDate: '',
+  cvc: '',
+  iban: '',
+  paypalEmail: '',
+})
+
 // Map status to user-friendly labels
 const getStatusLabel = (status) => {
   const labels = {
@@ -331,22 +429,59 @@ const isAddressChanged = computed(() => {
   )
 })
 
-// Zahlungsinformationen geändert?
+// Pruefen ob input valide und ob es ueberhaupt changes gab
 const isPaymentChanged = computed(() => {
+  // Wenn es keine ursprüngliche Zahlung gibt, kann nichts geändert sein
   if (!order.value?.payment) return false
-  return (
-    editablePayment.paymentOption !== order.value.payment.paymentOption ||
-    (editablePayment.paymentOption === 'credit card' &&
-      editablePayment.creditCardNumber !== order.value.payment.creditCardNumber) ||
-    (editablePayment.paymentOption === 'credit card' &&
-      editablePayment.expiryDate !== order.value.payment.expiryDate) ||
-    (editablePayment.paymentOption === 'credit card' &&
-      editablePayment.cvc !== order.value.payment.cvc) ||
-    (editablePayment.paymentOption === 'paypal' &&
-      editablePayment.paypalEmail !== order.value.payment.paypalEmail) ||
-    (editablePayment.paymentOption === 'bank transfer' &&
-      editablePayment.iban !== order.value.payment.iban)
-  )
+
+  // Prüfen, ob Validierungsfehler vorhanden sind
+  const hasErrors =
+    !!errors.creditCardNumber ||
+    !!errors.expiryDate ||
+    !!errors.cvc ||
+    !!errors.iban ||
+    !!errors.paypalEmail
+
+  if (hasErrors) return false // Wenn Fehler vorliegen, keine Änderung melden
+
+  // Prüfen, ob alle Pflichtfelder für die aktuelle Zahlungsmethode ausgefüllt sind
+  switch (editablePayment.paymentOption) {
+    case 'credit card':
+      if (
+        !editablePayment.creditCardNumber ||
+        !editablePayment.expiryDate ||
+        !editablePayment.cvc
+      ) {
+        return false // Unvollständige Eingabe
+      }
+      return (
+        editablePayment.paymentOption !== order.value.payment.paymentOption ||
+        editablePayment.creditCardNumber !== order.value.payment.creditCardNumber ||
+        editablePayment.expiryDate !== order.value.payment.expiryDate ||
+        editablePayment.cvc !== order.value.payment.cvc
+      )
+
+    case 'bank transfer':
+      if (!editablePayment.iban) {
+        return false // Unvollständige Eingabe
+      }
+      return (
+        editablePayment.paymentOption !== order.value.payment.paymentOption ||
+        editablePayment.iban !== order.value.payment.iban
+      )
+
+    case 'paypal':
+      if (!editablePayment.paypalEmail) {
+        return false // Unvollständige Eingabe
+      }
+      return (
+        editablePayment.paymentOption !== order.value.payment.paymentOption ||
+        editablePayment.paypalEmail !== order.value.payment.paypalEmail
+      )
+
+    default:
+      return false // Ungültige Zahlungsmethode
+  }
 })
 
 // Bestellung von der API laden
@@ -540,6 +675,87 @@ const savePaymentInfo = async () => {
       icon: 'error',
       confirmButtonText: 'OK',
     })
+  }
+}
+
+// ========== VALIDIERUNGSFUNKTIONEN ==========
+
+// Kreditkartennummer: Nur Ziffern, 13–19 Stellen
+function validateCreditCardNumber() {
+  const val = (editablePayment.creditCardNumber || '').replace(/\s+/g, '') // Leerzeichen entfernen
+  if (!val) {
+    errors.creditCardNumber = ''
+    return
+  }
+  if (!/^\d{13,19}$/.test(val)) {
+    errors.creditCardNumber = 'Bitte eine gültige Kreditkartennummer (13–19 Ziffern) eingeben'
+  } else {
+    errors.creditCardNumber = ''
+  }
+}
+
+// Datum: Muss gültig sein und in der Zukunft liegen (optional)
+function validateExpiryDate() {
+  const val = editablePayment.expiryDate
+  if (!val) {
+    errors.expiryDate = ''
+    return
+  }
+  const parsed = new Date(val)
+  if (isNaN(parsed.valueOf())) {
+    errors.expiryDate = 'Ungültiges Datum'
+    return
+  }
+  // Optional: In der Vergangenheit liegendes Datum abfangen
+  const now = new Date()
+  if (parsed < now) {
+    errors.expiryDate = 'Das Ablaufdatum darf nicht in der Vergangenheit liegen'
+  } else {
+    errors.expiryDate = ''
+  }
+}
+
+// CVC: 3–4 Ziffern
+function validateCVC() {
+  const val = editablePayment.cvc
+  if (!val) {
+    errors.cvc = ''
+    return
+  }
+  if (!/^\d{3,4}$/.test(val)) {
+    errors.cvc = 'Bitte einen gültigen CVC (3–4 Ziffern) eingeben'
+  } else {
+    errors.cvc = ''
+  }
+}
+
+// IBAN: 15–34 alphanumerische Zeichen
+function validateIBAN() {
+  const val = editablePayment.iban
+  if (!val) {
+    errors.iban = ''
+    return
+  }
+  if (!/^[A-Za-z0-9]{15,34}$/.test(val)) {
+    errors.iban = 'Bitte eine gültige IBAN (15–34 alphanumerische Zeichen) eingeben'
+  } else {
+    errors.iban = ''
+  }
+}
+
+// PayPal Email: Muss ein valid-Email-Pattern matchen
+function validatePayPalEmail() {
+  const val = editablePayment.paypalEmail
+  if (!val) {
+    errors.paypalEmail = ''
+    return
+  }
+  // Einfacher E-Mail-Regex
+  const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+  if (!re.test(val)) {
+    errors.paypalEmail = 'Bitte eine gültige E-Mail-Adresse eingeben'
+  } else {
+    errors.paypalEmail = ''
   }
 }
 
@@ -754,6 +970,17 @@ form {
   margin: 20px 0;
   border: none;
   border-top: 1px solid #eee;
+}
+
+/* Beispiel-Fehlerzustand: Umrandung rot, wenn Fehler vorhanden */
+.has-error input {
+  border-color: #e74c3c !important;
+}
+
+.error {
+  color: #e74c3c;
+  font-size: 0.9rem;
+  margin-top: 5px;
 }
 
 /* Responsive Design */
