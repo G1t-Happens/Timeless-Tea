@@ -28,6 +28,7 @@ defineProps({
   transition:
     transform 0.2s ease,
     box-shadow 0.2s ease;
+  min-height: 200px; /* Mindesthöhe für die Karte */
 }
 
 .order-card:hover {
@@ -38,9 +39,22 @@ defineProps({
 .card-title {
   font-size: 1.25rem;
   font-weight: bold;
+  word-wrap: break-word; /* Ermöglicht Umbrüche in langen Wörtern */
+  overflow-wrap: break-word; /* Moderne Eigenschaft für Umbrüche */
+  white-space: normal; /* Zeilenumbruch aktivieren */
+  overflow: hidden; /* Kein Überlauf aus dem Container */
+  text-overflow: ellipsis; /* Optional: Zeigt "..." bei Überlauf */
+  display: -webkit-box; /* Für Ellipsen im Mehrzeiligen Text */
+  line-clamp: 2; /* Begrenze auf 2 Zeilen */
+  -webkit-line-clamp: 2; /* Begrenze auf 2 Zeilen */
+  -webkit-box-orient: vertical;
 }
 
 .card-text {
   font-size: 1rem;
+  word-wrap: break-word; /* Umbrüche in langen Wörtern */
+  overflow-wrap: break-word; /* Moderne Umbrüche */
+  white-space: normal; /* Zeilenumbruch aktivieren */
+  overflow: hidden; /* Kein Überlauf aus dem Container */
 }
 </style>
