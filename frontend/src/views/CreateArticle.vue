@@ -56,7 +56,7 @@
         <label for="price" class="form-label">Preis in €</label>
         <input
           type="number"
-          step="1"
+          step="0.01"
           v-model="price"
           id="price"
           class="form-control"
