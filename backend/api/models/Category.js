@@ -15,7 +15,7 @@ module.exports = {
      */
     name: {
       type: 'string',
-      maxLength: 10,
+      maxLength: 20,
       required: true
     },
 
@@ -26,7 +26,7 @@ module.exports = {
      */
     type: {
       type: 'string',
-      maxLength: 10,
+      maxLength: 20,
       required: true
     },
 
