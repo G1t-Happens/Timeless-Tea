@@ -65,8 +65,7 @@
 
         <!-- Wishlist -->
         <div class="position-relative icon-wrapper">
-          <!-- Router-Link, der zur WishlistView führt -->
-          <router-link :to="{ name: 'WishList' }" class="wishlist-link">
+          <router-link :to="{ name: 'WishList' }" class="wishlist-link" @click="closeCart">
             <img
               :src="currentWishlistIcon"
               width="63"
@@ -74,7 +73,6 @@
               alt="Wishlist Icon"
               class="round-icon-responsive"
             />
-            <!-- Badge/Counter für die Anzahl der Items in der Wishlist -->
             <span v-if="wishlistStore.itemCount > 0" class="cart-count">
               {{ wishlistStore.itemCount }}
             </span>
@@ -112,8 +110,8 @@
               </ul>
               <div class="cart-total">
                 <p>Gesamt: {{ cartStore.totalAmount }}€</p>
-                <router-link :to="{ name: 'ShoppingCart' }" class="btn to-cart"
-                  >Zum Warenkorb
+                <router-link :to="{ name: 'ShoppingCart' }" class="btn to-cart" @click="closeCart">
+                  Zum Warenkorb
                 </router-link>
               </div>
             </div>
@@ -203,6 +201,10 @@ const toggleCart = () => {
     showLogoutPopup.value = false
   }
   showCart.value = !showCart.value
+}
+
+function closeCart() {
+  showCart.value = false
 }
 
 // Entfernen eines Artikels aus dem Warenkorb
