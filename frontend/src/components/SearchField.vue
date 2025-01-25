@@ -8,6 +8,7 @@
           v-model="searchQuery"
           class="search-input"
           type="search"
+          maxlength="50"
           :placeholder="placeholder"
         />
 
