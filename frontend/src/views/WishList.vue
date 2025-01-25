@@ -290,6 +290,7 @@ const truncatedDescription = (description = '') => {
   overflow: hidden;
   text-overflow: ellipsis;
   display: -webkit-box;
+  line-clamp: 5;
   -webkit-line-clamp: 5; /* Beschränkt die Anzeige auf 5 Zeilen */
   -webkit-box-orient: vertical;
   margin-bottom: 0;
