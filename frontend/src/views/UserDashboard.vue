@@ -168,13 +168,19 @@ onMounted(() => {
 
 <style scoped>
 .user-title {
-  font-size: 2.5rem;
+  font-size: clamp(
+    1.5rem,
+    5vw,
+    3rem
+  ); /* Dynamische Schriftgröße: mindestens 1.5rem, maximal 3rem */
   font-weight: bold;
   text-transform: uppercase;
   letter-spacing: 2px;
   text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.1);
   margin-bottom: 20px;
-  margin-top: 20px;
+  word-break: break-word; /* Lässt den Text umbrechen, falls nötig */
+  text-align: center; /* Zentrierung */
+  padding: 0 10px;
 }
 
 /* Navigation Buttons */
@@ -247,6 +253,7 @@ onMounted(() => {
   text-align: center;
   font-size: 1.5rem;
   font-weight: normal;
+  word-break: break-word;
   color: #4a5043;
   margin-top: -10px;
   margin-bottom: 30px;
