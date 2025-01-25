@@ -1,8 +1,10 @@
 <template>
   <div class="admin-dashboard">
     <div class="header">
+      <!-- Header message -->
       <h1 class="text-center admin-title">Admin Dashboard</h1>
       <h2 v-if="currentUserName" class="welcome-message">Willkommen, {{ currentUserName }}!</h2>
+      <!-- Meta Stats ueber das System -->
       <div class="stats-row">
         <div class="stat-card">
           <h3>Artikel</h3>
@@ -53,6 +55,7 @@
       </button>
     </div>
 
+    <!-- Trennlinie -->
     <div class="dashboard-divider"></div>
 
     <!-- Artikel verwalten Panel -->
@@ -67,15 +70,15 @@
         />
       </div>
 
-      <!-- Button zum Hinzufügen eines neuen Artikels -->
-      <div class="text-center mt-4 mb-4" style="display: flex; justify-content: center; gap: 10px">
-        <button @click="createNewArticle" class="btn btn-primary" style="width: 100%">
+      <!-- Button-Gruppe zum Hinzufügen/Bearbeiten von Artikeln/Kategorien -->
+      <div class="button-group">
+        <button @click="createNewArticle" class="btn btn-primary btn-full-width">
           Neuen Artikel erstellen
         </button>
-        <button @click="createNewCategory" class="btn btn-primary" style="width: 100%">
+        <button @click="createNewCategory" class="btn btn-primary btn-full-width">
           Neue Kategorien erstellen
         </button>
-        <button @click="editCategories" class="btn btn-primary" style="width: 100%">
+        <button @click="editCategories" class="btn btn-primary btn-full-width">
           Kategorien bearbeiten
         </button>
       </div>
@@ -669,12 +672,19 @@ onMounted(() => {
 
 <style scoped>
 .admin-title {
-  font-size: 2.5rem;
+  font-size: clamp(
+    1.5rem,
+    5vw,
+    3rem
+  ); /* Dynamische Schriftgröße: mindestens 1.5rem, maximal 3rem */
   font-weight: bold;
   text-transform: uppercase;
   letter-spacing: 2px;
   text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.1);
   margin-bottom: 20px;
+  word-break: break-word; /* Lässt den Text umbrechen, falls nötig */
+  text-align: center; /* Zentrierung */
+  padding: 0 10px; /* Etwas Innenabstand für kleinere Bildschirme */
 }
 
 /* Navigationsmenü Styles */
@@ -820,8 +830,10 @@ onMounted(() => {
 
 .stats-row {
   display: flex;
+  flex-wrap: wrap; /* Ermöglicht das Umrücken auf kleinere Bildschirme */
   justify-content: space-between;
   gap: 10px;
+  margin-bottom: 30px;
 }
 
 .stat-card {
@@ -843,6 +855,7 @@ onMounted(() => {
   text-align: center;
   font-size: 1.5rem;
   font-weight: normal;
+  word-break: break-word;
   color: #4a5043;
   margin-top: -10px;
   margin-bottom: 30px;
@@ -860,5 +873,32 @@ onMounted(() => {
   margin: 10px auto; /* Zentrieren und Abstand */
   border-bottom: whitesmoke;
   border-radius: 20px; /* Runde Kanten */
+}
+
+.button-group {
+  display: flex; /* Flexbox aktivieren */
+  flex-wrap: wrap; /* Erlaubt Zeilenumbruch */
+  gap: 10px; /* Abstand zwischen den Buttons */
+  justify-content: space-between; /* Gleiche Verteilung */
+  width: 100%; /* Volle Breite */
+  margin-bottom: 10px; /* Abstand nach unten */
+}
+
+.button-group button {
+  flex: 1 1 calc(33.33% - 10px); /* Flexibles Verhalten: Drittel der Breite */
+  min-width: 100px; /* Mindestbreite für die Buttons */
+  padding: 12px; /* Einheitliche Polsterung */
+  border-radius: 8px; /* Abgerundete Kanten */
+  font-size: 1rem; /* Lesbare Schriftgröße */
+  text-align: center; /* Zentrierter Text */
+  background-color: #c06e52; /* Hintergrundfarbe */
+  color: white; /* Textfarbe */
+  border: none; /* Kein Rahmen */
+  transition: transform 0.3s ease; /* Animation beim Hover */
+}
+
+.button-group button:hover {
+  transform: translateY(-2px); /* Leichtes Anheben beim Hover */
+  background-color: #8f4c37; /* Dunklere Hintergrundfarbe beim Hover */
 }
 </style>
