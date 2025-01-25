@@ -20,6 +20,7 @@
                     v-model="firstName"
                     id="firstName"
                     class="form-control"
+                    maxlength="50"
                     required
                   />
                 </div>
@@ -32,6 +33,7 @@
                     v-model="lastName"
                     id="lastName"
                     class="form-control"
+                    maxlength="50"
                     required
                   />
                 </div>
@@ -39,7 +41,14 @@
                 <!-- Eingabefeld für die E-Mail-Adresse -->
                 <div class="mb-3">
                   <label for="email" class="form-label">E-Mail*</label>
-                  <input type="email" v-model="email" id="email" class="form-control" required />
+                  <input
+                    type="email"
+                    v-model="email"
+                    id="email"
+                    class="form-control"
+                    maxlength="100"
+                    required
+                  />
                 </div>
 
                 <!-- Eingabefeld für das Passwort -->
@@ -72,19 +81,39 @@
                 <!-- Land -->
                 <div class="mb-3">
                   <label for="country" class="form-label">Land*</label>
-                  <input type="text" v-model="country" id="country" class="form-control" required />
+                  <input
+                    type="text"
+                    v-model="country"
+                    id="country"
+                    class="form-control"
+                    maxlength="60"
+                    required
+                  />
                 </div>
 
                 <!-- Bundesland (optional) -->
                 <div class="mb-3">
                   <label for="state" class="form-label">Bundesland (optional)</label>
-                  <input type="text" v-model="state" id="state" class="form-control" />
+                  <input
+                    type="text"
+                    v-model="state"
+                    id="state"
+                    class="form-control"
+                    maxlength="50"
+                  />
                 </div>
 
                 <!-- Stadt -->
                 <div class="mb-3">
                   <label for="city" class="form-label">Stadt*</label>
-                  <input type="text" v-model="city" id="city" class="form-control" required />
+                  <input
+                    type="text"
+                    v-model="city"
+                    id="city"
+                    class="form-control"
+                    maxlength="50"
+                    required
+                  />
                 </div>
 
                 <!-- Postleitzahl -->
@@ -95,6 +124,7 @@
                     v-model="postalCode"
                     id="postalCode"
                     class="form-control"
+                    maxlength="10"
                     required
                   />
                 </div>
@@ -102,7 +132,14 @@
                 <!-- Straße -->
                 <div class="mb-3">
                   <label for="street" class="form-label">Straße*</label>
-                  <input type="text" v-model="street" id="street" class="form-control" required />
+                  <input
+                    type="text"
+                    v-model="street"
+                    id="street"
+                    class="form-control"
+                    maxlength="30"
+                    required
+                  />
                 </div>
 
                 <!-- Hausnummer -->
@@ -113,6 +150,7 @@
                     v-model="houseNumber"
                     id="houseNumber"
                     class="form-control"
+                    maxlength="8"
                     required
                   />
                 </div>
@@ -125,6 +163,7 @@
                     v-model="addressAddition"
                     id="addressAddition"
                     class="form-control"
+                    maxlength="150"
                   />
                 </div>
 

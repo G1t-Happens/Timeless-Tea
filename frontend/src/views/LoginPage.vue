@@ -15,7 +15,14 @@
                 <!-- Eingabefeld für die E-Mail-Adresse -->
                 <div class="mb-3">
                   <label for="email" class="form-label">E-Mail</label>
-                  <input type="email" v-model="email" id="email" class="form-control" required />
+                  <input
+                    type="email"
+                    v-model="email"
+                    id="email"
+                    class="form-control"
+                    maxlength="100"
+                    required
+                  />
                 </div>
 
                 <!-- Eingabefeld für das Passwort -->
