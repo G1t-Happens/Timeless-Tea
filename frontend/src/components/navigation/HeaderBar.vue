@@ -109,7 +109,7 @@
                 </li>
               </ul>
               <div class="cart-total">
-                <p>Gesamt: {{ cartStore.totalAmount }}€</p>
+                <p>Gesamt: {{ cartStore.totalAmount.toFixed(2) }}€</p>
                 <router-link :to="{ name: 'ShoppingCart' }" class="btn to-cart" @click="closeCart">
                   Zum Warenkorb
                 </router-link>
