@@ -12,15 +12,15 @@
           <h3>Bestellübersicht</h3>
           <ul>
             <li>
-              <span>Gesamtbetrag:</span>
+              <span>Gesamtbetrag: </span>
               <span>{{ formatCurrency(order.totalAmount) }}</span>
             </li>
             <li>
-              <span>Erstellt:</span>
+              <span>Erstellt: </span>
               <span>{{ formatDate(order.createdAt) }}</span>
             </li>
             <li>
-              <span>Aktualisiert:</span>
+              <span>Aktualisiert: </span>
               <span>{{ formatDate(order.updatedAt) }}</span>
             </li>
           </ul>
@@ -301,10 +301,10 @@
               <h4>{{ product.product.name }}</h4>
               <p>{{ product.product.description }}</p>
               <ul>
-                <li><strong>Preis:</strong> {{ formatCurrency(product.product.price) }}</li>
-                <li><strong>Menge:</strong> {{ product.quantity }}</li>
+                <li><strong>Preis: </strong> {{ formatCurrency(product.product.price) }}</li>
+                <li><strong>Menge: </strong> {{ product.quantity }}</li>
                 <li>
-                  <strong>Gesamt:</strong>
+                  <strong>Gesamt: </strong>
                   {{ formatCurrency(product.product.price * product.quantity) }}
                 </li>
               </ul>
