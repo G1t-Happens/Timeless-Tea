@@ -102,7 +102,7 @@ const wishlistItems = computed(() => wishlistStore.items)
 const removeFromWishlist = (productId) => {
   wishlistStore.removeFromWishlist(productId)
   Swal.fire({
-    backdrop:false,
+    backdrop: false,
     title: 'Artikel von der Wunschliste entfernt!',
     text: `Artikel wurde von der Wunschliste entfernt.`,
     icon: 'success',
@@ -117,7 +117,7 @@ const moveToCart = (product) => {
   cartStore.addToCart(product, 1)
   wishlistStore.removeFromWishlist(product.id)
   Swal.fire({
-    backdrop:false,
+    backdrop: false,
     title: 'Artikel dem Warenkorb hinzugefügt!',
     text: `1 Artikel: "${product.name}" wurde dem Warenkorb hinzugefügt.`,
     icon: 'success',
@@ -128,9 +128,21 @@ const moveToCart = (product) => {
 }
 
 // Alle Produkte in den Warenkorb verschieben
-const moveAllToCart = () => {
-  wishlistItems.value.forEach((item) => cartStore.addToCart(item, 1))
-  wishlistStore.clearWishlist()
+const moveAllToCart = async () => {
+  const result = await Swal.fire({
+    backdrop: false,
+    title: 'Alle Artikel in den Warenkorb?',
+    text: 'Möchten Sie wirklich alle Artikel in den Warenkorb verschieben?',
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonText: 'Ja, alle verschieben',
+    cancelButtonText: 'Abbrechen',
+  })
+
+  if (result.isConfirmed) {
+    wishlistItems.value.forEach((item) => cartStore.addToCart(item, 1))
+    wishlistStore.clearWishlist()
+  }
 }
 
 // Sterne-Anzeige
