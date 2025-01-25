@@ -31,7 +31,11 @@
           </tbody>
         </table>
         <div class="summary-total">
-          <strong>Gesamtsumme: {{ cartStore.totalAmount }} €</strong>
+          <strong>Gesamtsumme: {{ cartStore.totalAmount.toFixed(2) }} €</strong>
+        </div>
+        <!-- Fehlermeldung bei überschrittener Gesamtsumme -->
+        <div v-if="isTotalExceeded" class="error-message">
+          <p>Die Gesamtsumme darf 1.000.000 € nicht überschreiten.</p>
         </div>
       </div>
 
@@ -81,33 +85,40 @@
       <!-- Zahlungsmethode -->
       <div class="payment-method">
         <h2>Zahlungsmethode</h2>
-        <p class="edit-hint">
-          <strong>Hinweis:</strong>
-          Wählen Sie eine der hinterlegten Zahlungsmethoden aus oder
-          <router-link :to="{ name: 'UserEditUser' }">fügen Sie eine neue hinzu.</router-link>
-        </p>
-        <div v-if="payments.length > 0" class="payment-list-container">
-          <div
-            v-for="payment in payments"
-            :key="payment.id"
-            class="payment-panel"
-            :class="{ active: selectedPayment === payment.id }"
-            @click="selectPayment(payment.id)"
-          >
-            <p class="payment-option">Option: {{ payment.paymentOption }}</p>
-            <div v-if="payment.paymentOption === 'bank transfer'">
-              <p>IBAN: {{ obfuscateIban(payment.iban) }}</p>
-            </div>
-            <div v-else-if="payment.paymentOption === 'credit card'">
-              <p>Kreditkartennummer: {{ obfuscateCardNumber(payment.creditCardNumber) }}</p>
-              <p>Ablaufdatum: {{ payment.expiryDate || 'n/a' }}</p>
-            </div>
-            <div v-else-if="payment.paymentOption === 'paypal'">
-              <p>PayPal E-Mail: {{ obfuscatePaypalEmail(payment.paypalEmail) }}</p>
+
+        <div v-if="payments.length > 0">
+          <!-- Hinweis, wenn Zahlungsmethoden vorhanden sind -->
+          <p class="edit-hint">
+            Hinweis: Wählen Sie eine der hinterlegten Zahlungsmethoden aus oder
+            <router-link :to="{ name: 'UserEditUser' }">fügen Sie eine neue hinzu.</router-link>
+          </p>
+
+          <!-- Liste der Zahlungsmethoden -->
+          <div class="payment-list-container">
+            <div
+              v-for="payment in payments"
+              :key="payment.id"
+              class="payment-panel"
+              :class="{ active: selectedPayment === payment.id }"
+              @click="selectPayment(payment.id)"
+            >
+              <p class="payment-option">Option: {{ payment.paymentOption }}</p>
+              <div v-if="payment.paymentOption === 'bank transfer'">
+                <p>IBAN: {{ obfuscateIban(payment.iban) }}</p>
+              </div>
+              <div v-else-if="payment.paymentOption === 'credit card'">
+                <p>Kreditkartennummer: {{ obfuscateCardNumber(payment.creditCardNumber) }}</p>
+                <p>Ablaufdatum: {{ payment.expiryDate || 'n/a' }}</p>
+              </div>
+              <div v-else-if="payment.paymentOption === 'paypal'">
+                <p>PayPal E-Mail: {{ obfuscatePaypalEmail(payment.paypalEmail) }}</p>
+              </div>
             </div>
           </div>
         </div>
+
         <div v-else>
+          <!-- Text, wenn keine Zahlungsmethoden vorhanden sind -->
           <p>
             Keine Zahlungsmethode hinterlegt. Bitte
             <router-link :to="{ name: 'UserEditUser' }">
@@ -133,31 +144,66 @@
         <div v-else>
           <div class="detail-item">
             <label for="ship-country">Land*:</label>
-            <input id="ship-country" type="text" v-model="shippingAddress.country" />
+            <input
+              id="ship-country"
+              type="text"
+              v-model="shippingAddress.country"
+              maxlength="60"
+              required
+            />
           </div>
           <div class="detail-item">
             <label for="ship-postal-code">Postleitzahl*:</label>
-            <input id="ship-postal-code" type="text" v-model="shippingAddress.postalCode" />
+            <input
+              id="ship-postal-code"
+              type="text"
+              v-model="shippingAddress.postalCode"
+              maxlength="10"
+              required
+            />
           </div>
           <div class="detail-item">
             <label for="ship-city">Stadt*:</label>
-            <input id="ship-city" type="text" v-model="shippingAddress.city" />
+            <input
+              id="ship-city"
+              type="text"
+              v-model="shippingAddress.city"
+              maxlength="50"
+              required
+            />
           </div>
           <div class="detail-item">
             <label for="ship-street">Straße*:</label>
-            <input id="ship-street" type="text" v-model="shippingAddress.street" />
+            <input
+              id="ship-street"
+              type="text"
+              v-model="shippingAddress.street"
+              maxlength="30"
+              required
+            />
           </div>
           <div class="detail-item">
             <label for="ship-house-number">Hausnummer*:</label>
-            <input id="ship-house-number" type="text" v-model="shippingAddress.houseNumber" />
+            <input
+              id="ship-house-number"
+              type="text"
+              v-model="shippingAddress.houseNumber"
+              maxlength="8"
+              required
+            />
           </div>
           <div class="detail-item">
             <label for="ship-addition">Adresszusatz (optional):</label>
-            <input id="ship-addition" type="text" v-model="shippingAddress.addressAddition" />
+            <input
+              id="ship-addition"
+              type="text"
+              v-model="shippingAddress.addressAddition"
+              maxlength="150"
+            />
           </div>
           <div class="detail-item">
             <label for="ship-state">Bundesland (optional):</label>
-            <input id="ship-state" type="text" v-model="shippingAddress.state" />
+            <input id="ship-state" type="text" v-model="shippingAddress.state" maxlength="50" />
           </div>
         </div>
       </div>
@@ -202,7 +248,15 @@ const payments = ref([])
 const selectedPayment = ref(null)
 const showConfirmationModal = ref(false)
 const useBillingAsShipping = ref(true)
-const shippingAddress = ref({})
+const shippingAddress = ref({
+  country: '',
+  postalCode: '',
+  city: '',
+  street: '',
+  houseNumber: '',
+  addressAddition: '',
+  state: '',
+})
 
 const user = ref({
   id: null,
@@ -228,8 +282,22 @@ const user = ref({
   },
 })
 
+const isTotalValid = computed(() => {
+  return cartStore.totalAmount <= 1000000
+})
+
+const isTotalExceeded = computed(() => {
+  return cartStore.totalAmount > 1000000
+})
+
 const canCheckout = computed(() => {
-  return cartStore.items.length > 0 && userStore.user && user.value.address && selectedPayment.value
+  return (
+    cartStore.items.length > 0 &&
+    userStore.user &&
+    user.value.address &&
+    selectedPayment.value &&
+    isTotalValid.value
+  )
 })
 
 const getSelectedPayment = () => {
@@ -261,7 +329,8 @@ const obfuscateIban = (iban) => {
 const obfuscatePaypalEmail = (email) => {
   if (!email) return 'n/a'
   const [localPart, domain] = email.split('@')
-  return localPart[0] + '****@' + domain
+  if (!localPart || !domain) return 'n/a'
+  return localPart.charAt(0) + '****@' + domain
 }
 
 const selectPayment = (paymentId) => {
@@ -392,6 +461,13 @@ onMounted(async () => {
   margin-top: 15px;
   font-size: 1.2rem;
   color: #c06e52;
+}
+
+.error-message {
+  margin-top: 10px;
+  color: #d9534f;
+  font-weight: bold;
+  text-align: right;
 }
 
 .payment-list-container {

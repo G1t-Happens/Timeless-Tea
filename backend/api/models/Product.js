@@ -37,7 +37,7 @@ module.exports = {
       type: 'number',
       columnType: 'decimal(10,2)',
       min: 0,
-      max: 100000,
+      max: 1000,
       required: true
     },
 
@@ -51,7 +51,7 @@ module.exports = {
     },
 
     /**
-     * @description Die Menge in dem das Produkt in einem Stueck angeboten wird.
+     * @description Die Menge(Gram) in dem das Produkt in einem Stueck angeboten wird.
      * @type {number}
      * @example idr. 100g
      */

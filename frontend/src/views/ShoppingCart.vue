@@ -54,11 +54,18 @@
         </tbody>
       </table>
 
+      <!-- Fehlermeldung bei überschrittener Gesamtsumme -->
+      <div v-if="isTotalExceeded" class="error-message">
+        <p>Die Gesamtsumme darf 1.000.000 € nicht überschreiten.</p>
+      </div>
+
       <div class="cart-summary">
         <p>
-          Gesamtsumme: <strong>{{ cartStore.totalAmount }} €</strong>
+          Gesamtsumme: <strong>{{ cartStore.totalAmount.toFixed(2) }} €</strong>
         </p>
-        <router-link :to="{ name: 'CheckOut' }" class="btn btn-success">Zur Kasse</router-link>
+        <button @click="proceedToCheckout" class="btn btn-success" :disabled="isTotalExceeded">
+          Zur Kasse
+        </button>
         <button @click="clearCart" class="btn btn-secondary">Warenkorb leeren</button>
       </div>
     </div>
@@ -66,11 +73,14 @@
 </template>
 
 <script setup>
+import { computed } from 'vue'
 import { useCartStore } from '@/stores/shoppingCart.js'
 import BackButton from '@/components/navigation/BackButton.vue'
 import Swal from 'sweetalert2'
+import { useRouter } from 'vue-router'
 
 const cartStore = useCartStore()
+const router = useRouter()
 
 const removeItem = (productId) => {
   cartStore.removeFromCart(productId)
@@ -91,7 +101,7 @@ const handleQuantityChange = (item) => {
     return
   }
 
-  // Sicherstellen dass der Wert innerhalb des erlaubten Bereichs liegt (Input Validation mit auto. Anpassung)
+  // Sicherstellen, dass der Wert innerhalb des erlaubten Bereichs liegt (Input Validation mit automatischer Anpassung)
   if (item.productQuantity < 1) {
     item.productQuantity = 1
     Swal.fire({
@@ -136,6 +146,26 @@ const clearCart = async () => {
       icon: 'success',
       confirmButtonText: 'OK',
     })
+  }
+}
+
+// Computed Property für den Gesamtsummen-Check
+const isTotalExceeded = computed(() => {
+  return cartStore.totalAmount > 1000000
+})
+
+// Methode zum Fortfahren zur Kasse
+const proceedToCheckout = () => {
+  if (isTotalExceeded.value) {
+    Swal.fire({
+      backdrop: false,
+      title: 'Gesamtsumme überschritten!',
+      text: 'Die Gesamtsumme darf 1.000.000 € nicht überschreiten.',
+      icon: 'error',
+      confirmButtonText: 'OK',
+    })
+  } else {
+    router.push({ name: 'CheckOut' })
   }
 }
 </script>
@@ -272,6 +302,13 @@ const clearCart = async () => {
 
 .btn-secondary:hover {
   background-color: #5a6268;
+}
+
+.error-message {
+  margin-bottom: 15px;
+  color: #d9534f;
+  font-weight: bold;
+  text-align: center;
 }
 
 @media (max-width: 768px) {

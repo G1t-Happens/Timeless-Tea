@@ -1,3 +1,4 @@
+// src/stores/shoppingCart.js
 import { defineStore } from 'pinia'
 
 export const useCartStore = defineStore('cart', {
@@ -7,9 +8,7 @@ export const useCartStore = defineStore('cart', {
   getters: {
     // Gesamtpreis (Preis * productQuantity)
     totalAmount: (state) => {
-      return state.items
-        .reduce((total, item) => total + item.price * item.productQuantity, 0)
-        .toFixed(2)
+      return state.items.reduce((total, item) => total + item.price * item.productQuantity, 0)
     },
     // Gesamtanzahl aller Artikel im Warenkorb (aufsummierte productQuantity)
     totalItems: (state) => {

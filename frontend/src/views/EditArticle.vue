@@ -78,7 +78,7 @@
             placeholder="z.B. 12.99"
             @input="validatePrice"
             min="0"
-            max="100000"
+            max="1000"
             required
           />
           <span v-if="errors.price" class="error">{{ errors.price }}</span>
@@ -337,8 +337,8 @@ function validatePrice() {
 
   // Min/Max prüfen
   const numericVal = parseFloat(val)
-  if (numericVal < 0 || numericVal > 100000) {
-    errors.value.price = 'Preis muss zwischen 0 und 100000 liegen.'
+  if (numericVal < 0 || numericVal > 1000) {
+    errors.value.price = 'Preis muss zwischen 0 und 1000 liegen.'
     return
   }
 

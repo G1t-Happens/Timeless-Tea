@@ -17,7 +17,7 @@ module.exports = {
       type: 'number',
       required: true,
       min: 0,
-      max: 100000,
+      max: 1000000,
       example: 99.99
     },
 
