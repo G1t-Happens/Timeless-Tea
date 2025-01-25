@@ -35,46 +35,70 @@
         </div>
 
         <!-- Eingabefeld für den Artikelnamen -->
-        <div class="form-group">
+        <div class="form-group" :class="{ 'has-error': errors.name }">
           <label for="name" class="form-label">Artikelname</label>
-          <input v-model="product.name" type="text" id="name" class="form-control" required />
+          <input
+            v-model="product.name"
+            type="text"
+            id="name"
+            class="form-control"
+            placeholder="z.B. Sencha Green Tea"
+            @input="validateName"
+            maxlength="30"
+            required
+          />
+          <!-- Fehlermeldung -->
+          <span v-if="errors.name" class="error">{{ errors.name }}</span>
         </div>
 
-        <!-- Textarea für die Artikelbeschreibung -->
-        <div class="form-group">
+        <!-- Eingabefeld für die Beschreibung (optional) -->
+        <div class="form-group" :class="{ 'has-error': errors.description }">
           <label for="description" class="form-label">Beschreibung</label>
-          <textarea
+          <input
+            type="text"
             v-model="product.description"
             id="description"
             class="form-control"
-            required
-          ></textarea>
+            placeholder="z.B. Dieser Tee..."
+            @input="validateDescription"
+            maxlength="512"
+          />
+          <span v-if="errors.description" class="error">{{ errors.description }}</span>
         </div>
 
         <!-- Eingabefeld für den Preis des Artikels -->
-        <div class="form-group">
-          <label for="price" class="form-label">Preis</label>
+        <div class="form-group" :class="{ 'has-error': errors.price }">
+          <label for="price" class="form-label">Preis in €</label>
           <input
             v-model="product.price"
             type="number"
             step="0.01"
             id="price"
             class="form-control"
+            placeholder="z.B. 12.99"
+            @input="validatePrice"
+            min="0"
+            max="100000"
             required
           />
+          <span v-if="errors.price" class="error">{{ errors.price }}</span>
         </div>
 
         <!-- Menge pro Produkt -->
-        <div class="form-group">
+        <div class="form-group" :class="{ 'has-error': errors.quantity }">
           <label for="price" class="form-label">Menge in g (Gram)</label>
           <input
             type="number"
-            step="0.01"
+            step="1"
             v-model="product.quantity"
             id="quantity"
             class="form-control"
+            @input="validateQuantity"
+            min="1"
+            max="100000"
             required
           />
+          <span v-if="errors.quantity" class="error">{{ errors.quantity }}</span>
         </div>
 
         <!-- Dropdown für die Kategorienauswahl -->
@@ -122,7 +146,14 @@
 
         <!-- Button zum Speichern der Änderungen -->
         <div class="button-group">
-          <button type="submit" class="btn btn-primary">Speichern</button>
+          <button
+            type="submit"
+            class="btn btn-primary"
+            :disabled="!isFormValid"
+            :class="{ 'btn-disabled': !isFormValid }"
+          >
+            Speichern
+          </button>
           <button
             v-if="!product.isDeleted"
             type="button"
@@ -138,7 +169,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted, onUnmounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import axios from 'axios'
 import BackButton from '@/components/navigation/BackButton.vue'
@@ -164,6 +195,12 @@ const product = ref({
   categories: [],
   image: null,
   isDeleted: false,
+})
+const errors = ref({
+  name: '',
+  description: '',
+  price: '',
+  quantity: '',
 })
 
 // Funktion zum Gruppieren von Kategorien nach ihrem Typ
@@ -262,6 +299,106 @@ const fetchArticle = async (id) => {
     loading.value = false // Ladeanzeige ausblenden
   }
 }
+
+//Validieren des Produktnamens
+function validateName() {
+  if (!product.value.name.trim()) {
+    errors.value.name = 'Bitte einen Artikelnamen eingeben'
+  } else if (product.value.name.trim().length > 30) {
+    errors.value.name = 'Der Name darf max. 30 Zeichen lang sein'
+  } else {
+    errors.value.name = ''
+  }
+}
+
+// Beschreibung (optional) – hier prüfen wir z.B. nur die maximale Länge
+function validateDescription() {
+  if (product.value.description.trim().length > 512) {
+    errors.value.description = 'Die Beschreibung darf max. 512 Zeichen lang sein.'
+  } else {
+    errors.value.description = ''
+  }
+}
+
+// Preis (Pflicht, max 2 Nachkommastellen)
+function validatePrice() {
+  const val = product.value.price
+  if (!val) {
+    errors.value.price = 'Bitte einen Preis eingeben.'
+    return
+  }
+
+  // Regex: Erlaubt nur ganze Zahl oder Zahl mit max. 2 Nachkommastellen
+  const twoDecimalRegex = /^\d+(\.\d{1,2})?$/
+  if (!twoDecimalRegex.test(val)) {
+    errors.value.price = 'Preis darf max. zwei Nachkommastellen haben.'
+    return
+  }
+
+  // Min/Max prüfen
+  const numericVal = parseFloat(val)
+  if (numericVal < 0 || numericVal > 100000) {
+    errors.value.price = 'Preis muss zwischen 0 und 100000 liegen.'
+    return
+  }
+
+  errors.value.price = ''
+}
+
+// Menge (Pflicht)
+function validateQuantity() {
+  // `quantity.value` ist ein Number oder kann leer/undefined sein,
+  // wenn noch nichts eingegeben wurde.
+  const val = product.value.quantity
+
+  // 1) Leer-Check: Falls nichts eingetippt
+  if (val === null || val === undefined || val === '') {
+    errors.value.quantity = 'Bitte eine Menge eingeben'
+    return
+  }
+
+  // 2) Prüfen, ob der Wert wirklich eine Zahl ist
+  if (isNaN(val)) {
+    errors.value.quantity = 'Bitte eine gültige Menge eingeben'
+    return
+  }
+
+  // 3) Prüfen, ob ganzzahlig => keine Nachkommastellen
+  //    Number.isInteger(12) = true, Number.isInteger(12.3) = false
+  if (!Number.isInteger(val)) {
+    errors.value.quantity = 'Bitte nur ganze Zahlen eingeben'
+    return
+  }
+
+  // 4) Negative Zahlen abfangen
+  if (val < 0) {
+    errors.value.quantity = 'Die Menge darf nicht negativ sein'
+    return
+  }
+
+  if (val > 100000) {
+    errors.value.quantity = 'Die Menge darf nicht mehr als 100000 sein'
+    return
+  }
+
+  // 5) Alles in Ordnung -> kein Fehler
+  errors.value.quantity = ''
+}
+
+// Gesamtvalidität
+const isFormValid = computed(() => {
+  // Pflichtfelder ausgefüllt?
+  const hasName = !!product.value.name.trim()
+  const hasPrice = !!product.value.price
+  const hasQuantity = !!product.value.quantity
+
+  // Liegen Fehler vor?
+  const hasErrors =
+    errors.value.name || errors.value.description || errors.value.price || errors.value.quantity
+
+  // Formular ist valid, wenn keine Errors und alle Pflichtfelder belegt
+  return !hasErrors && hasName && hasPrice && hasQuantity
+})
 
 // Funktion zum Speichern der Änderungen
 const handleSave = async () => {
@@ -539,5 +676,16 @@ input:focus + .slider {
 
 input:checked + .slider:before {
   transform: translateX(26px);
+}
+
+/* Fehlerzustand: roter Rahmen + Fehlermeldung */
+.has-error input {
+  border-color: #e74c3c !important;
+}
+
+.error {
+  color: #e74c3c;
+  font-size: 0.9rem;
+  margin-top: 5px;
 }
 </style>

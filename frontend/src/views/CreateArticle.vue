@@ -211,6 +211,7 @@ const onFileChange = (event) => {
   }
 }
 
+//Validieren des Produktnamens
 function validateName() {
   if (!name.value.trim()) {
     errors.value.name = 'Bitte einen Artikelnamen eingeben'
