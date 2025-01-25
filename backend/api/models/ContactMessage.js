@@ -55,6 +55,7 @@ module.exports = {
     message: {
       type: 'string',
       required: true,
+      columnType: 'varchar(500)',
       maxLength: 500,
       description: 'Der Inhalt der Nachricht',
       example: 'Schreiben Sie hier Ihre Nachricht...'
