@@ -16,5 +16,5 @@ Aufgabe 5:
 - [x] d) Consistency
 - [x] e) Security
 - [x] f) Deployment
-- [ ] g) Code Qualität
+- [x] g) Code Qualität
 - [ ] h) Dokumentation
