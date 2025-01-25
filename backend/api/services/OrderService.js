@@ -652,7 +652,7 @@ module.exports = {
     const updatedPaymentInfo = {
       paymentOption,
       creditCardNumber: paymentOption === 'credit card' ? creditCardNumber : null,
-      expiryDate: paymentOption === 'credit card' && expiryDate ? new Date(expiryDate).toISOString() : null,
+      expiryDate: paymentOption === 'credit card' && expiryDate ? expiryDate : null,
       paypalEmail: paymentOption === 'paypal' ? paypalEmail : null,
       iban: paymentOption === 'bank transfer' ? iban : null,
     };

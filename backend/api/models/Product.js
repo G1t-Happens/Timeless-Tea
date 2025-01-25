@@ -14,7 +14,7 @@ module.exports = {
      */
     name: {
       type: 'string',
-      columnType: 'varchar(30)',
+      maxLength: 30,
       required: true
     },
 
@@ -24,7 +24,8 @@ module.exports = {
      */
     description: {
       type: 'string',
-      columnType: 'varchar(1024)'
+      columnType: 'varchar(1024)',
+      maxLength: 1024,
     },
 
     /**
@@ -35,6 +36,8 @@ module.exports = {
     price: {
       type: 'number',
       columnType: 'decimal(10,2)',
+      min: 0,
+      max: 100000,
       required: true
     },
 
@@ -44,7 +47,7 @@ module.exports = {
      */
     image: {
       type: 'string',
-      columnType: 'varchar(255)'
+      maxLength: 512,
     },
 
     /**
@@ -55,6 +58,8 @@ module.exports = {
     quantity: {
       type: 'number',
       columnType: 'decimal(10,2)',
+      min: 0,
+      max: 100000,
       required: false
     },
 

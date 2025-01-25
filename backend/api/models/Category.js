@@ -15,7 +15,7 @@ module.exports = {
      */
     name: {
       type: 'string',
-      columnType: 'varchar(20)',
+      maxLength: 10,
       required: true
     },
 
@@ -26,7 +26,7 @@ module.exports = {
      */
     type: {
       type: 'string',
-      columnType: 'varchar(20)',
+      maxLength: 10,
       required: true
     },
 

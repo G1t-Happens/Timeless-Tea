@@ -28,6 +28,8 @@ module.exports = {
     iban: {
       type: 'string',
       allowNull: true,   // IBAN ist nur relevant, wenn paymentOption = 'bank transfer'
+      minLength: 15,
+      maxLength: 34,
       description: 'IBAN bei Banküberweisung. Beispiel: DE89370400440532013000'
     },
 
@@ -39,6 +41,8 @@ module.exports = {
     creditCardNumber: {
       type: 'string',
       allowNull: true,
+      minLength: 13,
+      maxLength: 19,
       description: 'Nur relevant bei credit card, z.B. 1234567890123456'
     },
 
@@ -48,9 +52,9 @@ module.exports = {
      * @example 12/27
      */
     expiryDate: {
-      type: 'string',
-      allowNull: true,
-      description: 'Nur relevant bei credit card, z.B. "12/24"'
+      type: 'ref',
+      columnType: 'date',
+      description: 'Speicher als YYYY-MM-DD'
     },
 
     /**
@@ -61,6 +65,8 @@ module.exports = {
     cvc: {
       type: 'string',
       allowNull: true,
+      minLength: 3,
+      maxLength: 4,
       description: 'Nur relevant bei credit card, z.B. "123"'
     },
 
@@ -73,6 +79,7 @@ module.exports = {
       type: 'string',
       allowNull: true,
       isEmail: true,
+      maxLength: 100,
       description: 'Nur relevant bei PayPal, z.B. user@paypal.com'
     },
 

@@ -17,7 +17,7 @@ module.exports = {
     country: {
       type: 'string',
       required: true,
-      maxLength: 200,
+      maxLength: 60,
       example: 'Germany'
     },
 
@@ -52,7 +52,7 @@ module.exports = {
     postalCode: {
       type: 'string',
       required: true,
-      maxLength: 20,
+      maxLength: 10,
       example: '80331'
     },
 
@@ -64,7 +64,7 @@ module.exports = {
     street: {
       type: 'string',
       required: true,
-      maxLength: 50,
+      maxLength: 30,
       example: 'Marienplatz'
     },
 
@@ -76,8 +76,8 @@ module.exports = {
     houseNumber: {
       type: 'string',
       required: true,
-      maxLength: 10,
-      example: '15'
+      maxLength: 8,
+      example: '15-A'
     },
 
     /**
@@ -87,7 +87,7 @@ module.exports = {
      */
     addressAddition: {
       type: 'string',
-      maxLength: 200,
+      maxLength: 150,
       example: 'Apartment 4B'
     },
   },

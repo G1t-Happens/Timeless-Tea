@@ -155,7 +155,7 @@
               </div>
               <div v-else-if="payment.paymentOption === 'credit card'">
                 <p>Nummer: {{ obfuscateCreditCard(payment.creditCardNumber) }}</p>
-                <p>Ablaufdatum: {{ payment.expiryDate || 'n/a' }}</p>
+                <p>Ablaufdatum: {{ formatInputDate(payment.expiryDate) || 'n/a' }}</p>
               </div>
               <div v-else-if="payment.paymentOption === 'paypal'">
                 <p>E-Mail: {{ obfuscatePaypalEmail(payment.paypalEmail) }}</p>
@@ -281,6 +281,20 @@ const isFormChanged = computed(() => {
 const passwordMismatch = computed(
   () => newPassword.value && confirmPassword.value && newPassword.value !== confirmPassword.value,
 )
+
+//Date Formatierung
+const formatInputDate = (date) => {
+  if (!date) return ''
+  const parsedDate = new Date(date)
+  if (isNaN(parsedDate.getTime())) {
+    console.warn('Ungültiges Datum:', date)
+    return ''
+  }
+  const year = parsedDate.getFullYear()
+  const month = String(parsedDate.getMonth() + 1).padStart(2, '0')
+  const day = String(parsedDate.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
 
 // Passwort-Sichtbarkeit ein-/ausblenden
 const togglePasswordVisibility = (state) => {

@@ -18,7 +18,7 @@ module.exports = {
       required: true,
       unique: true,
       isEmail: true,
-      maxLength: 200,
+      maxLength: 100,
       example: 'mary.sue@example.com'
     },
 
@@ -44,7 +44,7 @@ module.exports = {
       type: 'string',
       required: true,
       description: 'First Name of the user.',
-      maxLength: 100,
+      maxLength: 50,
       example: 'Mary Sue van der McHenst'
     },
 
@@ -57,7 +57,7 @@ module.exports = {
       type: 'string',
       required: true,
       description: 'Last Name of the user.',
-      maxLength: 100,
+      maxLength: 50,
       example: 'Mary Sue van der McHenst'
     },
 
@@ -68,6 +68,7 @@ module.exports = {
      */
     isAdmin: {
       type: 'boolean',
+      required: true,
       description: 'Whether this user is a "admin" with extra permissions, etc.',
     },
 

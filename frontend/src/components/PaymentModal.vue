@@ -16,27 +16,38 @@
 
         <!-- Felder für Kreditkarte -->
         <div v-if="localPayment.paymentOption === 'credit card'" class="payment-fields">
-          <div class="form-group">
+          <div class="form-group" :class="{ 'has-error': errors.creditCardNumber }">
             <label for="creditCardNumber">Kartennummer</label>
             <input
               id="creditCardNumber"
               type="text"
               class="form-control"
               v-model="localPayment.creditCardNumber"
-              placeholder="z.B. 1234 5678 9012 3456"
+              placeholder="z.B. 1234567890123456"
+              @input="validateCreditCardNumber"
             />
+            <!-- Fehlermeldung direkt anzeigen -->
+            <span v-if="errors.creditCardNumber" class="error">
+              {{ errors.creditCardNumber }}
+            </span>
           </div>
-          <div class="form-group">
+
+          <div class="form-group" :class="{ 'has-error': errors.expiryDate }">
             <label for="expiryDate">Ablaufdatum</label>
             <input
               id="expiryDate"
-              type="text"
+              type="date"
               class="form-control"
-              v-model="localPayment.expiryDate"
-              placeholder="MM/YY"
+              v-model="expiryDate"
+              placeholder="YYYY-MM-DD"
+              @blur="validateExpiryDate"
             />
+            <span v-if="errors.expiryDate" class="error">
+              {{ errors.expiryDate }}
+            </span>
           </div>
-          <div class="form-group">
+
+          <div class="form-group" :class="{ 'has-error': errors.cvc }">
             <label for="cvc">CVC</label>
             <input
               id="cvc"
@@ -44,13 +55,17 @@
               class="form-control"
               v-model="localPayment.cvc"
               placeholder="z.B. 123"
+              @input="validateCVC"
             />
+            <span v-if="errors.cvc" class="error">
+              {{ errors.cvc }}
+            </span>
           </div>
         </div>
 
         <!-- Felder für Banküberweisung -->
         <div v-else-if="localPayment.paymentOption === 'bank transfer'" class="payment-fields">
-          <div class="form-group">
+          <div class="form-group" :class="{ 'has-error': errors.iban }">
             <label for="iban">IBAN</label>
             <input
               id="iban"
@@ -58,13 +73,17 @@
               class="form-control"
               v-model="localPayment.iban"
               placeholder="z.B. DE89370400440532013000"
+              @input="validateIBAN"
             />
+            <span v-if="errors.iban" class="error">
+              {{ errors.iban }}
+            </span>
           </div>
         </div>
 
         <!-- Felder für PayPal -->
         <div v-else-if="localPayment.paymentOption === 'paypal'" class="payment-fields">
-          <div class="form-group">
+          <div class="form-group" :class="{ 'has-error': errors.paypalEmail }">
             <label for="paypalEmail">PayPal E-Mail</label>
             <input
               id="paypalEmail"
@@ -72,7 +91,11 @@
               class="form-control"
               v-model="localPayment.paypalEmail"
               placeholder="z.B. user@mail.com"
+              @input="validatePayPalEmail"
             />
+            <span v-if="errors.paypalEmail" class="error">
+              {{ errors.paypalEmail }}
+            </span>
           </div>
         </div>
 
@@ -93,8 +116,8 @@ import { computed, reactive, watch } from 'vue'
 import axios from 'axios'
 import Swal from 'sweetalert2'
 
+// Events / Props
 const emit = defineEmits(['close', 'save'])
-const localPayment = reactive({})
 const props = defineProps({
   show: {
     type: Boolean,
@@ -107,11 +130,23 @@ const props = defineProps({
   },
   userId: {
     type: Number,
-    required: true, // Die `userId` muss übergeben werden
+    required: true,
   },
 })
 
-// Syncronisiere `localPayment` mit der Prop
+// Lokaler Payment State
+const localPayment = reactive({})
+
+// Fehlerobjekt für Inline-Validierung
+const errors = reactive({
+  creditCardNumber: '',
+  expiryDate: '',
+  cvc: '',
+  iban: '',
+  paypalEmail: '',
+})
+
+// Payment-Prop direkt synchronisieren
 watch(
   () => props.payment,
   (newPayment) => {
@@ -120,31 +155,164 @@ watch(
   { immediate: true },
 )
 
+// Computed für disable-Button
 const isConfirmDisabled = computed(() => {
   if (!localPayment.paymentOption) return true
 
   switch (localPayment.paymentOption) {
     case 'credit card':
-      return !localPayment.creditCardNumber || !localPayment.expiryDate || !localPayment.cvc
+      return (
+        // Felder dürfen nicht leer sein
+        !localPayment.creditCardNumber ||
+        !localPayment.expiryDate ||
+        !localPayment.cvc ||
+        // Und sie dürfen keine Fehlermeldung enthalten
+        !!errors.creditCardNumber ||
+        !!errors.expiryDate ||
+        !!errors.cvc
+      )
+
     case 'bank transfer':
-      return !localPayment.iban
+      return !localPayment.iban || !!errors.iban
+
     case 'paypal':
-      return !localPayment.paypalEmail
+      return !localPayment.paypalEmail || !!errors.paypalEmail
+
     default:
       return true
   }
 })
 
-const closeModal = () => {
+// Ablaufdatum als Computed (wie gehabt)
+const expiryDate = computed({
+  get() {
+    return localPayment.expiryDate ? formatInputDate(localPayment.expiryDate) : ''
+  },
+  set(value) {
+    localPayment.expiryDate = value
+  },
+})
+
+// Datum formatieren
+function formatInputDate(date) {
+  if (!date) return ''
+  const parsedDate = new Date(date)
+  if (isNaN(parsedDate.getTime())) {
+    console.warn('Ungültiges Datum:', date)
+    return ''
+  }
+  const year = parsedDate.getFullYear()
+  const month = String(parsedDate.getMonth() + 1).padStart(2, '0')
+  const day = String(parsedDate.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+
+// ========== VALIDIERUNGSFUNKTIONEN ==========
+
+// Kreditkartennummer: Nur Ziffern, 13–19 Stellen
+function validateCreditCardNumber() {
+  const val = (localPayment.creditCardNumber || '').replace(/\s+/g, '') // Leerzeichen entfernen
+  if (!val) {
+    errors.creditCardNumber = ''
+    return
+  }
+  if (!/^\d{13,19}$/.test(val)) {
+    errors.creditCardNumber = 'Bitte eine gültige Kreditkartennummer (13–19 Ziffern) eingeben'
+  } else {
+    errors.creditCardNumber = ''
+  }
+}
+
+// Datum: Muss gültig sein und in der Zukunft liegen (optional)
+function validateExpiryDate() {
+  const val = localPayment.expiryDate
+  if (!val) {
+    errors.expiryDate = ''
+    return
+  }
+  const parsed = new Date(val)
+  if (isNaN(parsed.valueOf())) {
+    errors.expiryDate = 'Ungültiges Datum'
+    return
+  }
+  // Optional: In der Vergangenheit liegendes Datum abfangen
+  const now = new Date()
+  if (parsed < now) {
+    errors.expiryDate = 'Das Ablaufdatum darf nicht in der Vergangenheit liegen'
+  } else {
+    errors.expiryDate = ''
+  }
+}
+
+// CVC: 3–4 Ziffern
+function validateCVC() {
+  const val = localPayment.cvc
+  if (!val) {
+    errors.cvc = ''
+    return
+  }
+  if (!/^\d{3,4}$/.test(val)) {
+    errors.cvc = 'Bitte einen gültigen CVC (3–4 Ziffern) eingeben'
+  } else {
+    errors.cvc = ''
+  }
+}
+
+// IBAN: 15–34 alphanumerische Zeichen
+function validateIBAN() {
+  const val = localPayment.iban
+  if (!val) {
+    errors.iban = ''
+    return
+  }
+  if (!/^[A-Za-z0-9]{15,34}$/.test(val)) {
+    errors.iban = 'Bitte eine gültige IBAN (15–34 alphanumerische Zeichen) eingeben'
+  } else {
+    errors.iban = ''
+  }
+}
+
+// PayPal Email: Muss ein valid-Email-Pattern matchen
+function validatePayPalEmail() {
+  const val = localPayment.paypalEmail
+  if (!val) {
+    errors.paypalEmail = ''
+    return
+  }
+  // Einfacher E-Mail-Regex
+  const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+  if (!re.test(val)) {
+    errors.paypalEmail = 'Bitte eine gültige E-Mail-Adresse eingeben'
+  } else {
+    errors.paypalEmail = ''
+  }
+}
+
+// Modal schließen
+function closeModal() {
   emit('close')
 }
 
-const handleConfirm = async () => {
+// Speichern
+async function handleConfirm() {
   try {
-    const paymentData = {
-      ...localPayment,
+    // Beispielhafter "Vor dem Submit" Check:
+    // Wenn noch Fehler vorliegen, abbrechen
+    if (
+      errors.creditCardNumber ||
+      errors.expiryDate ||
+      errors.cvc ||
+      errors.iban ||
+      errors.paypalEmail
+    ) {
+      return Swal.fire({
+        title: 'Bitte alle Fehler beheben',
+        icon: 'warning',
+        confirmButtonText: 'OK',
+      })
     }
 
+    const paymentData = { ...localPayment }
     paymentData.user = props.userId
 
     let result
@@ -155,13 +323,14 @@ const handleConfirm = async () => {
       // Neue Zahlungsmethode erstellen
       result = await createPayment(paymentData)
     }
-    emit('save', result.data) // Emit der neuen/aktualisierten Zahlungsmethode
+    emit('save', result.data)
     emit('close')
     resetPayment()
+
     if (localPayment.id) {
       await Swal.fire({
-        title: 'Zahlungsmethode updated!',
-        text: `Zahlungsmethode wurde erfolgreich geupdated.`,
+        title: 'Zahlungsmethode aktualisiert!',
+        text: 'Zahlungsmethode wurde erfolgreich aktualisiert.',
         icon: 'success',
         showConfirmButton: false,
         timer: 1500,
@@ -170,7 +339,7 @@ const handleConfirm = async () => {
     } else {
       await Swal.fire({
         title: 'Zahlungsmethode erstellt!',
-        text: `Zahlungsmethode wurde erfolgreich erstellt.`,
+        text: 'Zahlungsmethode wurde erfolgreich erstellt.',
         icon: 'success',
         showConfirmButton: false,
         timer: 1500,
@@ -188,17 +357,27 @@ const handleConfirm = async () => {
   }
 }
 
-const resetPayment = () => {
+// Reset des PaymentModals
+function resetPayment() {
   Object.assign(localPayment, {
     paymentOption: '',
     creditCardNumber: '',
+    expiryDate: '',
+    cvc: '',
     iban: '',
     paypalEmail: '',
+  })
+  // Auch Fehlermeldungen zurücksetzen
+  Object.assign(errors, {
+    creditCardNumber: '',
     expiryDate: '',
+    cvc: '',
+    iban: '',
+    paypalEmail: '',
   })
 }
 
-// Methode zum Erstellen einer neuen Zahlung
+// Payment-APIs
 async function createPayment(paymentData) {
   try {
     return await axios.post(`/api/payment/create`, paymentData)
@@ -213,7 +392,6 @@ async function createPayment(paymentData) {
   }
 }
 
-// Methode zum Aktualisieren einer bestehenden Zahlung
 async function updatePayment(paymentId, paymentData) {
   try {
     return await axios.patch(`/api/payment/${paymentId}`, paymentData)
@@ -267,24 +445,24 @@ async function updatePayment(paymentId, paymentData) {
   gap: 10px;
 }
 
-/* Allgemeine Form-Stile (kannst du anpassen/übernehmen) */
 .form-group {
   display: flex;
   flex-direction: column;
+  margin-bottom: 10px;
 }
 
-.form-control {
-  padding: 10px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  font-size: 1rem;
-  outline: none;
+/* Beispiel-Fehlerzustand: Umrandung rot, wenn Fehler vorhanden */
+.has-error input {
+  border-color: #e74c3c !important;
 }
 
-.form-control:focus {
-  border-color: #007bff;
+.error {
+  color: #e74c3c;
+  font-size: 0.9rem;
+  margin-top: 5px;
 }
 
+/* Button-Stile (Beispiel) */
 .btn {
   padding: 10px 20px;
   font-size: 1rem;

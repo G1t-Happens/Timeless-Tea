@@ -32,15 +32,17 @@ module.exports = {
     },
 
     /**
-     * @description Die Menge des Produkts in Gramm.
+     * @description Die Menge des Produkts in der Bestellung
      * @type {number}
-     * @example Für Productbestellung: 250 (für 250 Gramm)
+     * @example Für Productbestellung
      */
     quantity: {
       type: 'number',
-      columnType: 'decimal(10,2)',
-      required: false
-    },
-
+      required: true,
+      min: 1,
+      max: 1000,
+      custom: (value) => Number.isInteger(value), // Akzeptiert nur Ganzzahlen
+      example: 5
+    }
   },
 };

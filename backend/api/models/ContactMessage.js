@@ -15,6 +15,7 @@ module.exports = {
     name: {
       type: 'string',
       required: true,
+      maxLength: 60,
       description: 'Der Name des Absenders',
       example: 'Max Mustermann'
     },
@@ -28,6 +29,7 @@ module.exports = {
       type: 'string',
       required: true,
       isEmail: true,
+      maxLength: 100,
       description: 'Die E-Mail-Adresse des Absenders',
       example: 'max@beispiel.de'
     },
@@ -40,6 +42,7 @@ module.exports = {
     subject: {
       type: 'string',
       required: true,
+      maxLength: 50,
       description: 'Der Betreff der Nachricht',
       example: 'Worum geht es?'
     },
@@ -52,6 +55,7 @@ module.exports = {
     message: {
       type: 'string',
       required: true,
+      maxLength: 500,
       description: 'Der Inhalt der Nachricht',
       example: 'Schreiben Sie hier Ihre Nachricht...'
     },

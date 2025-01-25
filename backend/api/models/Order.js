@@ -16,6 +16,8 @@ module.exports = {
     totalAmount: {
       type: 'number',
       required: true,
+      min: 0,
+      max: 100000,
       example: 99.99
     },
 

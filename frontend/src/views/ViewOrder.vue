@@ -43,7 +43,7 @@
         <h3>Status der Bestellung</h3>
         <form @submit.prevent="saveOrderStatus">
           <div class="form-group">
-            <label for="orderStatus">Bestellstatus:</label>
+            <label for="orderStatus">Bestellstatus*:</label>
             <select id="orderStatus" v-model="editableOrderStatus" required>
               <option value="open">Offen</option>
               <option value="processing">In Bearbeitung</option>
@@ -69,11 +69,11 @@
         <h3>Versandinformationen</h3>
         <form @submit.prevent="saveShippingInfo">
           <div class="form-group">
-            <label for="carrier">Versanddienst:</label>
+            <label for="carrier">Versanddienst*:</label>
             <input type="text" id="carrier" v-model="editableShipping.carrier" required />
           </div>
           <div class="form-group">
-            <label for="deliveryStatus">Lieferstatus:</label>
+            <label for="deliveryStatus">Lieferstatus*:</label>
             <select id="deliveryStatus" v-model="editableShipping.deliveryStatus" required>
               <option value="not shipped">Nicht versandt</option>
               <option value="shipped">Versandt</option>
@@ -81,7 +81,7 @@
             </select>
           </div>
           <div class="form-group">
-            <label for="estimatedDeliveryDate">Geschätztes Lieferdatum:</label>
+            <label for="estimatedDeliveryDate">Geschätztes Lieferdatum*:</label>
             <input
               type="date"
               id="estimatedDeliveryDate"
@@ -90,7 +90,7 @@
             />
           </div>
           <div class="form-group">
-            <label for="shippingDate">Versanddatum:</label>
+            <label for="shippingDate">Versanddatum*:</label>
             <input type="date" id="shippingDate" v-model="editableShipping.shippingDate" required />
           </div>
           <button
@@ -106,7 +106,7 @@
         <h4>Lieferadresse</h4>
         <form @submit.prevent="saveDeliveryAddress">
           <div class="form-group">
-            <label for="country">Land:</label>
+            <label for="country">Land*:</label>
             <input type="text" id="country" v-model="editableAddress.country" required />
           </div>
           <div class="form-group">
@@ -114,23 +114,23 @@
             <input type="text" id="state" v-model="editableAddress.state" />
           </div>
           <div class="form-group">
-            <label for="city">Stadt:</label>
+            <label for="city">Stadt*:</label>
             <input type="text" id="city" v-model="editableAddress.city" required />
           </div>
           <div class="form-group">
-            <label for="postalCode">Postleitzahl:</label>
+            <label for="postalCode">Postleitzahl*:</label>
             <input type="text" id="postalCode" v-model="editableAddress.postalCode" required />
           </div>
           <div class="form-group">
-            <label for="street">Straße:</label>
+            <label for="street">Straße*:</label>
             <input type="text" id="street" v-model="editableAddress.street" required />
           </div>
           <div class="form-group">
-            <label for="houseNumber">Hausnummer:</label>
+            <label for="houseNumber">Hausnummer*:</label>
             <input type="text" id="houseNumber" v-model="editableAddress.houseNumber" required />
           </div>
-          <div class="form-group" v-if="order.shipping.address.addressAddition">
-            <label for="addressAddition">Zusatz:</label>
+          <div class="form-group">
+            <label for="addressAddition">Zusatz(optional):</label>
             <input type="text" id="addressAddition" v-model="editableAddress.addressAddition" />
           </div>
           <button
@@ -149,7 +149,7 @@
         <h3>Zahlungsinformationen</h3>
         <form @submit.prevent="savePaymentInfo">
           <div class="form-group">
-            <label for="paymentOption">Zahlungsmethode:</label>
+            <label for="paymentOption">Zahlungsmethode*:</label>
             <select id="paymentOption" v-model="editablePayment.paymentOption" required>
               <option value="credit card">Kreditkarte</option>
               <option value="paypal">PayPal</option>
@@ -159,7 +159,7 @@
 
           <div v-if="editablePayment.paymentOption === 'credit card'">
             <div class="form-group">
-              <label for="creditCardNumber">Kreditkartennummer:</label>
+              <label for="creditCardNumber">Kreditkartennummer*:</label>
               <input
                 type="text"
                 id="creditCardNumber"
@@ -168,21 +168,25 @@
               />
             </div>
             <div class="form-group">
-              <label for="expiryDate">Ablaufdatum:</label>
-              <input type="month" id="expiryDate" v-model="editablePayment.expiryDate" required />
+              <label for="expiryDate">Ablaufdatum*:</label>
+              <input type="date" id="expiryDate" v-model="editablePayment.expiryDate" required />
+            </div>
+            <div class="form-group">
+              <label for="cvc">Kartenprüfnummer(CVC)*:</label>
+              <input type="text" id="cvc" v-model="editablePayment.cvc" required />
             </div>
           </div>
 
           <div v-if="editablePayment.paymentOption === 'paypal'">
             <div class="form-group">
-              <label for="paypalEmail">PayPal Email:</label>
+              <label for="paypalEmail">PayPal Email*:</label>
               <input type="email" id="paypalEmail" v-model="editablePayment.paypalEmail" required />
             </div>
           </div>
 
           <div v-if="editablePayment.paymentOption === 'bank transfer'">
             <div class="form-group">
-              <label for="iban">IBAN:</label>
+              <label for="iban">IBAN*:</label>
               <input type="text" id="iban" v-model="editablePayment.iban" required />
             </div>
           </div>
@@ -262,6 +266,7 @@ const editablePayment = reactive({
   expiryDate: '',
   paypalEmail: '',
   iban: '',
+  cvc: '',
 })
 
 // Map status to user-friendly labels
@@ -334,7 +339,9 @@ const isPaymentChanged = computed(() => {
     (editablePayment.paymentOption === 'credit card' &&
       editablePayment.creditCardNumber !== order.value.payment.creditCardNumber) ||
     (editablePayment.paymentOption === 'credit card' &&
-      editablePayment.expiryDate !== formatInputMonth(order.value.payment.expiryDate)) ||
+      editablePayment.expiryDate !== order.value.payment.expiryDate) ||
+    (editablePayment.paymentOption === 'credit card' &&
+      editablePayment.cvc !== order.value.payment.cvc) ||
     (editablePayment.paymentOption === 'paypal' &&
       editablePayment.paypalEmail !== order.value.payment.paypalEmail) ||
     (editablePayment.paymentOption === 'bank transfer' &&
@@ -381,9 +388,8 @@ const populateEditableFields = () => {
     // Zahlungsinformationen
     editablePayment.paymentOption = order.value.payment.paymentOption
     editablePayment.creditCardNumber = order.value.payment.creditCardNumber || ''
-    editablePayment.expiryDate = order.value.payment.expiryDate
-      ? formatInputMonth(order.value.payment.expiryDate)
-      : ''
+    editablePayment.expiryDate = formatInputDate(order.value.payment.expiryDate) || ''
+    editablePayment.cvc = order.value.payment.cvc || ''
     editablePayment.paypalEmail = order.value.payment.paypalEmail || ''
     editablePayment.iban = order.value.payment.iban || ''
   }
@@ -406,15 +412,6 @@ const formatInputDate = (date) => {
   const day = String(parsedDate.getDate()).padStart(2, '0')
 
   return `${year}-${month}-${day}`
-}
-
-// Hilfsfunktion zur Formatierung von Monatseingaben (YYYY-MM)
-const formatInputMonth = (date) => {
-  if (!date) return ''
-  const parsedDate = new Date(date)
-  const year = parsedDate.getFullYear()
-  const month = String(parsedDate.getMonth() + 1).padStart(2, '0')
-  return `${year}-${month}`
 }
 
 // Methoden zum Speichern der bearbeiteten Daten
@@ -451,10 +448,8 @@ const saveShippingInfo = async () => {
     const updatedShipping = {
       carrier: editableShipping.carrier,
       deliveryStatus: editableShipping.deliveryStatus,
-      estimatedDeliveryDate: formatInputDate(
-        new Date(editableShipping.estimatedDeliveryDate).toISOString(),
-      ),
-      shippingDate: formatInputDate(new Date(editableShipping.shippingDate).toISOString()),
+      estimatedDeliveryDate: editableShipping.estimatedDeliveryDate,
+      shippingDate: editableShipping.shippingDate,
     }
     await axios.patch(`/api/order/${order.value.id}/shipping`, updatedShipping)
     order.value.shipping = { ...order.value.shipping, ...updatedShipping }
@@ -519,10 +514,9 @@ const savePaymentInfo = async () => {
       paymentOption: editablePayment.paymentOption,
       creditCardNumber:
         editablePayment.paymentOption === 'credit card' ? editablePayment.creditCardNumber : null,
+      cvc: editablePayment.paymentOption === 'credit card' ? editablePayment.cvc : null,
       expiryDate:
-        editablePayment.paymentOption === 'credit card'
-          ? new Date(editablePayment.expiryDate + '-01').toISOString()
-          : null,
+        editablePayment.paymentOption === 'credit card' ? editablePayment.expiryDate : null,
       paypalEmail: editablePayment.paymentOption === 'paypal' ? editablePayment.paypalEmail : null,
       iban: editablePayment.paymentOption === 'bank transfer' ? editablePayment.iban : null,
     }
