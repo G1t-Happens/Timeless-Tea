@@ -37,6 +37,7 @@
                 type="number"
                 v-model.number="item.productQuantity"
                 min="1"
+                max="1000"
                 step="1"
                 @change="handleQuantityChange(item)"
                 class="quantity-input"
@@ -76,15 +77,43 @@ const removeItem = (productId) => {
 }
 
 const handleQuantityChange = (item) => {
-  if (item.productQuantity < 1) {
+  // Prüfen, ob der Wert eine gültige Zahl ist
+  if (isNaN(item.productQuantity)) {
+    item.productQuantity = 1
     Swal.fire({
-      title: 'Bitte gültige Menge eingeben.',
-      text: 'Die Menge der Produkte muss positiv sein.',
+      backdrop: false,
+      title: 'Ungültige Eingabe!',
+      text: 'Bitte geben Sie eine gültige Zahl ein.',
+      icon: 'error',
+      confirmButtonText: 'OK',
+    })
+    cartStore.updateQuantity(item.id, item.productQuantity)
+    return
+  }
+
+  // Sicherstellen dass der Wert innerhalb des erlaubten Bereichs liegt (Input Validation mit auto. Anpassung)
+  if (item.productQuantity < 1) {
+    item.productQuantity = 1
+    Swal.fire({
+      backdrop: false,
+      title: 'Ungültige Menge!',
+      text: 'Die Menge muss mindestens 1 betragen.',
       icon: 'warning',
       confirmButtonText: 'OK',
     })
-    cartStore.updateQuantity(item.id, 1)
+  } else if (item.productQuantity > 1000) {
+    item.productQuantity = 1000
+    Swal.fire({
+      backdrop: false,
+      title: 'Ungültige Menge!',
+      text: 'Die maximale Menge ist 1000.',
+      icon: 'warning',
+      confirmButtonText: 'OK',
+    })
   }
+
+  // Aktualisiere die Menge im Warenkorb
+  cartStore.updateQuantity(item.id, item.productQuantity)
 }
 
 const clearCart = async () => {
