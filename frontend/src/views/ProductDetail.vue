@@ -37,7 +37,7 @@
           </router-link>
         </p>
         <p class="content-info">Inhalt: {{ product.quantity }}g ({{ pricePerKg }}€ / kg)</p>
-        <p v-if="product.description">{{ product.description }}</p>
+        <p v-if="product.description" class="description-info">{{ product.description }}</p>
 
         <hr class="section-divider" />
 
@@ -319,6 +319,10 @@ onMounted(fetchProduct)
   font-size: 14px;
   color: #555; /* Dezente Farbe */
   margin-bottom: 8px;
+}
+
+.description-info {
+  word-break: break-word;
 }
 
 /* Sternebewertung */
