@@ -19,44 +19,52 @@
 
         <!-- E-Mail -->
         <div v-if="user?.emailAddress" class="form-group">
-          <label for="email" class="form-label">E-Mail-Adresse</label>
+          <label for="email" class="form-label">E-Mail-Adresse*</label>
           <input
             v-model="user.emailAddress"
             type="email"
             id="email"
             class="form-control"
+            maxlength="100"
             required
           />
         </div>
 
         <!-- Vorname -->
         <div v-if="user?.firstName" class="form-group">
-          <label for="firstName" class="form-label">Vorname</label>
+          <label for="firstName" class="form-label">Vorname*</label>
           <input
             v-model="user.firstName"
             type="text"
             id="firstName"
             class="form-control"
+            maxlength="50"
             required
           />
         </div>
 
         <!-- Nachname -->
         <div v-if="user?.lastName" class="form-group">
-          <label for="lastName" class="form-label">Nachname</label>
-          <input v-model="user.lastName" type="text" id="lastName" class="form-control" required />
+          <label for="lastName" class="form-label">Nachname*</label>
+          <input
+            v-model="user.lastName"
+            type="text"
+            id="lastName"
+            class="form-control"
+            maxlength="50"
+            required
+          />
         </div>
 
         <!-- Admin Toggle (nur für Admins) -->
         <div v-if="currentUser?.isAdmin" class="form-group toggle-switch">
           <label class="form-label" for="isAdmin">Admin</label>
           <label class="switch" aria-labelledby="isAdmin">
-            <input v-model="user.isAdmin" type="checkbox" id="isAdmin" />
+            <input v-model="user.isAdmin" type="checkbox" id="isAdmin" required />
             <span class="slider round"></span>
           </label>
         </div>
 
-        <!-- Passwort ändern -->
         <!-- Passwort ändern -->
         <h3 class="form-label">Passwort ändern</h3>
         <div class="form-group password-fields">
@@ -114,13 +122,22 @@
         <h3 class="mt-4 form-label">Adressenangabe</h3>
         <div v-if="user?.address" class="form-group address-fields">
           <label for="street" class="form-label">Straße*</label>
-          <input v-model="user.address.street" type="text" id="street" class="form-control" />
+          <input
+            v-model="user.address.street"
+            type="text"
+            id="street"
+            class="form-control"
+            maxlength="30"
+            required
+          />
           <label for="houseNumber" class="form-label">Hausnummer*</label>
           <input
             v-model="user.address.houseNumber"
             type="text"
             id="houseNumber"
             class="form-control"
+            maxlength="8"
+            required
           />
           <label for="addressAddition" class="form-label">Adresszusatz</label>
           <input
@@ -128,18 +145,35 @@
             type="text"
             id="addressAddition"
             class="form-control"
+            maxlength="150"
           />
           <label for="city" class="form-label">Stadt*</label>
-          <input v-model="user.address.city" type="text" id="city" class="form-control" />
+          <input
+            v-model="user.address.city"
+            type="text"
+            id="city"
+            class="form-control"
+            maxlength="50"
+            required
+          />
           <label for="postalCode" class="form-label">Postleitzahl*</label>
           <input
             v-model="user.address.postalCode"
             type="text"
             id="postalCode"
             class="form-control"
+            maxlength="10"
+            required
           />
           <label for="country" class="form-label">Land*</label>
-          <input v-model="user.address.country" type="text" id="country" class="form-control" />
+          <input
+            v-model="user.address.country"
+            type="text"
+            id="country"
+            class="form-control"
+            maxlength="60"
+            required
+          />
         </div>
 
         <!-- Zahlungsmethoden -->
