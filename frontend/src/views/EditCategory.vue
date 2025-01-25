@@ -36,23 +36,37 @@
               @dblclick="enableEditing(category.id)"
             >
               <td>{{ category.id }}</td>
-              <td :class="{ 'modified-field': isModified(category.id, 'name') }">
+              <td
+                :class="[
+                  { 'modified-field': isModified(category.id, 'name') },
+                  { 'empty-field': !category.name.trim() },
+                ]"
+              >
                 <input
                   v-if="isEditing(category.id)"
                   v-model="category.name"
                   @input="trackChange(category.id, 'name')"
                   @blur="disableEditing(category.id)"
                   class="edit-input"
+                  maxlength="10"
+                  required
                 />
                 <span v-else>{{ category.name }}</span>
               </td>
-              <td :class="{ 'modified-field': isModified(category.id, 'type') }">
+              <td
+                :class="[
+                  { 'modified-field': isModified(category.id, 'type') },
+                  { 'empty-field': !category.type.trim() },
+                ]"
+              >
                 <input
                   v-if="isEditing(category.id)"
                   v-model="category.type"
                   @input="trackChange(category.id, 'type')"
                   @blur="disableEditing(category.id)"
                   class="edit-input"
+                  maxlength="10"
+                  required
                 />
                 <span v-else>{{ category.type }}</span>
               </td>
@@ -76,7 +90,7 @@
         <button
           @click="saveChanges"
           class="btn btn-primary"
-          :disabled="pendingChanges.length === 0"
+          :disabled="pendingChanges.length === 0 || hasInvalidChanges"
         >
           Änderungen speichern
         </button>
@@ -161,6 +175,12 @@ const paginatedCategories = computed(() => {
 
 const totalPages = computed(() => Math.ceil(categories.value.length / itemsPerPage))
 
+const hasInvalidChanges = computed(() => {
+  return pendingChanges.some(
+    (change) => !change.name.trim() || !change.type.trim(), // Prüfe, ob irgendein Feld leer ist
+  )
+})
+
 // Pagination-Funktionen
 const previousPage = () => {
   if (currentPage.value > 1) currentPage.value--
@@ -200,6 +220,16 @@ const trackPendingChanges = (id) => {
   const original = originalCategories.value.find((c) => c.id === id)
 
   if (edited && original) {
+    // Entferne ungültige Änderungen
+    if (!edited.name.trim() || !edited.type.trim()) {
+      const index = pendingChanges.findIndex((c) => c.id === id)
+      if (index >= 0) {
+        pendingChanges.splice(index, 1)
+      }
+      return
+    }
+
+    // Prüfen, ob echte Änderungen existieren
     const isChanged = Object.keys(original).some((key) => edited[key] !== original[key])
     if (isChanged) {
       const existingIndex = pendingChanges.findIndex((c) => c.id === id)
@@ -209,6 +239,7 @@ const trackPendingChanges = (id) => {
         pendingChanges.push({ ...edited })
       }
     } else {
+      // Entferne Änderungen, wenn keine Änderungen existieren
       const index = pendingChanges.findIndex((c) => c.id === id)
       if (index >= 0) {
         pendingChanges.splice(index, 1)
@@ -405,5 +436,10 @@ onMounted(fetchCategories)
 .btn:disabled {
   background-color: #ddd;
   cursor: not-allowed;
+}
+
+.empty-field {
+  background-color: #ffe6e6; /* Leeres Feld rot markieren */
+  border: 1px solid #e74c3c;
 }
 </style>
