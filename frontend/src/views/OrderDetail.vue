@@ -10,7 +10,7 @@
         <input
           v-model="searchQuery"
           type="text"
-          placeholder="Suche nach Bestellungen..."
+          placeholder="Suche nach Bestellung-ID..."
           maxlength="50"
           class="search-input"
         />
