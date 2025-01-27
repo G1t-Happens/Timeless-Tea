@@ -93,12 +93,17 @@
       <div class="form-group">
         <label for="categories" class="form-label">Kategorien</label>
         <!-- Button zum Öffnen des Dropdown-Menüs -->
-        <button class="dropdown-button" type="button" @click="toggleDropdown('categories')">
+        <button
+          class="dropdown-button"
+          type="button"
+          @click="toggleDropdown('categories')"
+          ref="dropdownButtonRef"
+        >
           ▾ Kategorien wählen
         </button>
 
         <!-- Dropdown-Menü für die Auswahl von Kategorien -->
-        <div v-if="activeDropdown === 'categories'" class="dropdown-menu">
+        <div v-if="activeDropdown === 'categories'" class="dropdown-menu" ref="dropdownMenuRef">
           <div v-for="group in organizedCategories" :key="group.type">
             <strong>{{ group.type }}</strong>
             <div v-for="category in group.categories" :key="category.id">
@@ -142,7 +147,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import axios from 'axios'
 import BackButton from '@/components/navigation/BackButton.vue'
@@ -156,6 +161,8 @@ const quantity = ref('')
 const selectedCategories = ref([])
 const organizedCategories = ref([])
 const activeDropdown = ref(null)
+const dropdownButtonRef = ref(null)
+const dropdownMenuRef = ref(null)
 const imageFile = ref(null)
 const imagePreview = ref(null)
 const router = useRouter()
@@ -187,11 +194,30 @@ onMounted(async () => {
   } catch (error) {
     console.error('Fehler beim Laden der Kategorien:', error)
   }
+  // Hinzufügen eines globalen Click-Listeners, um das Popup zu schließen
+  document.addEventListener('click', handleOutsideClick)
+})
+
+onUnmounted(() => {
+  // Entfernen des globalen Click-Listeners beim Verlassen der Komponente
+  document.removeEventListener('click', handleOutsideClick)
 })
 
 // Funktion zum Umschalten des geöffneten Dropdown-Menüs
 const toggleDropdown = (dropdown) => {
   activeDropdown.value = activeDropdown.value === dropdown ? null : dropdown
+}
+
+// Funktion, um Klicks außerhalb des Dropdowns zu behandeln
+const handleOutsideClick = (event) => {
+  const clickedInsideButton =
+    dropdownButtonRef.value && dropdownButtonRef.value.contains(event.target)
+  const clickedInsideMenu = dropdownMenuRef.value && dropdownMenuRef.value.contains(event.target)
+
+  // Nur schließen, wenn der Klick außerhalb von Button und Dropdown erfolgt
+  if (!clickedInsideButton && !clickedInsideMenu) {
+    activeDropdown.value = null
+  }
 }
 
 // Funktion, um die Namen der ausgewählten Kategorien zu erhalten
