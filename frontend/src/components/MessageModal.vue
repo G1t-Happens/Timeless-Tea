@@ -5,7 +5,7 @@
       <h3 class="modal-title">{{ message.subject }}</h3>
       <p><strong>Name:</strong> {{ message.name }}</p>
       <p><strong>Email:</strong> {{ message.email }}</p>
-      <p><strong>Nachricht:</strong> {{ message.message }}</p>
+      <p class="break-text"><strong>Nachricht:</strong> {{ message.message }}</p>
       <p>
         <small>Erstellt am: {{ new Date(message.createdAt).toLocaleString() }}</small>
       </p>
@@ -168,5 +168,11 @@ textarea:focus {
 .btn-send:disabled {
   background-color: #d6d6d6;
   cursor: not-allowed;
+}
+
+.break-text {
+  word-wrap: break-word; /* Ermöglicht Zeilenumbruch bei langen Wörtern */
+  white-space: normal; /* Ermöglicht Zeilenumbruch */
+  overflow-wrap: break-word; /* Fällt zurück auf den Umbruch, wenn kein Platz mehr vorhanden ist */
 }
 </style>
