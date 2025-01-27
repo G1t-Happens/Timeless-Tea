@@ -17,4 +17,4 @@ Aufgabe 5:
 - [x] e) Security
 - [x] f) Deployment
 - [x] g) Code Qualität
-- [ ] h) Dokumentation
+- [x] h) Dokumentation
