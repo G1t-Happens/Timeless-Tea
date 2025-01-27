@@ -403,7 +403,7 @@ const deleteArticle = async (id) => {
         product.isDeleted = true
       }
       await Swal.fire({
-        title: 'Gelöscht',
+        title: 'Entfernt!',
         text: 'Das Produkt wurde erfolgreich entfernt.',
         icon: 'success',
         confirmButtonText: 'OK',
