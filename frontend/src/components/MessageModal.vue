@@ -2,9 +2,9 @@
   <div class="modal-overlay" @click.self="closeModal">
     <div class="modal-content">
       <!-- Anzeige der Message Infos -->
-      <h3 class="modal-title">{{ message.subject }}</h3>
-      <p><strong>Name:</strong> {{ message.name }}</p>
-      <p><strong>Email:</strong> {{ message.email }}</p>
+      <h3 class="modal-title break-text">{{ message.subject }}</h3>
+      <p class="break-text"><strong>Name:</strong> {{ message.name }}</p>
+      <p class="break-text"><strong>Email:</strong> {{ message.email }}</p>
       <p class="break-text"><strong>Nachricht:</strong> {{ message.message }}</p>
       <p>
         <small>Erstellt am: {{ new Date(message.createdAt).toLocaleString() }}</small>
@@ -94,15 +94,22 @@ const emitDelete = async (id) => {
   justify-content: center;
   align-items: center;
   z-index: 1000;
+  overflow: hidden; /* Verhindert Scrollen der Seite im Hintergrund */
 }
 
 .modal-content {
   background: white;
   padding: 2rem;
   border-radius: 10px;
-  width: 500px;
+  width: 90%; /* Standardbreite: 90% des Viewports */
+  max-width: 800px; /* Maximalbreite */
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
   text-align: left;
+  display: flex;
+  flex-direction: column; /* Alle Inhalte untereinander */
+  gap: 1rem; /* Abstand zwischen Elementen */
+  max-height: 90vh; /* Begrenzung der maximalen Höhe */
+  overflow-y: auto; /* Aktiviert vertikales Scrollen bei Überlauf */
 }
 
 .modal-title {
@@ -115,6 +122,8 @@ const emitDelete = async (id) => {
   display: flex;
   justify-content: space-between;
   margin-top: 1.5rem;
+  flex-wrap: wrap;
+  gap: 1rem; /* Abstand zwischen Buttons, falls sie umbrechen */
 }
 
 .btn {
@@ -123,6 +132,8 @@ const emitDelete = async (id) => {
   font-weight: bold;
   cursor: pointer;
   transition: all 0.3s ease;
+  flex: 1; /* Buttons gleich breit */
+  min-width: 120px; /* Mindestbreite der Buttons */
 }
 
 .btn-delete {

@@ -11,11 +11,13 @@
         @click="openModal(message)"
       >
         <div class="message-header">
-          <h3>{{ message.subject }}</h3>
+          <h3 class="break-text">{{ message.subject }}</h3>
           <span class="message-time">{{ formatDate(message.createdAt) }}</span>
         </div>
         <div class="message-details">
-          <p><strong>Name:</strong> {{ message.name }}</p>
+          <p>
+            <strong>Name:</strong> <span class="break-text">{{ message.name }}</span>
+          </p>
         </div>
       </div>
 
@@ -216,11 +218,6 @@ onMounted(() => {
 
 .pagination-button:hover {
   background-color: #9fa86d;
-  color: white;
-  border: none;
-  padding: 10px 15px;
-  margin: 0 10px;
-  border-radius: 4px;
   transform: scale(1.1);
 }
 
@@ -232,5 +229,18 @@ onMounted(() => {
 .pagination span {
   font-size: 1.1rem;
   color: #333;
+}
+
+/* Zeilenumbruch */
+.break-text {
+  word-wrap: break-word;
+  white-space: normal;
+  overflow-wrap: break-word;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  line-clamp: 2;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
 }
 </style>
