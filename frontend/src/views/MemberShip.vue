@@ -173,7 +173,7 @@
                 </div>
 
                 <!-- Button zum Absenden des Formulars -->
-                <button type="submit" class="btn btn-primary w-100">Registrieren</button>
+                <button type="submit" class="btn btn-secondary w-100">Registrieren</button>
               </form>
             </div>
           </div>
@@ -292,17 +292,6 @@ async function register() {
 .form-control {
   border-radius: 8px;
   border-color: #c06e52;
-}
-
-.btn-primary {
-  background-color: #c06e52;
-  border-color: #c06e52;
-  border-radius: 8px;
-}
-
-.btn-primary:hover {
-  background-color: #9f7a56;
-  border-color: #9f7a56;
 }
 
 .alert {

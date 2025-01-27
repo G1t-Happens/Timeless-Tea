@@ -365,6 +365,13 @@ const truncatedDescription = (description = '') => {
   color: #fff;
 }
 
+.btn-outline-primary:focus:active,
+.btn-outline-primary:active:focus {
+  background-color: #9fa86d;
+  border-color: #9fa86d;
+  box-shadow: none;
+}
+
 .btn-outline-danger {
   background-color: #c06e52;
   border: none;
@@ -378,24 +385,19 @@ const truncatedDescription = (description = '') => {
   color: #fff;
 }
 
+.btn-outline-danger:focus:active,
+.btn-outline-danger:active:focus {
+  background-color: #8f4c37;
+  border-color: #8f4c37;
+  box-shadow: none;
+}
+
 /* Leerer Zustand */
 .wishlist-empty {
   text-align: center;
   font-size: 1.1rem;
   color: #666;
   padding: 40px;
-}
-
-/* Transition-Effekte (für fade-enter/fade-leave) */
-.fade-enter-active,
-.fade-leave-active {
-  transition: all 0.3s ease;
-}
-
-.fade-enter-from,
-.fade-leave-to {
-  opacity: 0;
-  transform: translateY(-10px);
 }
 
 /* Responsives Verhalten:

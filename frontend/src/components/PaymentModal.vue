@@ -109,7 +109,7 @@
           >
             Übernehmen
           </button>
-          <button class="btn btn-danger" @click="closeModal">Abbrechen</button>
+          <button class="btn btn-secondary" @click="closeModal">Abbrechen</button>
         </div>
       </div>
     </div>
@@ -397,6 +397,7 @@ async function createPayment(paymentData) {
   }
 }
 
+//Backend Call, um Payments upzudaten
 async function updatePayment(paymentId, paymentData) {
   try {
     return await axios.patch(`/api/payment/${paymentId}`, paymentData)
@@ -465,35 +466,5 @@ async function updatePayment(paymentId, paymentData) {
   color: #e74c3c;
   font-size: 0.9rem;
   margin-top: 5px;
-}
-
-/* Button-Stile (Beispiel) */
-.btn {
-  padding: 10px 20px;
-  font-size: 1rem;
-  border-radius: 5px;
-  border: none;
-  display: inline-flex;
-  align-items: center;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.btn-primary {
-  background-color: #4a5043 !important;
-  color: white;
-}
-
-.btn-primary:hover {
-  background-color: #9fa86d !important;
-}
-
-.btn-danger {
-  background-color: #c06e52 !important;
-  color: white;
-}
-
-.btn-danger:hover {
-  background-color: #c0392b !important;
 }
 </style>

@@ -18,13 +18,13 @@ main {
 }
 
 button {
-    border: none !important;
-    outline: none !important;
+    border: none;
+    outline: none;
 }
 
 button:active {
-    border: none !important;
-    outline: none !important;
+    border: none;
+    outline: none;
 }
 
 /* Setze den globalen Rand und die Farbe für alle Popups */
@@ -45,12 +45,200 @@ button:active {
 }
 
 /* Style für die Buttons */
-.swal2-confirm, .swal2-cancel {
+.swal2-confirm {
     background-color: #4a5043;
     color: white;
     border-radius: 5px;
     padding: 10px 20px;
 }
+
+.swal2-cancel {
+    background-color: #8f4c37;
+    color: white;
+    border-radius: 5px;
+    padding: 10px 20px;
+}
+
+/* Grundstil für btn-primary */
+.btn-primary {
+    background-color: #4a5043 !important; /* Hauptfarbe */
+    border: 2px solid #4a5043 !important; /* Randfarbe identisch mit Hintergrund */
+    color: white !important; /* Textfarbe */
+    font-weight: bold !important; /* Fettschrift */
+    border-radius: 8px !important; /* Abgerundete Ecken */
+    padding: 10px 20px !important; /* Innenabstand */
+    transition: all 0.3s ease !important; /* Sanfte Übergänge für Hover/Active */
+    box-shadow: none !important; /* Kein zusätzlicher Fokus-Schatten */
+}
+
+
+/* Hover-Zustand */
+.btn-primary:hover {
+    background-color: #9fa86d !important; /* Neue Farbe beim Hover */
+    border-color: #9fa86d !important; /* Randfarbe beim Hover */
+    color: white !important; /* Textfarbe ändern */
+    transform: translateY(-2px) !important; /* Leichtes Schweben */
+    box-shadow: none !important; /* Kein zusätzlicher Fokus-Schatten */
+}
+
+/* Fokus-Zustand */
+.btn-primary:focus,
+.btn-primary:focus-visible {
+    outline: none !important; /* Entfernt den Standardfokusrahmen */
+    background-color: #9fa86d !important; /* Fokusfarbe */
+    border-color: #9fa86d !important; /* Randfarbe bleibt */
+    color: white !important; /* Textfarbe ändern */
+    box-shadow: none !important; /* Kein zusätzlicher Fokus-Schatten */
+}
+
+/* Active-Zustand (beim Klick) */
+.btn-primary:active {
+    background-color: #9fa86d !important; /* Klickfarbe */
+    border-color: #9fa86d !important; /* Randfarbe beim Klick */
+    transform: translateY(2px) !important; /* Button gedrückt */
+    color: white !important; /* Text bleibt weiß */
+    box-shadow: none !important; /* Kein zusätzlicher Fokus-Schatten */
+}
+
+/* Entfernen des blauen Fokus-Hintergrunds bei Bewegung nach Klick */
+.btn-primary:focus:active,
+.btn-primary:active:focus {
+    background-color: #9fa86d !important; /* Farbe bleibt */
+    border-color: #9fa86d !important; /* Randfarbe bleibt */
+    box-shadow: none !important; /* Kein zusätzlicher Fokus-Schatten */
+}
+
+/* Disabled-Zustand */
+.btn-primary:disabled,
+.btn-primary[disabled] {
+    background-color: #7e8777 !important; /* Etwas hellere Version von #6c7567 */
+    border-color: #7e8777 !important; /* Blasserer Rand */
+    color: #e0e0e0 !important; /* Hellerer Text */
+    cursor: not-allowed !important; /* Kein klickbarer Cursor */
+    box-shadow: none !important; /* Kein Schatten */
+    transform: none !important; /* Keine Transformation */
+}
+
+/* Grundstil für btn-secondary */
+.btn-secondary {
+    background-color: #8f4c37 !important; /* Dunklere Standardfarbe */
+    border: 2px solid #8f4c37 !important; /* Randfarbe identisch mit Hintergrund */
+    color: white !important; /* Textfarbe */
+    font-weight: bold !important; /* Fettschrift */
+    border-radius: 8px !important; /* Abgerundete Ecken */
+    padding: 10px 20px !important; /* Innenabstand */
+    transition: all 0.3s ease !important; /* Sanfte Übergänge für Hover/Active */
+    box-shadow: none !important; /* Kein zusätzlicher Fokus-Schatten */
+}
+
+/* Hover-Zustand */
+.btn-secondary:hover {
+    background-color: #cb7e64 !important; /* Hellere Farbe beim Hover */
+    border-color: #cb7e64 !important; /* Randfarbe ändern */
+    color: white !important; /* Text bleibt weiß */
+    transform: translateY(-2px) !important; /* Leichtes Schweben */
+    box-shadow: none !important; /* Kein zusätzlicher Fokus-Schatten */
+}
+
+/* Fokus-Zustand */
+.btn-secondary:focus,
+.btn-secondary:focus-visible {
+    outline: none !important; /* Entfernt den Standardfokusrahmen */
+    background-color: #cb7e64 !important; /* Fokusfarbe (heller Ton) */
+    border-color: #cb7e64 !important; /* Randfarbe bleibt */
+    color: white !important; /* Text bleibt weiß */
+    box-shadow: none !important; /* Kein zusätzlicher Fokus-Schatten */
+}
+
+/* Active-Zustand (beim Klick) */
+.btn-secondary:active {
+    background-color: #cb7e64 !important; /* Klickfarbe (heller Ton) */
+    border-color: #cb7e64 !important; /* Randfarbe bleibt */
+    transform: translateY(2px) !important; /* Button gedrückt */
+    color: white !important; /* Text bleibt weiß */
+    box-shadow: none !important; /* Kein zusätzlicher Fokus-Schatten */
+}
+
+/* Entfernen des blauen Fokus-Hintergrunds bei Bewegung nach Klick */
+.btn-secondary:focus:active,
+.btn-secondary:active:focus {
+    background-color: #cb7e64 !important; /* Farbe bleibt */
+    border-color: #cb7e64 !important; /* Randfarbe bleibt */
+    box-shadow: none !important; /* Kein zusätzlicher Fokus-Schatten */
+}
+
+/* Disabled-Zustand */
+.btn-secondary:disabled,
+.btn-secondary[disabled] {
+    background-color: #d19a86 !important; /* Blassere Version von #c06e52 */
+    border-color: #d19a86 !important; /* Blasser Rand */
+    color: #f0e0da !important; /* Blasser Text */
+    cursor: not-allowed !important; /* Kein klickbarer Cursor */
+    transform: none !important; /* Keine Transformation */
+    box-shadow: none !important; /* Kein zusätzlicher Fokus-Schatten */
+}
+
+/* Grundstil für btn-success */
+.btn-success {
+    display: flex; /* Flexbox für Icon und Text */
+    align-items: center; /* Vertikale Zentrierung */
+    justify-content: center; /* Zentriert Text und Icon */
+    background-color: grey !important; /* Dezentes Grau */
+    border: 2px solid grey !important; /* Randfarbe */
+    color: white !important; /* Textfarbe */
+    font-weight: bold !important; /* Fettschrift */
+    border-radius: 8px !important; /* Abgerundete Ecken */
+    padding: 10px 20px !important; /* Innenabstand */
+    transition: all 0.3s ease !important; /* Sanfte Übergänge */
+    gap: 10px; /* Abstand zwischen Icon und Text */
+    box-shadow: none !important; /* Kein zusätzlicher Fokus-Schatten */
+}
+
+/* Hover-Zustand */
+.btn-success:hover {
+    background-color: darkgrey !important; /* Helleres Grau beim Hover */
+    border-color: darkgrey !important; /* Randfarbe ändern */
+    color: white !important; /* Textfarbe bleibt */
+    transform: translateY(-2px) !important; /* Leichtes Schweben */
+    box-shadow: none !important; /* Kein zusätzlicher Fokus-Schatten */
+}
+
+/* Fokus-Zustand */
+.btn-success:focus,
+.btn-success:focus-visible {
+    outline: none !important; /* Entfernt Standardfokusrahmen */
+    background-color: #e0e0e0 !important; /* Fokusfarbe */
+    border-color: #e0e0e0 !important; /* Randfarbe bleibt */
+    color: white !important; /* Text bleibt */
+    box-shadow: none !important; /* Kein zusätzlicher Fokus-Schatten */
+}
+
+/* Active-Zustand */
+.btn-success:active {
+    background-color: #e0e0e0 !important; /* Klickfarbe */
+    border-color: #e0e0e0 !important; /* Randfarbe bleibt */
+    transform: translateY(2px) !important; /* Button gedrückt */
+    color: white !important; /* Text bleibt */
+    box-shadow: none !important; /* Kein zusätzlicher Fokus-Schatten */
+}
+
+/* Disabled-Zustand */
+.btn-success:disabled,
+.btn-success[disabled] {
+    background-color: #f0f0f0 !important; /* Blassgrau */
+    border-color: #f0f0f0 !important; /* Blasser Rand */
+    color: #aaa !important; /* Blasser Text */
+    cursor: not-allowed !important; /* Kein klickbarer Cursor */
+    transform: none !important; /* Keine Transformation */
+    box-shadow: none !important; /* Kein zusätzlicher Fokus-Schatten */
+}
+
+
+
+
+
+
+
 
 
 

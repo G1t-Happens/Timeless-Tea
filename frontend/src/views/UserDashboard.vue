@@ -46,7 +46,9 @@
       </div>
       <!-- Mehr Tees Button -->
       <div v-if="hasMore.articles && !loading.articles" class="text-center mt-4">
-        <button @click="loadMoreArticles" class="btn btn-secondary">Mehr Tees</button>
+        <button @click="loadMoreArticles" class="btn btn-success" style="margin-bottom: 10px">
+          Mehr Tees
+        </button>
       </div>
       <!-- Keine weiteren Produkte -->
       <div v-if="!hasMore.articles && articles.length > 0" class="text-center mt-4">
@@ -229,24 +231,6 @@ onMounted(() => {
 .text-center button {
   display: inline-block;
   width: auto;
-}
-
-.btn-secondary {
-  background-color: #6c757d; /* Einheitlich Grau */
-  color: white;
-  border: none;
-  padding: 10px 20px;
-  margin-bottom: 15px;
-  border-radius: 8px;
-  transition: background-color 0.3s ease;
-}
-
-.btn-secondary:hover {
-  background-color: #8f4c37;
-}
-
-.btn-secondary:active {
-  background-color: #d4b483;
 }
 
 .welcome-message {

@@ -97,6 +97,7 @@
           class="btn btn-primary"
           :disabled="!isFormValid"
           :class="{ 'btn-disabled': !isFormValid }"
+          style="width: 100%"
         >
           Nachricht senden
         </button>
@@ -431,35 +432,6 @@ async function submitForm() {
   display: flex;
   justify-content: flex-start;
   gap: 10px;
-}
-
-/* Allgemeine Button-Stile */
-.btn {
-  padding: 10px 20px;
-  font-size: 1rem;
-  border-radius: 5px;
-  transition: all 0.3s ease;
-  border: none;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-}
-
-.btn-primary {
-  background-color: #4a5043;
-  color: white;
-}
-
-.btn-primary:hover {
-  background-color: #9fa86d;
-}
-
-/* Deaktivierter Button */
-.btn-disabled {
-  background-color: rgba(75, 80, 67, 0.4) !important;
-  cursor: not-allowed !important;
 }
 
 /* Erfolgsnachricht */

@@ -38,7 +38,7 @@
                 </div>
 
                 <!-- Login-Button -->
-                <button type="submit" class="btn btn-primary w-100">Einloggen</button>
+                <button type="submit" class="btn btn-secondary w-100">Einloggen</button>
               </form>
             </div>
           </div>
@@ -100,18 +100,5 @@ async function login() {
 .form-control {
   border-radius: 8px; /* Abgerundete Ecken für Eingabefelder */
   border-color: #c06e52; /* Orangefarbener Rand */
-}
-
-/* Stil für den Login-Button */
-.btn-primary {
-  background-color: #c06e52; /* Orangefarbener Hintergrund */
-  border-color: #c06e52; /* Orangefarbener Rand */
-  border-radius: 8px; /* Abgerundete Ecken */
-}
-
-/* Hover-Effekt für den Login-Button */
-.btn-primary:hover {
-  background-color: #9f7a56; /* Dunkleres Orange beim Hover */
-  border-color: #9f7a56; /* Dunklerer Rand beim Hover */
 }
 </style>

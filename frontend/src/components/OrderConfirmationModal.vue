@@ -75,8 +75,8 @@
         </div>
 
         <div class="modal-actions">
-          <button class="btn btn-success" @click="confirmOrder">Bestellung bestätigen</button>
-          <button class="btn btn-danger" @click="close">Abbrechen</button>
+          <button class="btn btn-primary" @click="confirmOrder">Bestellung bestätigen</button>
+          <button class="btn btn-secondary" @click="close">Abbrechen</button>
         </div>
       </div>
     </div>
@@ -95,7 +95,10 @@ defineProps({
 })
 const emit = defineEmits(['close', 'confirm'])
 
+//Close Event
 const close = () => emit('close')
+
+//Confirmation Event
 const confirmOrder = () => emit('confirm')
 </script>
 
@@ -149,33 +152,5 @@ const confirmOrder = () => emit('confirm')
   display: flex;
   justify-content: flex-end;
   gap: 10px;
-}
-
-.btn {
-  padding: 10px 20px;
-  font-size: 1rem;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-  margin-top: 10px;
-}
-
-.btn-success {
-  background-color: #4a5043;
-  color: white;
-}
-
-.btn-success:hover {
-  background-color: #9fa86d;
-}
-
-.btn-danger {
-  background-color: #c06e52;
-  color: white;
-}
-
-.btn-danger:hover {
-  background-color: #8f4c37;
 }
 </style>

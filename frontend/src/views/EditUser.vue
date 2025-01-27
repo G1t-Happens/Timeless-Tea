@@ -177,33 +177,42 @@
         </div>
 
         <!-- Zahlungsmethoden -->
+        <h3 class="form-label">Zahlungsmethoden</h3>
         <div class="form-group">
-          <h3 class="form-label">Zahlungsmethoden</h3>
-
           <!-- Liste der Zahlungsmethoden anzeigen -->
           <div v-if="user.payments.length > 0">
             <div v-for="payment in user.payments" :key="payment.id" class="payment-summary">
-              <strong>{{ payment.paymentOption }}</strong>
-              <div v-if="payment.paymentOption === 'bank transfer'">
-                <p>IBAN: {{ obfuscateIban(payment.iban) }}</p>
+              <div class="payment-info">
+                <div class="payment-icon">
+                  <i v-if="payment.paymentOption === 'bank transfer'" class="bi bi-bank"></i>
+                  <i
+                    v-else-if="payment.paymentOption === 'credit card'"
+                    class="bi bi-credit-card"
+                  ></i>
+                  <i v-else-if="payment.paymentOption === 'paypal'" class="bi bi-paypal"></i>
+                </div>
+                <div class="payment-details">
+                  <strong>{{ payment.paymentOption }}</strong>
+                  <p v-if="payment.paymentOption === 'bank transfer'">
+                    IBAN: {{ obfuscateIban(payment.iban) }}
+                  </p>
+                  <p v-else-if="payment.paymentOption === 'credit card'">
+                    Nummer: {{ obfuscateCreditCard(payment.creditCardNumber) }}<br />
+                    Ablaufdatum: {{ formatInputDate(payment.expiryDate) || 'n/a' }}
+                  </p>
+                  <p v-else-if="payment.paymentOption === 'paypal'">
+                    E-Mail: {{ obfuscatePaypalEmail(payment.paypalEmail) }}
+                  </p>
+                </div>
               </div>
-              <div v-else-if="payment.paymentOption === 'credit card'">
-                <p>Nummer: {{ obfuscateCreditCard(payment.creditCardNumber) }}</p>
-                <p>Ablaufdatum: {{ formatInputDate(payment.expiryDate) || 'n/a' }}</p>
+              <div class="payment-actions">
+                <button type="button" @click="editPayment(payment)" class="btn btn-primary">
+                  Bearbeiten
+                </button>
+                <button type="button" @click="deletePayment(payment.id)" class="btn btn-secondary">
+                  Löschen
+                </button>
               </div>
-              <div v-else-if="payment.paymentOption === 'paypal'">
-                <p>E-Mail: {{ obfuscatePaypalEmail(payment.paypalEmail) }}</p>
-              </div>
-              <button type="button" @click="editPayment(payment)" class="btn btn-edit-payment">
-                Bearbeiten
-              </button>
-              <button
-                type="button"
-                @click="deletePayment(payment.id)"
-                class="btn btn-delete-payment"
-              >
-                Löschen
-              </button>
             </div>
           </div>
           <div v-else>
@@ -211,7 +220,12 @@
           </div>
 
           <!-- Button zum Öffnen des Payment-Modals -->
-          <button type="button" class="btn btn-secondary" @click="openPaymentModal">
+          <button
+            type="button"
+            class="btn btn-primary"
+            style="margin-top: 5px"
+            @click="openPaymentModal"
+          >
             Zahlungsmethode hinzufügen
           </button>
         </div>
@@ -221,25 +235,19 @@
 
         <!-- Speichern/Löschen -->
         <div class="button-group">
-          <button
-            type="submit"
-            class="save-btn btn"
-            style="background-color: #4a5043; color: white"
-            :disabled="!isFormChanged"
-          >
+          <button type="submit" class="btn btn-primary" :disabled="!isFormChanged">
             Speichern
           </button>
           <button
             v-if="currentUser?.isAdmin && user?.id"
             type="button"
             @click="deleteUser(user.id)"
-            class="btn btn-danger"
+            class="btn btn-secondary"
           >
             Löschen
           </button>
         </div>
       </form>
-
       <!-- PaymentModal für Bearbeitung/Erstellung von Zahlungsmethoden -->
       <PaymentModal
         v-if="showPaymentModal"
@@ -250,7 +258,6 @@
         @save="savePayment"
       />
     </div>
-
     <!-- Fallback bei fehlendem currentUser -->
     <div v-else class="text-center">
       <p>Fehler: Benutzerinformationen konnten nicht geladen werden.</p>
@@ -597,91 +604,111 @@ const obfuscatePaypalEmail = (email) => {
   gap: 15px;
 }
 
-/* Payment-Anzeige */
 .payment-summary {
-  background-color: #f8f9f9;
-  border: 1px solid #eaeaea;
-  border-radius: 6px;
-  padding: 10px;
-  margin-bottom: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  padding: 15px;
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
-.payment-summary p {
-  margin: 0 0 5px;
+.payment-summary:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
 }
 
-.btn-edit-payment {
-  margin-right: 10px;
-  color: white;
-  background-color: #6c757d;
-}
-
-.btn-edit-payment:hover {
-  background-color: #5a6268;
-}
-
-.btn-delete-payment {
-  color: white;
-  background-color: #c06e52;
-}
-
-.btn-delete-payment:hover {
-  background-color: #c0392b;
-}
-
-/* Zusätzliche Symbole für Bearbeiten und Löschen */
-.btn-edit-payment:before {
-  content: '✎\00a0';
-  font-size: 18px;
-}
-
-.btn-delete-payment:before {
-  content: '✖\00a0';
-  font-size: 18px;
-}
-
-.btn {
-  padding: 10px 20px;
-  font-size: 1rem;
-  border-radius: 5px;
-  transition: all 0.3s ease;
-  border: none;
-  display: inline-flex;
+.payment-info {
+  display: flex;
+  gap: 20px;
   align-items: center;
-  cursor: pointer;
 }
 
-.save-btn {
+.payment-icon {
+  font-size: 2rem;
+  color: #4a5043;
+}
+
+.payment-details {
+  flex: 1;
+  color: #333;
+}
+
+.payment-details strong {
+  font-size: 1.2rem;
+  color: #000;
+}
+
+.payment-details p {
+  margin: 5px 0;
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.payment-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.payment-actions .btn {
+  padding: 8px 15px;
+  font-size: 0.9rem;
+  border-radius: 6px;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
+}
+
+.payment-actions .btn-primary {
   background-color: #4a5043;
-  color: white;
-  margin-right: 10px;
+  color: #fff;
+  border: none;
 }
 
-.save-btn:hover {
-  background-color: #9fa86d;
+.payment-actions .btn-primary:hover {
+  background-color: #3d4438;
 }
 
-.btn-secondary {
-  background-color: #6c757d;
-  color: white;
+.payment-actions .btn-secondary {
+  background-color: #e9ecef;
+  color: #333;
+  border: 1px solid #ccc;
 }
 
-.btn-secondary:hover {
-  background-color: #5a6268;
+.payment-actions .btn-secondary:hover {
+  background-color: #dcdcdc;
+  color: #000;
 }
 
-.btn-danger {
-  background-color: #c06e52;
-  color: white;
-}
+/* Responsiveness */
+@media (min-width: 768px) {
+  .payment-summary {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
 
-.btn-danger:hover {
-  background-color: #c0392b;
+  .payment-actions {
+    justify-content: flex-start;
+  }
 }
 
 .button-group {
   display: flex;
-  gap: 10px;
+  gap: 20px;
+  flex-wrap: wrap; /* Ermöglicht Zeilenumbruch */
+  justify-content: center; /* Zentriert die Buttons */
+}
+
+.button-group button {
+  flex: 1; /* Lässt Buttons gleichmäßig wachsen */
+  min-width: 100px; /* Verhindert, dass Buttons zu klein werden */
 }
 
 .toggle-switch {

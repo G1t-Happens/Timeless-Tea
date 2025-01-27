@@ -71,7 +71,9 @@
                 <span v-else>{{ category.type }}</span>
               </td>
               <td class="actions-column">
-                <button @click="deleteCategory(category.id)" class="btn delete-btn">Löschen</button>
+                <button @click="deleteCategory(category.id)" class="btn btn-secondary">
+                  Löschen
+                </button>
               </td>
             </tr>
           </tbody>
@@ -204,6 +206,7 @@ const disableEditing = (id) => {
 
 const isEditing = (id) => !!editing.value[id]
 
+// Changes tracken
 const trackChange = (id, field) => {
   const edited = categories.value.find((c) => c.id === id)
   if (edited) {
@@ -248,6 +251,7 @@ const trackPendingChanges = (id) => {
   }
 }
 
+// isModified tracken
 const isModified = (id, field) => {
   const edited = categories.value.find((c) => c.id === id)
   const original = originalCategories.value.find((c) => c.id === id)
@@ -293,20 +297,6 @@ onMounted(fetchCategories)
 .actions-column {
   text-align: center;
   width: 100px;
-}
-
-.delete-btn {
-  padding: 5px 10px;
-  background: #c06e52 !important;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background-color 0.2s ease-in-out;
-}
-
-.delete-btn:hover {
-  background: #8f4c37 !important;
 }
 
 .back-button-wrapper {
@@ -376,7 +366,7 @@ onMounted(fetchCategories)
 }
 
 .modified-field {
-  background-color: #ffe6e6; /* Rot markiert */
+  background-color: #ffd7d7; /* Rot markiert */
 }
 
 /* Pagination */
@@ -416,30 +406,5 @@ onMounted(fetchCategories)
 .actions {
   text-align: center;
   margin-top: 20px;
-}
-
-.btn {
-  padding: 10px 15px;
-  background-color: #4a5043;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 1rem;
-  transition: background-color 0.2s ease-in-out;
-}
-
-.btn:hover:not(:disabled) {
-  background-color: #9fa86d;
-}
-
-.btn:disabled {
-  background-color: #ddd;
-  cursor: not-allowed;
-}
-
-.empty-field {
-  background-color: #ffe6e6; /* Leeres Feld rot markieren */
-  border: 1px solid #e74c3c;
 }
 </style>

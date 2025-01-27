@@ -80,7 +80,7 @@
         <h2>Kontaktformular</h2>
         <p>
           Nutze unser Kontaktformular, um uns direkt eine Nachricht zu senden.
-          <router-link :to="{ name: 'ContactForm' }" class="btn btn-primary"
+          <router-link :to="{ name: 'ContactForm' }" class="btn btn-secondary"
             >Zum Kontaktformular
           </router-link>
         </p>
@@ -173,14 +173,5 @@ li {
   text-align: center;
   border-radius: 5px;
   transition: background-color 0.3s ease;
-}
-
-.btn-primary {
-  background-color: #c06e52;
-  color: white;
-}
-
-.btn-primary:hover {
-  background-color: #a35b42;
 }
 </style>

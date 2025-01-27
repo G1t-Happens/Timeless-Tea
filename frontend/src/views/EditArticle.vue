@@ -158,7 +158,7 @@
             v-if="!product.isDeleted"
             type="button"
             @click="deleteArticle(product.id)"
-            class="btn btn-danger"
+            class="btn btn-secondary"
           >
             Entfernen
           </button>
@@ -563,24 +563,6 @@ button {
   flex: 1;
   justify-content: center;
   text-align: center;
-}
-
-.btn-primary {
-  background-color: #4a5043;
-  color: white;
-}
-
-.btn-primary:hover {
-  background-color: #9fa86d;
-}
-
-.btn-danger {
-  background-color: #c06e52;
-  color: white;
-}
-
-.btn-danger:hover {
-  background-color: #c0392b;
 }
 
 /* Dropdown-Menü */

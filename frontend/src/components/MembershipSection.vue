@@ -43,6 +43,7 @@
 
 /* Hover-Effekt auf das Bild im Button */
 .btn-image:hover img {
-  transform: scale(1.1); /* Bild wird bei Hover leicht vergrößert */
+  transform: scale(1.1);
+  transition: transform 0.3s ease-in-out;
 }
 </style>

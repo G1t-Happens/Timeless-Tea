@@ -1,9 +1,11 @@
 <template>
   <div class="order-card mb-1 shadow-sm">
+    <!-- Order Card Header -->
     <div class="order-header">
       <h5>Bestellung ID: {{ order.id }}</h5>
       <span :class="['status', order.orderStatus]">{{ order.orderStatus }}</span>
     </div>
+    <!-- Order Card Body -->
     <div class="order-details">
       <p class="detail-item">
         <span class="detail-label">Vorname:</span>
@@ -34,12 +36,14 @@ export default {
     },
   },
   methods: {
+    //Formatierung in EUR
     formatCurrency(amount) {
       return new Intl.NumberFormat('de-DE', {
         style: 'currency',
         currency: 'EUR',
       }).format(amount)
     },
+    //Formatierung in schoenes Date Format (Bsp: 27. Januar 2025)
     formatDate(timestamp) {
       return new Date(timestamp).toLocaleDateString('de-DE', {
         year: 'numeric',
@@ -95,6 +99,7 @@ export default {
   color: #ffffff;
 }
 
+/* Status - Colors */
 .status.open {
   background-color: #f7b731;
 }
@@ -112,7 +117,7 @@ export default {
 }
 
 .status.refunded {
-  background-color: #8e44ad; /* Beispiel: Lila Farbe für 'Erstattet' */
+  background-color: #8e44ad;
 }
 
 .status.canceled {

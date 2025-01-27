@@ -53,12 +53,16 @@
             </button>
           </div>
           <!-- Warenkorb Button mit Icon -->
-          <button @click="toggleCart" :disabled="quantity > 1000 || quantity < 1" class="btn">
+          <button
+            class="btn-secondary"
+            @click="toggleCart"
+            :disabled="quantity > 1000 || quantity < 1"
+          >
             <i :class="isInCart ? 'bi bi-cart-fill' : 'bi bi-cart'"></i> In den Warenkorb
           </button>
         </div>
         <!-- Wunschzettel Button mit Herz-Icon -->
-        <button class="btn secondary" @click="toggleWishlist">
+        <button class="btn-primary" @click="toggleWishlist">
           <i :class="isWished ? 'bi bi-heart-fill' : 'bi bi-heart'"></i> Auf den Wunschzettel
         </button>
       </div>
@@ -414,33 +418,6 @@ onMounted(fetchProduct)
   padding: 5px 10px;
   border-radius: 10px;
   font-size: 14px;
-}
-
-/* Stil für die Wunschzettel-Buttons */
-.btn {
-  padding: 10px 15px;
-  font-size: 16px;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  background: #c06e52;
-  color: #fff;
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  transition: background-color 0.3s ease;
-}
-
-.btn:hover {
-  background: #a35b42;
-}
-
-.btn.secondary {
-  background: #9fa86d;
-}
-
-.btn.secondary:hover {
-  background: #7a844b;
 }
 
 .shipping-link {

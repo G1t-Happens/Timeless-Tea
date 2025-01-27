@@ -55,7 +55,7 @@
           </div>
           <button
             type="submit"
-            class="btn"
+            class="btn-primary"
             :disabled="!isOrderStatusChanged"
             :class="{ 'btn-disabled': !isOrderStatusChanged }"
           >
@@ -101,7 +101,7 @@
           </div>
           <button
             type="submit"
-            class="btn"
+            class="btn-primary"
             :disabled="!isShippingChanged"
             :class="{ 'btn-disabled': !isShippingChanged }"
           >
@@ -170,7 +170,7 @@
           </div>
           <button
             type="submit"
-            class="btn"
+            class="btn-primary"
             :disabled="!isAddressChanged"
             :class="{ 'btn-disabled': !isAddressChanged }"
           >
@@ -282,7 +282,7 @@
 
           <button
             type="submit"
-            class="btn"
+            class="btn-primary"
             :disabled="!isPaymentChanged"
             :class="{ 'btn-disabled': !isPaymentChanged }"
           >
@@ -888,32 +888,6 @@ form {
 .form-group select:focus {
   border-color: #3498db;
   outline: none;
-}
-
-.btn {
-  padding: 10px 15px;
-  background-color: #4a5043;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  font-size: 1rem;
-  cursor: pointer;
-  align-self: flex-start;
-  transition: background-color 0.3s ease;
-}
-
-.btn:hover {
-  background-color: #9fa86d;
-}
-
-.btn:active {
-  background-color: #9fa86d;
-}
-
-/* Ausgegraute Buttons */
-.btn-disabled {
-  background-color: rgba(75, 80, 67, 0.4);
-  cursor: not-allowed;
 }
 
 /* Produkte */

@@ -5,7 +5,7 @@
 
     <div v-if="cartStore.items.length === 0" class="empty-cart">
       <p>Ihr Warenkorb ist leer.</p>
-      <router-link :to="{ name: 'LandingPage' }" class="btn btn-success"
+      <router-link :to="{ name: 'LandingPage' }" class="btn btn-primary"
         >Zurück zum Shop
       </router-link>
     </div>
@@ -46,9 +46,7 @@
             <td>{{ item.price.toFixed(2) }}</td>
             <td>{{ (item.price * item.productQuantity).toFixed(2) }}</td>
             <td>
-              <button @click="removeItem(item.id)" class="btn btn-danger remove-btn">
-                Entfernen
-              </button>
+              <button @click="removeItem(item.id)" class="btn btn-secondary">Entfernen</button>
             </td>
           </tr>
         </tbody>
@@ -63,10 +61,10 @@
         <p>
           Gesamtsumme: <strong>{{ cartStore.totalAmount.toFixed(2) }} €</strong>
         </p>
-        <button @click="proceedToCheckout" class="btn btn-success" :disabled="isTotalExceeded">
+        <button @click="proceedToCheckout" class="btn btn-primary" :disabled="isTotalExceeded">
           Zur Kasse
         </button>
-        <button @click="clearCart" class="btn btn-secondary">Warenkorb leeren</button>
+        <button @click="clearCart" class="btn btn-success">Warenkorb leeren</button>
       </div>
     </div>
   </div>
@@ -247,15 +245,6 @@ const proceedToCheckout = () => {
   border-radius: 4px;
 }
 
-.remove-btn {
-  background-color: #c06e52;
-  color: white;
-}
-
-.remove-btn:hover {
-  background-color: #8f4c37;
-}
-
 .cart-summary {
   display: flex;
   justify-content: space-between;
@@ -265,43 +254,6 @@ const proceedToCheckout = () => {
 
 .cart-summary p {
   font-size: 1.5rem;
-}
-
-.btn {
-  padding: 10px 20px;
-  font-size: 1rem;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-  margin-top: 10px;
-}
-
-.btn-success {
-  background-color: #4a5043;
-  color: white;
-}
-
-.btn-success:hover {
-  background-color: #9fa86d;
-}
-
-.btn-danger {
-  background-color: #c06e52;
-  color: white;
-}
-
-.btn-danger:hover {
-  background-color: #8f4c37;
-}
-
-.btn-secondary {
-  background-color: #6c757d;
-  color: white;
-}
-
-.btn-secondary:hover {
-  background-color: #5a6268;
 }
 
 .error-message {

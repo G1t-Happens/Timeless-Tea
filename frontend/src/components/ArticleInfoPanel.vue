@@ -38,6 +38,7 @@
 </template>
 
 <style scoped>
+/* Panel CSS fuer allgemeine Artikelinfo */
 .article-info-panel {
   margin-top: 20px;
   padding: 30px;

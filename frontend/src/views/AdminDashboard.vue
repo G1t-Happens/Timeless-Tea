@@ -72,13 +72,13 @@
 
       <!-- Button-Gruppe zum Hinzufügen/Bearbeiten von Artikeln/Kategorien -->
       <div class="button-group">
-        <button @click="createNewArticle" class="btn btn-primary btn-full-width">
+        <button @click="createNewArticle" class="btn btn-secondary btn-full-width">
           Neuen Artikel erstellen
         </button>
-        <button @click="createNewCategory" class="btn btn-primary btn-full-width">
+        <button @click="createNewCategory" class="btn btn-secondary btn-full-width">
           Neue Kategorien erstellen
         </button>
-        <button @click="editCategories" class="btn btn-primary btn-full-width">
+        <button @click="editCategories" class="btn btn-secondary btn-full-width">
           Kategorien bearbeiten
         </button>
       </div>
@@ -101,12 +101,15 @@
             </div>
 
             <!-- Buttons für Bearbeiten und Löschen -->
-            <div class="text-center mb-5 cardset-admin-button">
-              <button @click="editArticle(product)" class="btn btn-warning">Bearbeiten</button>
+            <div class="text-center mb-5" style="display: flex; gap: 10px; flex-wrap: wrap">
+              <button @click="editArticle(product)" class="btn btn-primary" style="flex: 1 1 100px">
+                Bearbeiten
+              </button>
               <button
                 v-if="!product.isDeleted"
                 @click="deleteArticle(product.id)"
-                class="btn btn-danger"
+                class="btn btn-secondary"
+                style="flex: 1 1 100px"
               >
                 Entfernen
               </button>
@@ -115,7 +118,9 @@
         </div>
         <!-- Mehr Tees Button -->
         <div v-if="hasMore.articles && !loading.articles" class="text-center mt-4">
-          <button @click="loadMoreArticles" class="btn btn-secondary">Mehr Tees</button>
+          <button @click="loadMoreArticles" class="btn btn-success" style="margin-bottom: 10px">
+            Mehr Tees
+          </button>
         </div>
         <!-- Ansonsten keine weiteren Produkte -->
         <div v-if="!hasMore.articles && articles.length > 0" class="text-center mt-4">
@@ -154,15 +159,25 @@
             </div>
 
             <!-- Buttons für Bearbeiten und Löschen -->
-            <div class="text-center mb-5 cardset-admin-button">
-              <button @click="editUser(user)" class="btn btn-warning">Bearbeiten</button>
-              <button @click="deleteUser(user.id)" class="btn btn-danger">Entfernen</button>
+            <div class="text-center mb-5" style="display: flex; gap: 10px; flex-wrap: wrap">
+              <button @click="editUser(user)" class="btn btn-primary" style="flex: 1 1 100px">
+                Bearbeiten
+              </button>
+              <button
+                @click="deleteUser(user.id)"
+                class="btn btn-secondary"
+                style="flex: 1 1 100px"
+              >
+                Entfernen
+              </button>
             </div>
           </div>
         </div>
         <!-- Mehr User Button -->
         <div v-if="hasMore.users && !loading.users" class="text-center mt-4">
-          <button @click="loadMoreUsers" class="btn btn-secondary">Mehr User</button>
+          <button @click="loadMoreUsers" class="btn btn-success" style="margin-bottom: 10px">
+            Mehr User
+          </button>
         </div>
         <!-- Ansonsten keine weiteren User -->
         <div v-if="!hasMore.users && users.length > 0" class="text-center mt-4">
@@ -201,8 +216,8 @@
             </div>
 
             <!-- Buttons für Details und Löschen -->
-            <div class="text-center mb-5 cardset-admin-button">
-              <button @click="viewOrder(order.id)" class="btn btn-warning">
+            <div class="text-center mb-5" style="display: flex; gap: 10px; flex-wrap: wrap">
+              <button @click="viewOrder(order.id)" class="btn btn-primary" style="flex: 1 1 100px">
                 Details/Bearbeiten
               </button>
             </div>
@@ -210,7 +225,9 @@
         </div>
         <!-- Mehr Bestellungen Button -->
         <div v-if="hasMore.orders && !loading.orders" class="text-center mt-4">
-          <button @click="loadMoreOrders" class="btn btn-secondary">Mehr Bestellungen</button>
+          <button @click="loadMoreOrders" class="btn btn-success" style="margin-bottom: 10px">
+            Mehr Bestellungen
+          </button>
         </div>
         <!-- Ansonsten keine weiteren Bestellungen -->
         <div v-if="!hasMore.orders && orders.length > 0" class="text-center mt-4">
@@ -734,55 +751,6 @@ onMounted(() => {
   color: white;
 }
 
-/* Produktkarten-Buttons */
-.cardset-admin-button {
-  display: flex; /* Buttons nebeneinander anordnen */
-  gap: 2px; /* Abstand zwischen den Buttons */
-  position: relative; /* Buttons bleiben in ihrem Bereich */
-  z-index: 1; /* Sicherstellen, dass die Buttons anklickbar bleiben */
-}
-
-.cardset-admin-button button {
-  flex: 1; /* Jeder Button nimmt gleichmäßig Platz ein */
-  padding: 10px 20px; /* Einheitliche Polsterung */
-  font-size: 14px; /* Einheitliche Schriftgröße */
-  border: none;
-  border-radius: 8px; /* Abgerundete Kanten */
-  transition: all 0.3s ease; /* Sanfter Übergang bei Hover- und Active-Zuständen */
-  text-align: center; /* Text im Button zentrieren */
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
-
-/* Bearbeiten-Button */
-.cardset-admin-button .btn-warning {
-  background-color: #4a5043; /* Neue Farbe */
-  color: #fff; /* Weißer Text */
-}
-
-.cardset-admin-button .btn-warning:hover {
-  background-color: #9fa86d; /* Hover-Farbe */
-}
-
-.cardset-admin-button button:hover {
-  transform: translateY(-2px); /* Leichtes Anheben */
-  box-shadow: 0 6px 8px rgba(0, 0, 0, 0.2); /* Verstärkter Schatten */
-}
-
-/* Löschen-Button */
-.cardset-admin-button .btn-danger {
-  background-color: #c06e52; /* Neue Farbe */
-  color: #fff; /* Weißer Text */
-}
-
-.cardset-admin-button .btn-danger:hover {
-  background-color: #a3523b; /* Dunkleres Rot beim Hover */
-}
-
-.cardset-admin-button button:active {
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Schatten verringern bei Klick */
-  transform: translateY(2px); /* Leichte Bewegung nach unten */
-}
-
 .text-center button {
   display: inline-block;
   width: auto;
@@ -793,30 +761,6 @@ onMounted(() => {
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between;
-}
-
-/* Stil für den Button */
-.btn-primary {
-  background-color: #c06e52; /* Orangefarbener Hintergrund */
-  border-color: #c06e52; /* Orangefarbener Rand */
-  border-radius: 8px; /* Abgerundete Ecken */
-}
-
-/* Stil für den Hover-Zustand */
-.btn-primary:hover {
-  background-color: #8f4c37; /* Dunkleres Orange beim Hover */
-  border-color: #8f4c37; /* Dunklerer Rand beim Hover */
-}
-
-/* Stil für den Active- (Klick-) Zustand */
-.btn-primary:active {
-  background-color: #d4b483; /* Noch dunkleres Orange bei Klick */
-  border-color: #d4b483; /* Noch dunklerer Rand bei Klick */
-}
-
-/* Optional: Stil für den Fokus-Zustand (wenn der Button fokussiert wird) */
-.btn-primary:focus {
-  box-shadow: 0 0 0 0.2rem rgba(192, 110, 82, 0.5); /* Ein sanfter Schatten beim Fokussieren */
 }
 
 .admin-dashboard {

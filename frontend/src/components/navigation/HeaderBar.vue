@@ -59,7 +59,7 @@
         <!-- Logout-Popup -->
         <transition name="fade">
           <div v-if="user && showLogoutPopup" ref="popupRef" class="logout-popup" @click.stop>
-            <button @click="logout" class="btn btn-danger">Abmelden</button>
+            <button @click="logout" class="btn btn-secondary">Abmelden</button>
           </div>
         </transition>
 
@@ -110,7 +110,11 @@
               </ul>
               <div class="cart-total">
                 <p>Gesamt: {{ cartStore.totalAmount.toFixed(2) }}€</p>
-                <router-link :to="{ name: 'ShoppingCart' }" class="btn to-cart" @click="closeCart">
+                <router-link
+                  :to="{ name: 'ShoppingCart' }"
+                  class="btn btn-primary"
+                  @click="closeCart"
+                >
                   Zum Warenkorb
                 </router-link>
               </div>
@@ -444,15 +448,6 @@ header {
   border: none;
   color: red;
   cursor: pointer;
-}
-
-.to-cart {
-  background-color: #4a5043;
-  color: white;
-}
-
-.to-cart:hover {
-  background-color: #9fa86d;
 }
 
 .cart-total {

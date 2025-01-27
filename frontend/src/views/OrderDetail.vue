@@ -1,10 +1,13 @@
 <template>
   <div class="order-page">
     <BackButton />
+    <!-- Titel -->
     <h2 class="page-title form-label">Meine Bestellungen</h2>
+    <!-- Ladeanzeige -->
     <div v-if="loading" class="loading">
       <p>Loading orders...</p>
     </div>
+    <!-- Falls geladen, Orders anzeigen -->
     <div v-if="!loading">
       <div class="search-container">
         <input
@@ -17,6 +20,7 @@
       </div>
       <div class="orders-container">
         <section class="active-orders">
+          <!-- Aktive Bestellungen -->
           <h3 class="section-title">Aktive Bestellungen</h3>
 
           <div class="pagination pagination-left">
@@ -104,7 +108,7 @@
               <div class="order-actions">
                 <button
                   v-if="order.orderStatus !== 'cancel'"
-                  class="cancel-button"
+                  class="btn-secondary"
                   @click="cancelOrder(order.id)"
                 >
                   Bestellung stornieren
@@ -115,6 +119,7 @@
         </section>
 
         <section class="order-history">
+          <!-- Alte Bestellungen -->
           <h3 class="section-title">Bestellhistorie</h3>
 
           <div class="pagination pagination-right">
@@ -208,7 +213,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import axios from 'axios'
 import BackButton from '@/components/navigation/BackButton.vue'
 import Swal from 'sweetalert2'
@@ -220,6 +225,7 @@ const activePage = ref(1)
 const historyPage = ref(1)
 const itemsPerPage = 3
 
+//Meine Bestellungen aus dem Backend laden
 const fetchOrders = async () => {
   loading.value = true
   try {
@@ -238,6 +244,7 @@ const fetchOrders = async () => {
   }
 }
 
+//Computed values - Sortieren, Filter etc.
 const sortedOrders = computed(() => {
   return [...orders.value].sort((a, b) => b.updatedAt - a.updatedAt)
 })
@@ -272,31 +279,37 @@ const filteredHistoricalOrders = computed(() => {
   )
 })
 
+//Pagination
 const paginatedActiveOrders = computed(() => {
   const start = (activePage.value - 1) * itemsPerPage
   const end = start + itemsPerPage
   return filteredActiveOrders.value.slice(start, end)
 })
 
+//Pagination
 const paginatedHistoricalOrders = computed(() => {
   const start = (historyPage.value - 1) * itemsPerPage
   const end = start + itemsPerPage
   return filteredHistoricalOrders.value.slice(start, end)
 })
 
+//Pagination
 const activeTotalPages = computed(() => {
   return Math.ceil(filteredActiveOrders.value.length / itemsPerPage)
 })
 
+//Pagination
 const historyTotalPages = computed(() => {
   return Math.ceil(filteredHistoricalOrders.value.length / itemsPerPage)
 })
 
+//Datum formatieren
 const formatDate = (timestamp) => {
   const date = new Date(timestamp)
   return date.toLocaleDateString('de-DE')
 }
 
+//Cancel Order, falls noch nicht Versand etc.
 const cancelOrder = async (orderId) => {
   try {
     const order = orders.value.find((o) => o.id === orderId)
@@ -353,7 +366,9 @@ const cancelOrder = async (orderId) => {
   }
 }
 
-fetchOrders()
+onMounted(() => {
+  fetchOrders()
+})
 </script>
 
 <style scoped>
@@ -427,7 +442,7 @@ fetchOrders()
   background-color: #fff;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
   transition: transform 0.2s;
-  height: 630px;
+  height: 675px;
   overflow-y: auto;
 }
 
@@ -524,21 +539,6 @@ fetchOrders()
 .order-actions {
   margin-top: auto;
   text-align: right;
-}
-
-.cancel-button {
-  background-color: #f44336;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  padding: 10px 15px;
-  cursor: pointer;
-  font-size: 14px;
-  transition: background-color 0.2s;
-}
-
-.cancel-button:hover {
-  background-color: #d32f2f;
 }
 
 .search-container {

@@ -1,6 +1,7 @@
 <template>
   <div class="modal-overlay" @click.self="closeModal">
     <div class="modal-content">
+      <!-- Anzeige der Message Infos -->
       <h3 class="modal-title">{{ message.subject }}</h3>
       <p><strong>Name:</strong> {{ message.name }}</p>
       <p><strong>Email:</strong> {{ message.email }}</p>
@@ -11,8 +12,8 @@
 
       <!-- Actions -->
       <div class="actions">
-        <button class="btn btn-exit" @click="closeModal">Schließen</button>
-        <button class="btn btn-reply" @click="toggleReply">Antworten</button>
+        <button class="btn btn-secondary" @click="closeModal">Schließen</button>
+        <button class="btn btn-primary" @click="toggleReply">Antworten</button>
         <button class="btn btn-delete" @click="emitDelete(message.id)">Löschen</button>
       </div>
 
@@ -122,28 +123,6 @@ const emitDelete = async (id) => {
   font-weight: bold;
   cursor: pointer;
   transition: all 0.3s ease;
-}
-
-.btn-exit {
-  background-color: #c06e52;
-  color: white;
-  border: none;
-}
-
-.btn-exit:hover {
-  background-color: #c0392b;
-  transform: scale(1.05);
-}
-
-.btn-reply {
-  background-color: #4a5043;
-  color: white;
-  border: none;
-}
-
-.btn-reply:hover {
-  background-color: #9fa86d;
-  transform: scale(1.05);
 }
 
 .btn-delete {

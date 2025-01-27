@@ -102,6 +102,7 @@ watch(
   { immediate: true },
 )
 
+//Alle Kategorien aus der DB laden
 onMounted(async () => {
   try {
     const response = await axios.get('/api/category/')
@@ -123,26 +124,31 @@ onMounted(async () => {
   }
 })
 
+//Filter Dropdown togglen
 const toggleDropdown = (dropdown) => {
   activeDropdown.value = activeDropdown.value === dropdown ? null : dropdown
 }
 
+//Filter Dropdown schliessen
 const closeDropdown = () => {
   activeDropdown.value = null
 }
 
+//Outside click handler, um popups automatisch zu schliessen
 const handleOutsideClick = (event) => {
   if (!event.target.closest('.dropdown-menu') && !event.target.closest('.filter-button')) {
     closeDropdown()
   }
 }
 
+//Namen extrahieren
 const getSelectedNames = (category) => {
   return (dynamicCategories.value[category] || [])
     .filter((item) => localFilters[category]?.includes(item.id))
     .map((item) => item.name)
 }
 
+//Filter anwenden und Popup danach closen
 const applyFiltersHandler = () => {
   emit('applyFilters', {
     ...localFilters,
@@ -153,6 +159,7 @@ const applyFiltersHandler = () => {
   emit('close')
 }
 
+//Filter reseten
 const resetFilters = () => {
   for (const category of Object.keys(dynamicCategories.value)) {
     localFilters[category] = []
@@ -166,6 +173,7 @@ const resetFilters = () => {
   })
 }
 
+//Close Event
 const emitClose = () => {
   emit('close')
 }

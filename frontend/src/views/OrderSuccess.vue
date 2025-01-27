@@ -53,16 +53,6 @@ defineProps({
 }
 
 .order-success .btn-primary {
-  border: transparent;
   margin-top: 20px;
-  background-color: #4a5043;
-  color: white;
-  text-decoration: none;
-  padding: 10px 20px;
-  border-radius: 5px;
-}
-
-.order-success .btn-primary:hover {
-  background-color: #9fa86d;
 }
 </style>

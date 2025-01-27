@@ -111,7 +111,7 @@ const isLast = (index) => index === breadcrumbs.value.length - 1
 
 /* Text Styling */
 .breadcrumb__text {
-  color: #868e96; /* Dezenter Grau-Ton */
+  color: #4a5043; /* Dezenter Grau-Ton */
   font-weight: bold;
   cursor: default;
 }

@@ -135,22 +135,4 @@ const createCategory = async () => {
   border-color: #007bff;
   outline: none;
 }
-
-/* Button-Stile */
-button {
-  padding: 10px 20px;
-  font-size: 1rem;
-  border-radius: 5px;
-  transition: background-color 0.3s;
-}
-
-.btn-primary {
-  background-color: #4a5043;
-  color: white;
-  border: none;
-}
-
-.btn-primary:hover {
-  background-color: #9fa86d;
-}
 </style>

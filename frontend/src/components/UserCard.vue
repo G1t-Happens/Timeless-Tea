@@ -1,5 +1,6 @@
 <template>
   <div class="order-card h-100 mb-1 shadow-sm">
+    <!-- Basic User Informationen -->
     <div class="card-body">
       <h5 class="card-title">{{ user.firstName }} {{ user.lastName }}</h5>
       <p class="card-text"><strong>User-ID: </strong>{{ user.id }}</p>
@@ -19,6 +20,7 @@ defineProps({
 </script>
 
 <style scoped>
+/* Order card default style */
 .order-card {
   border: 1px solid #e5e5e5;
   border-radius: 12px;
@@ -31,11 +33,13 @@ defineProps({
   min-height: 200px; /* Mindesthöhe für die Karte */
 }
 
+/* Order card hover style */
 .order-card:hover {
   transform: translateY(-5px);
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
 }
 
+/* Order card title style */
 .card-title {
   font-size: 1.25rem;
   font-weight: bold;
@@ -50,6 +54,7 @@ defineProps({
   -webkit-box-orient: vertical;
 }
 
+/* Order card body text style */
 .card-text {
   font-size: 1rem;
   word-wrap: break-word; /* Umbrüche in langen Wörtern */

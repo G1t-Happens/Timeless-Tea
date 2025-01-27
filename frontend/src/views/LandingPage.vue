@@ -41,7 +41,7 @@
 
       <!-- Mehr Tees Button -->
       <div v-if="hasMore && !loading" class="text-center mt-4">
-        <button @click="loadMore" class="btn btn-secondary">Mehr Tees</button>
+        <button @click="loadMore" class="btn btn-success">Mehr Tees</button>
       </div>
       <!-- Keine weiteren Produkte -->
       <div v-if="!hasMore && products.length > 0" class="text-center mt-4">

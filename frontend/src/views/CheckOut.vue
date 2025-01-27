@@ -210,7 +210,7 @@
 
       <!-- Bestellung abschicken -->
       <div class="checkout-actions">
-        <button @click="openConfirmationModal" class="btn btn-success" :disabled="!canCheckout">
+        <button @click="openConfirmationModal" class="btn btn-primary" :disabled="!canCheckout">
           Bestellung abschicken
         </button>
       </div>
@@ -282,6 +282,7 @@ const user = ref({
   },
 })
 
+//Computed Werte fuer validation checks
 const isTotalValid = computed(() => {
   return cartStore.totalAmount <= 1000000
 })
@@ -304,6 +305,7 @@ const getSelectedPayment = () => {
   return payments.value.find((payment) => payment.id === selectedPayment.value) || null
 }
 
+//User Details anhand der ID laden
 const fetchUserDetails = async () => {
   try {
     const response = await axios.get(`/api/user/${userStore.user.id}`)
@@ -314,18 +316,21 @@ const fetchUserDetails = async () => {
   }
 }
 
+//Kreditkartennummer verschleiern
 const obfuscateCardNumber = (number) => {
   if (!number) return 'n/a'
   const last4 = number.slice(-4)
   return '**** **** **** ' + last4
 }
 
+//IBAN verschleiern
 const obfuscateIban = (iban) => {
   if (!iban) return 'n/a'
   const cleanedIban = iban.replace(/\s/g, '')
   return cleanedIban.slice(0, 4) + ' **** **** ' + cleanedIban.slice(-2)
 }
 
+//Mail verschleiern
 const obfuscatePaypalEmail = (email) => {
   if (!email) return 'n/a'
   const [localPart, domain] = email.split('@')
@@ -350,6 +355,7 @@ const handleConfirmOrder = async () => {
   await submitOrder()
 }
 
+//Order erstellen
 const submitOrder = async () => {
   if (!canCheckout.value) {
     await Swal.fire({
@@ -471,7 +477,7 @@ onMounted(async () => {
 }
 
 .payment-list-container {
-  max-height: 210px;
+  max-height: 300px;
   overflow-y: auto;
 }
 
@@ -528,34 +534,6 @@ onMounted(async () => {
 
 .checkout-actions {
   text-align: center;
-}
-
-.btn {
-  padding: 12px 25px;
-  font-size: 1rem;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-  margin: 10px;
-}
-
-.btn-primary {
-  background-color: #4a5043;
-  color: white;
-}
-
-.btn-primary:hover {
-  background-color: #9fa86d;
-}
-
-.btn-success {
-  background-color: #4a5043;
-  color: white;
-}
-
-.btn-success:hover {
-  background-color: #9fa86d;
 }
 
 .detail-item {
