@@ -57,6 +57,8 @@ npm run dev
 
 ### Backend (Sails.js)
 
+- Set/Overwrite the database credentials under config/datastores.js and/or config/env/production.js.
+
 ```bash
 
 cd backend
