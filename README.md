@@ -1,4 +1,7 @@
 # TimelessTea - Web Technologies Demonstration (Tea Webshop)
+![Pic1](https://github.com/user-attachments/assets/1fa38d43-a67f-4e55-bff7-50520f008cec)
+![Pic2](https://github.com/user-attachments/assets/b06e8971-b414-4dc8-afd7-e34b66f9e174)
+
 
 ## Login:
 
